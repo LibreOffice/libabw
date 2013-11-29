@@ -24,23 +24,5 @@
 
 #define ABW_NUM_ELEMENTS(array) sizeof(array)/sizeof(array[0])
 
-// Various exceptions: libabw does not propagate exceptions externally..
-
-class VersionException
-{
-};
-
-class FileException
-{
-};
-
-class ParseException
-{
-};
-
-class GenericException
-{
-};
-
 #endif /* LIBABW_INTERNAL_H */
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */
