@@ -9,6 +9,7 @@
 
 #include <libabw/libabw.h>
 #include "ABWXMLHelper.h"
+#include "ABWParser.h"
 #include "libabw_internal.h"
 
 /**
@@ -102,10 +103,10 @@ was not, it indicates the reason of the error
 bool AbiDocument::parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *textInterface)
 {
   ABW_DEBUG_MSG(("AbiDocument::parse\n"));
-  if (!input)
-    return false;
-  if (!textInterface)
-    return false;
+  input->seek(0, librevenge::RVNG_SEEK_SET);
+  libabw::ABWParser parser(input, textInterface);
+  if (parser.parse())
+    return true;
   return false;
 }
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

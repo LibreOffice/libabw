@@ -1,23 +1,10 @@
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
-/* libabw
- * Version: MPL 2.0 / LGPLv2.1+
+/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+/*
+ * This file is part of the libabw project.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
- * Major Contributor(s):
- * Copyright (C) 2002-2003 William Lachance (wrlach@gmail.com)
- * Copyright (C) 2002-2004 Marc Maurer (uwog@uwog.net)
- *
- * For minor contributions see the git repository.
- *
- * Alternatively, the contents of this file may be used under the terms
- * of the GNU Lesser General Public License Version 2.1 or later
- * (LGPLv2.1+), in which case the provisions of the LGPLv2.1+ are
- * applicable instead of those above.
- *
- * For further information visit http://libabw.sourceforge.net
  */
 
 #include <stdio.h>
@@ -92,4 +79,4 @@ int main(int argc, char *argv[])
 
   return 0;
 }
-/* vim:set shiftwidth=4 softtabstop=4 noexpandtab: */
+/* vim:set shiftwidth=2 softtabstop=2 expandtab: */

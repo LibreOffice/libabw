@@ -84,4 +84,4 @@ int main(int argc, char *argv[])
 
   return 0;
 }
-/* vim:set shiftwidth=4 softtabstop=4 noexpandtab: */
+/* vim:set shiftwidth=2 softtabstop=2 expandtab: */
