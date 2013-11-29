@@ -1,0 +1,221 @@
+<!--
+
+          AbiWord Markup Language DTD
+	  Last updated January 17, 2007 
+          (but still far from complete and correct)
+
+	  Currently, this document is intend for reference purposes only, 
+	  and should not be interpreted as an absolute guide to the 
+	  AbiWord file format.  A more comprehsive view can be gained 
+	  from the code in files ie_exp_AbiWord_1.cpp and 
+	  ie_imp_AbiWord_1.cpp  These are currently definitive.  Other 
+	  documentation is availible in docs/AbiWord_DocumentFormat.abw
+
+	  Sam Tobin-Hochstadt
+	  Christian Biesinger    - Updated in August 2002
+	  Marc Maurer            - Updated in January 2007
+
+-->
+
+
+<!ELEMENT abiword (metadata?, history?, revisions?, ignoredwords?, styles?, lists?, pagesize*, section+, data?)>
+<!ATTLIST abiword
+          version     CDATA "unnumbered"
+          fileformat  CDATA "">
+<!-- This is the root element, with an attribute 
+     representing the version number, and an 
+     attribute representing the file format 
+     version. -->
+
+<!-- awml is an alias for abiword. copying above declaration. -->
+<!ELEMENT awml (metadata?, history?, revisions?, ignoredwords?, styles?, lists?, pagesize*, section+, data?)>
+<!ATTLIST awml
+          version     CDATA "unnumbered"
+          fileformat  CDATA "">
+
+<!ELEMENT metadata (m+)>
+<!ELEMENT m (#PCDATA)>
+<!ATTLIST m
+	  key CDATA #REQUIRED>
+
+<!ELEMENT ignoredwords (iw+)>
+<!ELEMENT iw (#PCDATA)>
+<!-- Each iw element contains a single word which 
+     is to be ignored when spell-checking the 
+     document. -->
+
+<!ELEMENT history   (version+)>
+<!ATTLIST history
+          version    CDATA #REQUIRED
+	  edit-time  CDATA #REQUIRED
+ 	  last-saved CDATA #REQUIRED
+          uid        CDATA #REQUIRED>
+<!-- A history keeps track of when the document was saved. -->
+
+<!ELEMENT version   EMPTY>
+<!ATTLIST version
+          id       CDATA #REQUIRED
+	  started  CDATA #REQUIRED
+ 	  uid      CDATA #REQUIRED
+          auto     CDATA #REQUIRED
+          top-xid  CDATA #REQUIRED>
+<!-- A version represents a single safe-point in time. -->
+
+<!ELEMENT revisions   (r+)>
+<!ATTLIST revisions
+          show       CDATA #REQUIRED
+	  mark       CDATA #REQUIRED
+ 	  show-level CDATA #REQUIRED
+          auto       CDATA #REQUIRED>
+<!-- Revisions store all document changes made within a
+     single editing session. -->
+
+<!ELEMENT styles (s*)>
+<!ELEMENT s  EMPTY>
+<!ATTLIST s
+          basedon  CDATA #IMPLIED
+	  name     CDATA #REQUIRED
+	  type     CDATA #IMPLIED
+	  parentid CDATA #IMPLIED
+	  level    CDATA #IMPLIED
+	  style    CDATA #IMPLIED
+          props    CDATA #IMPLIED>
+<!-- Styles allow for paragraph level formatting.  
+     The basedon attribute specifies inheritance
+     and the props attribute specifies features 
+     of the style. -->
+
+<!ELEMENT lists (l*)>
+<!ELEMENT l  EMPTY>
+<!ATTLIST l
+          id           CDATA #REQUIRED
+	  parentid     CDATA #REQUIRED
+	  type         CDATA #REQUIRED
+          start-value  CDATA #REQUIRED
+	  list-decimal CDATA #REQUIRED
+          list-delim   CDATA #REQUIRED>
+<!-- Styles allow for paragraph level formatting.  
+     The basedon attribute specifies inheritance
+     and the props attribute specifies features 
+     of the style. -->
+
+<!ELEMENT pagesize EMPTY>
+<!ATTLIST pagesize
+          pagetype     CDATA #REQUIRED
+	  orientation  CDATA #REQUIRED
+	  width        CDATA #REQUIRED  
+	  height       CDATA #REQUIRED
+	  units        CDATA #REQUIRED
+	  page-scale   CDATA #REQUIRED>
+<!-- pagesizes specify different page sizes that can
+     be used in the document.  -->
+
+<!ELEMENT section   ((p | table | frame | toc)+)>
+<!ATTLIST section
+          props       CDATA            #IMPLIED
+	  type        (footer | CDATA) #IMPLIED
+	  id          CDATA            #IMPLIED
+	  header      CDATA            #IMPLIED
+	  footer      CDATA            #IMPLIED
+	  num_columns CDATA            #IMPLIED
+	  column_gap  CDATA            #IMPLIED
+          xid         CDATA            #IMPLIED>
+<!-- Sections are collections of paragraphs, tables,
+     Table of Contents and frames.  
+     They may specify footers to be attached, 
+     or formatting properties. -->
+
+<!ELEMENT p      (#PCDATA | c | field | f | image | i | cbr | pbr | br | bookmark | a)*>
+<!ATTLIST p
+          props    CDATA                            #IMPLIED
+	  level    (0|1|2|3|4|5|6|7|8|9|10 | CDATA) #IMPLIED
+	  style    CDATA                            #IMPLIED
+	  listid   CDATA			    #IMPLIED
+	  parentid CDATA			    #IMPLIED
+	  xid      CDATA			    #IMPLIED
+	  id       ID                               #IMPLIED>
+<!-- p element contain text, images, fields or character 
+     spans.  Level is used for lists, style for styles
+     and props for formatting. listid and parentid are 
+     both used in lists. -->
+
+<!ELEMENT c      (#PCDATA | cbr | pbr | br)*>
+<!ATTLIST c
+          props CDATA                #IMPLIED
+	  type  (list_label | CDATA) #IMPLIED
+	  style CDATA                #IMPLIED>
+<!-- c is used to specify character based formatting
+     which is done with the props attribute.
+     type is used for lists. style can specify 
+     predefined styles. -->
+
+<!ELEMENT field      EMPTY>
+<!ATTLIST field
+          type CDATA #REQUIRED
+          xid  CDATA #IMPLIED>
+<!-- fields represent calculated data on the page. -->
+<!ELEMENT f      EMPTY>
+<!ATTLIST f
+          type CDATA #REQUIRED>
+<!-- f is an alias for field -->
+
+<!ELEMENT image     EMPTY>
+<!ATTLIST image 
+          dataid CDATA #REQUIRED
+	  props  CDATA #IMPLIED
+	  title  CDATA #IMPLIED
+	  alt    CDATA #IMPLIED
+	  xid    CDATA #IMPLIED>
+<!-- image refers to an image in 
+     d section.  it is used much
+     the same as in HTML. -->
+
+<!ELEMENT i     EMPTY>
+<!ATTLIST i 
+          dataid CDATA #REQUIRED
+	  props  CDATA #IMPLIED>
+<!-- i is an alias for image -->
+
+<!ELEMENT br      EMPTY>
+<!ELEMENT pbr     EMPTY>
+<!ELEMENT cbr     EMPTY>
+<!-- These represent line,
+     page and column breaks. -->
+
+<!ELEMENT data      (d+)>
+<!ELEMENT d    (#PCDATA)>
+<!ATTLIST d
+          name CDATA #REQUIRED>
+<!-- d is used to store actual 
+     data, which currently means
+     images. -->
+
+<!ELEMENT bookmark EMPTY>
+<!ATTLIST bookmark type (start|end) #REQUIRED
+                   name CDATA       #REQUIRED
+                   xid  CDATA       #IMPLIED>
+
+<!ELEMENT a (c)>
+<!ATTLIST a href CDATA #REQUIRED>
+<!-- link to bookmark -->
+
+<!ELEMENT table   (cell+)>
+<!ATTLIST table
+          props  CDATA #IMPLIED
+          xid    CDATA #IMPLIED>
+<!-- A table is really a special type of section. 
+     Tables are collections of cells. -->
+
+<!ELEMENT cell   (p | table)+>
+<!ATTLIST cell
+          props  CDATA #IMPLIED
+	  xid    CDATA #IMPLIED>
+<!-- Cells are collections of paragraphs 
+     or embedded tables -->
+
+<!ELEMENT frame   (p | table)*>
+<!ATTLIST frame
+          props  CDATA #IMPLIED
+          xid    CDATA #IMPLIED>
+<!-- A frame is a container similar to a section. -->
+

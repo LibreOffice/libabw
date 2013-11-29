@@ -39,6 +39,25 @@ private:
   bool processXmlDocument(librevenge::RVNGInputStream *input);
   void processXmlNode(xmlTextReaderPtr reader);
 
+  void readMetadata(xmlTextReaderPtr reader);
+  void readHistory(xmlTextReaderPtr reader);
+  void readRevisions(xmlTextReaderPtr reader);
+  void readIgnoredWords(xmlTextReaderPtr reader);
+  void readStyles(xmlTextReaderPtr reader);
+  void readLists(xmlTextReaderPtr reader);
+  void readPageSize(xmlTextReaderPtr reader);
+  void readSection(xmlTextReaderPtr reader);
+  void readData(xmlTextReaderPtr reader);
+
+  void readM(xmlTextReaderPtr reader);
+  void readIw(xmlTextReaderPtr reader);
+  void readVersion(xmlTextReaderPtr reader);
+  void readS(xmlTextReaderPtr reader);
+  void readL(xmlTextReaderPtr reader);
+  void readP(xmlTextReaderPtr reader);
+  void readC(xmlTextReaderPtr reader);
+  void readD(xmlTextReaderPtr reader);
+
   librevenge::RVNGInputStream *m_input;
   librevenge::RVNGTextInterface *m_iface;
   ABWCollector *m_collector;

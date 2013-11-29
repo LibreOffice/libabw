@@ -60,7 +60,9 @@ bool libabw::ABWParser::processXmlDocument(librevenge::RVNGInputStream *input)
   int ret = xmlTextReaderRead(reader);
   while (1 == ret)
   {
-    processXmlNode(reader);
+    int tokenType = xmlTextReaderNodeType(reader);
+    if (XML_READER_TYPE_SIGNIFICANT_WHITESPACE != tokenType)
+      processXmlNode(reader);
 
     ret = xmlTextReaderRead(reader);
   }
@@ -77,6 +79,42 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
   int tokenType = xmlTextReaderNodeType(reader);
   switch (tokenId)
   {
+  case XML_METADATA:
+    if (XML_READER_TYPE_ELEMENT == tokenType)
+      readMetadata(reader);
+    break;
+  case XML_HISTORY:
+    if (XML_READER_TYPE_ELEMENT == tokenType)
+      readHistory(reader);
+    break;
+  case XML_REVISIONS:
+    if (XML_READER_TYPE_ELEMENT == tokenType)
+      readRevisions(reader);
+    break;
+  case XML_IGNOREDWORDS:
+    if (XML_READER_TYPE_ELEMENT == tokenType)
+      readIgnoredWords(reader);
+    break;
+  case XML_STYLES:
+    if (XML_READER_TYPE_ELEMENT == tokenType)
+      readStyles(reader);
+    break;
+  case XML_LISTS:
+    if (XML_READER_TYPE_ELEMENT == tokenType)
+      readLists(reader);
+    break;
+  case XML_PAGESIZE:
+    if (XML_READER_TYPE_ELEMENT == tokenType)
+      readPageSize(reader);
+    break;
+  case XML_SECTION:
+    if (XML_READER_TYPE_ELEMENT == tokenType)
+      readSection(reader);
+    break;
+  case XML_DATA:
+    if (XML_READER_TYPE_ELEMENT == tokenType)
+      readData(reader);
+    break;
   default:
     break;
   }
@@ -109,6 +147,356 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
 int libabw::ABWParser::getElementToken(xmlTextReaderPtr reader)
 {
   return ABWXMLTokenMap::getTokenId(xmlTextReaderConstName(reader));
+}
+
+
+void libabw::ABWParser::readMetadata(xmlTextReaderPtr reader)
+{
+  int ret = 1;
+  int tokenId = XML_TOKEN_INVALID;
+  int tokenType = -1;
+  do
+  {
+    ret = xmlTextReaderRead(reader);
+    tokenId = getElementToken(reader);
+    if (XML_TOKEN_INVALID == tokenId)
+    {
+      ABW_DEBUG_MSG(("VDXParser::readMetadata: unknown token %s\n", xmlTextReaderConstName(reader)));
+    }
+    tokenType = xmlTextReaderNodeType(reader);
+    switch (tokenId)
+    {
+    case XML_M:
+      if (XML_READER_TYPE_ELEMENT == tokenType)
+        readM(reader);
+      break;
+    default:
+      break;
+    }
+  }
+  while ((XML_METADATA != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
+}
+
+void libabw::ABWParser::readHistory(xmlTextReaderPtr reader)
+{
+  int ret = 1;
+  int tokenId = XML_TOKEN_INVALID;
+  int tokenType = -1;
+  do
+  {
+    ret = xmlTextReaderRead(reader);
+    tokenId = getElementToken(reader);
+    if (XML_TOKEN_INVALID == tokenId)
+    {
+      ABW_DEBUG_MSG(("VDXParser::readHistory: unknown token %s\n", xmlTextReaderConstName(reader)));
+    }
+    tokenType = xmlTextReaderNodeType(reader);
+    switch (tokenId)
+    {
+    case XML_VERSION:
+      if (XML_READER_TYPE_ELEMENT == tokenType)
+        readVersion(reader);
+      break;
+    default:
+      break;
+    }
+  }
+  while ((XML_HISTORY != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
+}
+
+void libabw::ABWParser::readRevisions(xmlTextReaderPtr reader)
+{
+  int ret = 1;
+  int tokenId = XML_TOKEN_INVALID;
+  int tokenType = -1;
+  do
+  {
+    ret = xmlTextReaderRead(reader);
+    tokenId = getElementToken(reader);
+    if (XML_TOKEN_INVALID == tokenId)
+    {
+      ABW_DEBUG_MSG(("VDXParser::readRevisions: unknown token %s\n", xmlTextReaderConstName(reader)));
+    }
+    tokenType = xmlTextReaderNodeType(reader);
+    (void)tokenType;
+    switch (tokenId)
+    {
+    default:
+      break;
+    }
+  }
+  while ((XML_REVISIONS != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
+}
+
+void libabw::ABWParser::readIgnoredWords(xmlTextReaderPtr reader)
+{
+  int ret = 1;
+  int tokenId = XML_TOKEN_INVALID;
+  int tokenType = -1;
+  do
+  {
+    ret = xmlTextReaderRead(reader);
+    tokenId = getElementToken(reader);
+    if (XML_TOKEN_INVALID == tokenId)
+    {
+      ABW_DEBUG_MSG(("VDXParser::readIgnoreWords: unknown token %s\n", xmlTextReaderConstName(reader)));
+    }
+    tokenType = xmlTextReaderNodeType(reader);
+    switch (tokenId)
+    {
+    case XML_IW:
+      if (XML_READER_TYPE_ELEMENT == tokenType)
+        readIw(reader);
+      break;
+    default:
+      break;
+    }
+  }
+  while ((XML_IGNOREDWORDS != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
+}
+
+void libabw::ABWParser::readStyles(xmlTextReaderPtr reader)
+{
+  int ret = 1;
+  int tokenId = XML_TOKEN_INVALID;
+  int tokenType = -1;
+  do
+  {
+    ret = xmlTextReaderRead(reader);
+    tokenId = getElementToken(reader);
+    if (XML_TOKEN_INVALID == tokenId)
+    {
+      ABW_DEBUG_MSG(("VDXParser::readStyles: unknown token %s\n", xmlTextReaderConstName(reader)));
+    }
+    tokenType = xmlTextReaderNodeType(reader);
+    switch (tokenId)
+    {
+    case XML_S:
+      if (XML_READER_TYPE_ELEMENT == tokenType)
+        readS(reader);
+      break;
+    default:
+      break;
+    }
+  }
+  while ((XML_STYLES != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
+}
+
+void libabw::ABWParser::readLists(xmlTextReaderPtr reader)
+{
+  int ret = 1;
+  int tokenId = XML_TOKEN_INVALID;
+  int tokenType = -1;
+  do
+  {
+    ret = xmlTextReaderRead(reader);
+    tokenId = getElementToken(reader);
+    if (XML_TOKEN_INVALID == tokenId)
+    {
+      ABW_DEBUG_MSG(("VDXParser::readLists: unknown token %s\n", xmlTextReaderConstName(reader)));
+    }
+    tokenType = xmlTextReaderNodeType(reader);
+    switch (tokenId)
+    {
+    case XML_L:
+      if (XML_READER_TYPE_ELEMENT == tokenType)
+        readL(reader);
+      break;
+    default:
+      break;
+    }
+  }
+  while ((XML_LISTS != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
+}
+
+void libabw::ABWParser::readPageSize(xmlTextReaderPtr reader)
+{
+  xmlTextReaderRead(reader);
+}
+
+void libabw::ABWParser::readSection(xmlTextReaderPtr reader)
+{
+  int ret = 1;
+  int tokenId = XML_TOKEN_INVALID;
+  int tokenType = -1;
+  do
+  {
+    ret = xmlTextReaderRead(reader);
+    tokenId = getElementToken(reader);
+    if (XML_TOKEN_INVALID == tokenId)
+    {
+      ABW_DEBUG_MSG(("VDXParser::readSection: unknown token %s\n", xmlTextReaderConstName(reader)));
+    }
+    tokenType = xmlTextReaderNodeType(reader);
+    switch (tokenId)
+    {
+    default:
+      break;
+    }
+  }
+  while ((XML_SECTION != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
+}
+
+void libabw::ABWParser::readData(xmlTextReaderPtr reader)
+{
+  int ret = 1;
+  int tokenId = XML_TOKEN_INVALID;
+  int tokenType = -1;
+  do
+  {
+    ret = xmlTextReaderRead(reader);
+    tokenId = getElementToken(reader);
+    if (XML_TOKEN_INVALID == tokenId)
+    {
+      ABW_DEBUG_MSG(("VDXParser::readData: unknown token %s\n", xmlTextReaderConstName(reader)));
+    }
+    tokenType = xmlTextReaderNodeType(reader);
+    switch (tokenId)
+    {
+    case XML_D:
+      if (XML_READER_TYPE_ELEMENT == tokenType)
+        readD(reader);
+      break;
+    default:
+      break;
+    }
+  }
+  while ((XML_DATA != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
+}
+
+void libabw::ABWParser::readM(xmlTextReaderPtr reader)
+{
+  int ret = 1;
+  int tokenId = XML_TOKEN_INVALID;
+  int tokenType = -1;
+  do
+  {
+    ret = xmlTextReaderRead(reader);
+    tokenId = getElementToken(reader);
+    if (XML_TOKEN_INVALID == tokenId)
+    {
+      ABW_DEBUG_MSG(("VDXParser::readM: unknown token %s\n", xmlTextReaderConstName(reader)));
+    }
+    tokenType = xmlTextReaderNodeType(reader);
+    (void)tokenType;
+    switch (tokenId)
+    {
+    default:
+      break;
+    }
+  }
+  while ((XML_M != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
+}
+
+void libabw::ABWParser::readIw(xmlTextReaderPtr reader)
+{
+  int ret = 1;
+  int tokenId = XML_TOKEN_INVALID;
+  int tokenType = -1;
+  do
+  {
+    ret = xmlTextReaderRead(reader);
+    tokenId = getElementToken(reader);
+    if (XML_TOKEN_INVALID == tokenId)
+    {
+      ABW_DEBUG_MSG(("VDXParser::readIw: unknown token %s\n", xmlTextReaderConstName(reader)));
+    }
+    tokenType = xmlTextReaderNodeType(reader);
+    (void)tokenType;
+    switch (tokenId)
+    {
+    default:
+      break;
+    }
+  }
+  while ((XML_IW != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
+}
+
+void libabw::ABWParser::readVersion(xmlTextReaderPtr reader)
+{
+  xmlTextReaderRead(reader);
+}
+
+void libabw::ABWParser::readS(xmlTextReaderPtr reader)
+{
+  xmlTextReaderRead(reader);
+}
+
+void libabw::ABWParser::readL(xmlTextReaderPtr reader)
+{
+  xmlTextReaderRead(reader);
+}
+
+void libabw::ABWParser::readP(xmlTextReaderPtr reader)
+{
+  int ret = 1;
+  int tokenId = XML_TOKEN_INVALID;
+  int tokenType = -1;
+  do
+  {
+    ret = xmlTextReaderRead(reader);
+    tokenId = getElementToken(reader);
+    if (XML_TOKEN_INVALID == tokenId)
+    {
+      ABW_DEBUG_MSG(("VDXParser::readP: unknown token %s\n", xmlTextReaderConstName(reader)));
+    }
+    tokenType = xmlTextReaderNodeType(reader);
+    (void)tokenType;
+    switch (tokenId)
+    {
+    default:
+      break;
+    }
+  }
+  while ((XML_P != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
+}
+
+void libabw::ABWParser::readC(xmlTextReaderPtr reader)
+{
+  int ret = 1;
+  int tokenId = XML_TOKEN_INVALID;
+  int tokenType = -1;
+  do
+  {
+    ret = xmlTextReaderRead(reader);
+    tokenId = getElementToken(reader);
+    if (XML_TOKEN_INVALID == tokenId)
+    {
+      ABW_DEBUG_MSG(("VDXParser::readC: unknown token %s\n", xmlTextReaderConstName(reader)));
+    }
+    tokenType = xmlTextReaderNodeType(reader);
+    (void)tokenType;
+    switch (tokenId)
+    {
+    default:
+      break;
+    }
+  }
+  while ((XML_C != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
+}
+
+void libabw::ABWParser::readD(xmlTextReaderPtr reader)
+{
+  int ret = 1;
+  int tokenId = XML_TOKEN_INVALID;
+  int tokenType = -1;
+  do
+  {
+    ret = xmlTextReaderRead(reader);
+    tokenId = getElementToken(reader);
+    if (XML_TOKEN_INVALID == tokenId)
+    {
+      ABW_DEBUG_MSG(("VDXParser::readD: unknown token %s\n", xmlTextReaderConstName(reader)));
+    }
+    tokenType = xmlTextReaderNodeType(reader);
+    (void)tokenType;
+    switch (tokenId)
+    {
+    default:
+      break;
+    }
+  }
+  while ((XML_D != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
 }
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

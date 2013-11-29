@@ -61,8 +61,11 @@ bool AbiDocument::isFileFormatSupported(librevenge::RVNGInputStream *input)
     }
     if (!xmlStrEqual(name, BAD_CAST("abiword")))
     {
-      xmlFreeTextReader(reader);
-      return false;
+      if (!xmlStrEqual(name, BAD_CAST("awml")))
+      {
+        xmlFreeTextReader(reader);
+        return false;
+      }
     }
 
     // Checking the namespace of AbiWord documents.

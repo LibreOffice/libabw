@@ -45,7 +45,7 @@ libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_SOURCES = \
 	$(generated_files)
 
 ABWXMLTokenMap.lo : $(generated_files)
-ABWXParser.lo : $(generated_files)
+ABWParser.lo : $(generated_files)
 
 $(top_builddir)/src/lib/tokens.h : $(top_builddir)/src/lib/tokens.gperf
 
