@@ -1,0 +1,43 @@
+if PLATFORM_WIN32
+no_undefined = -no-undefined
+else
+if PLATFORM_DARWIN
+no_undefined = -no-undefined
+else
+no_undefined =
+endif
+endif
+
+if OS_WIN32
+version_info = -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) -avoid-version
+else
+version_info = -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
+endif
+
+lib_LTLIBRARIES = libabw-@ABW_MAJOR_VERSION@.@ABW_MINOR_VERSION@.la $(target_libabw_stream)
+libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_includedir = $(includedir)/libabw-@ABW_MAJOR_VERSION@.@ABW_MINOR_VERSION@/libabw
+libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_include_HEADERS = \
+	$(top_srcdir)/inc/libabw/libabw.h \
+	$(top_srcdir)/inc/libabw/AbiDocument.h
+
+AM_CXXFLAGS = -I$(top_srcdir)/inc $(REVENGE_CFLAGS) $(DEBUG_CXXFLAGS)
+
+libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_LIBADD  = $(REVENGE_LIBS) @LIBABW_WIN32_RESOURCE@
+libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_DEPENDENCIES = @LIBABW_WIN32_RESOURCE@
+libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_LDFLAGS = $(version_info) -export-dynamic $(no_undefined)
+libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_SOURCES = \
+	AbiDocument.cpp
+
+if OS_WIN32
+
+@LIBABW_WIN32_RESOURCE@ : libabw.rc $(libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_OBJECTS)
+	chmod +x $(top_srcdir)/build/win32/*compile-resource
+	WINDRES=@WINDRES@ $(top_srcdir)/build/win32/lt-compile-resource libabw.rc @LIBABW_WIN32_RESOURCE@
+endif
+
+EXTRA_DIST = \
+	libabw.rc.in
+
+# These may be in the builddir too
+BUILD_EXTRA_DIST = \
+	libabw.rc

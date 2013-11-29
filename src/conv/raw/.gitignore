@@ -1,0 +1,8 @@
+.deps
+.libs
+*.lo
+*.la
+Makefile
+Makefile.in
+abw2raw
+*.rc
