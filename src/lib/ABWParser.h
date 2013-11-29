@@ -54,9 +54,16 @@ private:
   void readVersion(xmlTextReaderPtr reader);
   void readS(xmlTextReaderPtr reader);
   void readL(xmlTextReaderPtr reader);
-  void readP(xmlTextReaderPtr reader);
-  void readC(xmlTextReaderPtr reader);
   void readD(xmlTextReaderPtr reader);
+
+  void readP(xmlTextReaderPtr reader);
+  void readTable(xmlTextReaderPtr reader);
+  void readFrame(xmlTextReaderPtr reader);
+
+  void readC(xmlTextReaderPtr reader);
+  void readBr(xmlTextReaderPtr reader);
+  void readCbr(xmlTextReaderPtr reader);
+  void readPbr(xmlTextReaderPtr reader);
 
   librevenge::RVNGInputStream *m_input;
   librevenge::RVNGTextInterface *m_iface;

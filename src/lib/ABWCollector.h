@@ -10,6 +10,8 @@
 #ifndef __ABWCOLLECTOR_H__
 #define __ABWCOLLECTOR_H__
 
+#include <librevenge/librevenge.h>
+
 namespace libabw
 {
 
@@ -20,6 +22,19 @@ public:
   virtual ~ABWCollector();
 
   // collector functions
+
+  void openParagraph();
+  void closeParagraph();
+  void openSpan();
+  void closeSpan();
+  void startSection();
+  void endSection();
+  void startDocument();
+  void endDocument();
+  void insertLineBreak();
+  void insertColumnBreak();
+  void insertPageBreak();
+  void insertText(const librevenge::RVNGString &text);
 
 private:
   ABWCollector(const ABWCollector &);
