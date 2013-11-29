@@ -1,6 +1,6 @@
 # formatting options
 style=allman
-indent=tab
+indent=spaces=2
 align-pointer=name
 break-closing-brackets
 pad-header

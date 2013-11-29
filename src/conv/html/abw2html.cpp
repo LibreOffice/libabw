@@ -39,57 +39,57 @@ namespace
 
 int printUsage()
 {
-	printf("Usage: abw2html [OPTION] <AbiWord Document>\n");
-	printf("\n");
-	printf("Options:\n");
-	printf("--help                Shows this help message\n");
-	printf("--version             Output abw2html version \n");
-	return -1;
+  printf("Usage: abw2html [OPTION] <AbiWord Document>\n");
+  printf("\n");
+  printf("Options:\n");
+  printf("--help                Shows this help message\n");
+  printf("--version             Output abw2html version \n");
+  return -1;
 }
 
 int printVersion()
 {
-	printf("abw2html %s\n", VERSION);
-	return 0;
+  printf("abw2html %s\n", VERSION);
+  return 0;
 }
 
 } // anonymous namespace
 
 int main(int argc, char *argv[])
 {
-	if (argc < 2)
-		return printUsage();
+  if (argc < 2)
+    return printUsage();
 
-	char *file = 0;
+  char *file = 0;
 
-	for (int i = 1; i < argc; i++)
-	{
-		if (!strcmp(argv[i], "--version"))
-			return printVersion();
-		else if (!file && strncmp(argv[i], "--", 2))
-			file = argv[i];
-		else
-			return printUsage();
-	}
+  for (int i = 1; i < argc; i++)
+  {
+    if (!strcmp(argv[i], "--version"))
+      return printVersion();
+    else if (!file && strncmp(argv[i], "--", 2))
+      file = argv[i];
+    else
+      return printUsage();
+  }
 
-	if (!file)
-		return printUsage();
+  if (!file)
+    return printUsage();
 
-	librevenge::RVNGFileStream input(file);
+  librevenge::RVNGFileStream input(file);
 
-	if (!AbiDocument::isFileFormatSupported(&input))
-	{
-		fprintf(stderr, "ERROR: Unsupported file format!\n");
-		return 1;
-	}
+  if (!AbiDocument::isFileFormatSupported(&input))
+  {
+    fprintf(stderr, "ERROR: Unsupported file format!\n");
+    return 1;
+  }
 
-	librevenge::RVNGString document;
-	librevenge::RVNGHTMLTextGenerator documentGenerator(document);
-	if (!AbiDocument::parse(&input, &documentGenerator))
-		return 1;
+  librevenge::RVNGString document;
+  librevenge::RVNGHTMLTextGenerator documentGenerator(document);
+  if (!AbiDocument::parse(&input, &documentGenerator))
+    return 1;
 
-	printf("%s", document.cstr());
+  printf("%s", document.cstr());
 
-	return 0;
+  return 0;
 }
 /* vim:set shiftwidth=4 softtabstop=4 noexpandtab: */

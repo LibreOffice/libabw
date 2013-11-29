@@ -20,8 +20,8 @@ AbiWord documents.
 class AbiDocument
 {
 public:
-	static bool isFileFormatSupported(librevenge::RVNGInputStream *input);
-	static bool parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *documentInterface);
+  static bool isFileFormatSupported(librevenge::RVNGInputStream *input);
+  static bool parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *documentInterface);
 };
 
 #endif /* ABIDOCUMENT_H */

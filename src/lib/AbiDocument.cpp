@@ -32,9 +32,9 @@ the input stream can be parsed
 */
 bool AbiDocument::isFileFormatSupported(librevenge::RVNGInputStream *input)
 {
-	if (!input)
-		return false;
-	return false;
+  if (!input)
+    return false;
+  return false;
 }
 
 /**
@@ -50,10 +50,10 @@ was not, it indicates the reason of the error
 */
 bool AbiDocument::parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *textInterface)
 {
-	if (!input)
-		return false;
-	if (!textInterface)
-		return false;
-	return false;
+  if (!input)
+    return false;
+  if (!textInterface)
+    return false;
+  return false;
 }
 /* vim:set shiftwidth=4 softtabstop=4 noexpandtab: */
