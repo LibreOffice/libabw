@@ -210,6 +210,15 @@ PKG_CHECK_MODULES([REVENGE],[
 AC_SUBST([REVENGE_CFLAGS])
 AC_SUBST([REVENGE_LIBS])
 
+# ============
+# Find libxml2
+# ============
+PKG_CHECK_MODULES([LIBXML],[
+	libxml-2.0
+])
+AC_SUBST([LIBXML_CFLAGS])
+AC_SUBST([LIBXML_LIBS])
+
 # =====
 # Tools
 # =====
