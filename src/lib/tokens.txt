@@ -1,0 +1,10 @@
+abiword
+c
+history
+m
+metadata
+p
+pagesize
+s
+section
+styles

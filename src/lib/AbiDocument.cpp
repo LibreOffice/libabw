@@ -8,19 +8,21 @@
  */
 
 #include <libabw/libabw.h>
+#include "ABWXMLHelper.h"
+#include "libabw_internal.h"
 
 /**
-\mainpage libwpd documentation
-This document contains both the libwpd API specification and the normal libwpd
+\mainpage libabw documentation
+This document contains both the libabw API specification and the normal libabw
 documentation.
-\section api_docs libwpd API documentation
-The external libwpd API is provided by the AbiDocument class. This class, combined
+\section api_docs libabw API documentation
+The external libabw API is provided by the AbiDocument class. This class, combined
 with the librevenge::RVNGTextInterface class, are the only two classes that will be of interest
-for the application programmer using libwpd.
-\section lib_docs libwpd documentation
-If you are interrested in the structure of libwpd itself, this whole document
-would be a good starting point for exploring the interals of libwpd. Mind that
-this document is a work-in-progress, and will most likely not cover libwpd for
+for the application programmer using libabw.
+\section lib_docs libabw documentation
+If you are interrested in the structure of libabw itself, this whole document
+would be a good starting point for exploring the interals of libabw. Mind that
+this document is a work-in-progress, and will most likely not cover libabw for
 the full 100%.
 */
 
@@ -32,9 +34,58 @@ the input stream can be parsed
 */
 bool AbiDocument::isFileFormatSupported(librevenge::RVNGInputStream *input)
 {
+  ABW_DEBUG_MSG(("AbiDocument::isFileFormatSupported\n"));
   if (!input)
     return false;
-  return false;
+  xmlTextReaderPtr reader = 0;
+  try
+  {
+    input->seek(0, librevenge::RVNG_SEEK_SET);
+    reader = libabw::xmlReaderForStream(input, 0, 0, XML_PARSE_NOBLANKS|XML_PARSE_NOENT|XML_PARSE_NONET|XML_PARSE_RECOVER);
+    if (!reader)
+      return false;
+    int ret = xmlTextReaderRead(reader);
+    while (ret == 1 && 1 != xmlTextReaderNodeType(reader))
+      ret = xmlTextReaderRead(reader);
+    if (ret != 1)
+    {
+      xmlFreeTextReader(reader);
+      return false;
+    }
+    const xmlChar *name = xmlTextReaderConstName(reader);
+    if (!name)
+    {
+      xmlFreeTextReader(reader);
+      return false;
+    }
+    if (!xmlStrEqual(name, BAD_CAST("abiword")))
+    {
+      xmlFreeTextReader(reader);
+      return false;
+    }
+
+    // Checking the namespace of AbiWord documents.
+    const xmlChar *nsname = xmlTextReaderConstNamespaceUri(reader);
+    if (!nsname)
+    {
+      xmlFreeTextReader(reader);
+      return false;
+    }
+    if (!xmlStrEqual(nsname, BAD_CAST("http://www.abisource.com/awml.dtd")))
+    {
+      xmlFreeTextReader(reader);
+      return false;
+    }
+
+    xmlFreeTextReader(reader);
+    return true;
+  }
+  catch (...)
+  {
+    if (reader)
+      xmlFreeTextReader(reader);
+    return false;
+  }
 }
 
 /**
@@ -50,6 +101,7 @@ was not, it indicates the reason of the error
 */
 bool AbiDocument::parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *textInterface)
 {
+  ABW_DEBUG_MSG(("AbiDocument::parse\n"));
   if (!input)
     return false;
   if (!textInterface)

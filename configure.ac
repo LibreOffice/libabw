@@ -201,6 +201,22 @@ AS_IF([test "x$with_docs" != "xno"], [
 AM_CONDITIONAL([WITH_LIBABW_DOCS], [test "x$build_docs" != "xno"])
 
 
+dnl ===================================================================
+dnl Check for gperf
+dnl ===================================================================
+AC_ARG_VAR(GPERF, [Setting this variable will override the gperf detection])
+AC_PATH_PROG(GPERF, gperf)
+if test -z "$GPERF"; then
+    AC_MSG_ERROR([gperf not found but needed. Install it.])
+fi
+AC_MSG_CHECKING([gperf version])
+if test "`$GPERF --version | $EGREP ^GNU\ gperf | $AWK '{ print $3 }' | cut -d. -f1`" -ge "3"; then
+    AC_MSG_RESULT([OK])
+else
+    AC_MSG_ERROR([too old, you need at least 3.0.0])
+fi
+AC_SUBST(GPERF)
+
 # ===============
 # Find librevenge
 # ===============
