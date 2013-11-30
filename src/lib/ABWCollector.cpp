@@ -21,11 +21,10 @@ static void separateTabsAndInsertText(librevenge::RVNGTextInterface *iface, cons
   if (!iface || text.empty())
     return;
   librevenge::RVNGString tmpText;
-  const char ASCII_TAB = 0x9;
   librevenge::RVNGString::Iter i(text);
   for (i.rewind(); i.next();)
   {
-    if (*(i()) == ASCII_TAB)
+    if (*(i()) == '\t')
     {
       if (!tmpText.empty())
       {
@@ -123,13 +122,11 @@ void libabw::ABWCollector::insertText(const librevenge::RVNGString &text)
     return;
 
   librevenge::RVNGString tmpText;
-  const char ASCII_SPACE = 0x20;
-
   int numConsecutiveSpaces = 0;
   librevenge::RVNGString::Iter i(text);
   for (i.rewind(); i.next();)
   {
-    if (*(i()) == ASCII_SPACE)
+    if (*(i()) == ' ')
       numConsecutiveSpaces++;
     else
       numConsecutiveSpaces = 0;
