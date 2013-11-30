@@ -79,8 +79,41 @@ void libabw::ABWCollector::insertPageBreak()
 
 void libabw::ABWCollector::insertText(const librevenge::RVNGString &text)
 {
+  if (text.len() <= 0)
+    return;
+
+  librevenge::RVNGString tmpText;
+  const char ASCII_SPACE = 0x0020;
+
+  int numConsecutiveSpaces = 0;
+  librevenge::RVNGString::Iter i(text);
+  for (i.rewind(); i.next();)
+  {
+    if (*(i()) == ASCII_SPACE)
+      numConsecutiveSpaces++;
+    else
+      numConsecutiveSpaces = 0;
+
+    if (numConsecutiveSpaces > 1)
+    {
+      if (tmpText.len() > 0)
+      {
+        if (m_iface)
+          m_iface->insertText(tmpText);
+        tmpText.clear();
+      }
+
+      if (m_iface)
+        m_iface->insertSpace();
+    }
+    else
+    {
+      tmpText.append(i());
+    }
+  }
+
   if (m_iface)
-    m_iface->insertText(text);
+    m_iface->insertText(tmpText);
 }
 
 
