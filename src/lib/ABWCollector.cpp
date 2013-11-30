@@ -10,6 +10,46 @@
 #include <librevenge/librevenge.h>
 #include "ABWCollector.h"
 
+namespace libabw
+{
+
+namespace
+{
+
+static void separateTabsAndInsertText(librevenge::RVNGTextInterface *iface, const librevenge::RVNGString &text)
+{
+  if (!iface || text.empty())
+    return;
+  librevenge::RVNGString tmpText;
+  const char ASCII_TAB = 0x9;
+  librevenge::RVNGString::Iter i(text);
+  for (i.rewind(); i.next();)
+  {
+    if (*(i()) == ASCII_TAB)
+    {
+      if (!tmpText.empty())
+      {
+        if (iface)
+          iface->insertText(tmpText);
+        tmpText.clear();
+      }
+
+      if (iface)
+        iface->insertTab();
+    }
+    else
+    {
+      tmpText.append(i());
+    }
+  }
+  if (iface && !tmpText.empty())
+    iface->insertText(tmpText);
+}
+
+}
+
+}
+
 libabw::ABWCollector::ABWCollector(librevenge::RVNGTextInterface *iface) :
   m_iface(iface)
 {
@@ -79,11 +119,11 @@ void libabw::ABWCollector::insertPageBreak()
 
 void libabw::ABWCollector::insertText(const librevenge::RVNGString &text)
 {
-  if (text.len() <= 0)
+  if (text.empty())
     return;
 
   librevenge::RVNGString tmpText;
-  const char ASCII_SPACE = 0x0020;
+  const char ASCII_SPACE = 0x20;
 
   int numConsecutiveSpaces = 0;
   librevenge::RVNGString::Iter i(text);
@@ -96,10 +136,9 @@ void libabw::ABWCollector::insertText(const librevenge::RVNGString &text)
 
     if (numConsecutiveSpaces > 1)
     {
-      if (tmpText.len() > 0)
+      if (!tmpText.empty())
       {
-        if (m_iface)
-          m_iface->insertText(tmpText);
+        separateTabsAndInsertText(m_iface, tmpText);
         tmpText.clear();
       }
 
@@ -111,9 +150,7 @@ void libabw::ABWCollector::insertText(const librevenge::RVNGString &text)
       tmpText.append(i());
     }
   }
-
-  if (m_iface)
-    m_iface->insertText(tmpText);
+  separateTabsAndInsertText(m_iface, tmpText);
 }
 
 
