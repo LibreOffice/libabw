@@ -98,29 +98,14 @@ void libabw::ABWCollector::endDocument()
     m_iface->endDocument();
 }
 
-void libabw::ABWCollector::startSection()
-{
-  _openSection();
-}
-
 void libabw::ABWCollector::endSection()
 {
   _closeSection();
 }
 
-void libabw::ABWCollector::openParagraph()
-{
-  _openParagraph();
-}
-
 void libabw::ABWCollector::closeParagraph()
 {
   _closeParagraph();
-}
-
-void libabw::ABWCollector::openSpan()
-{
-  _openSpan();
 }
 
 void libabw::ABWCollector::closeSpan()
@@ -130,16 +115,23 @@ void libabw::ABWCollector::closeSpan()
 
 void libabw::ABWCollector::insertLineBreak()
 {
+  if (!m_ps->m_isSpanOpened)
+    _openSpan();
+
   if (m_iface)
     m_iface->insertLineBreak();
 }
 
 void libabw::ABWCollector::insertColumnBreak()
 {
+  if (!m_ps->m_isSpanOpened)
+    _openSpan();
 }
 
 void libabw::ABWCollector::insertPageBreak()
 {
+  if (!m_ps->m_isSpanOpened)
+    _openSpan();
 }
 
 void libabw::ABWCollector::insertText(const librevenge::RVNGString &text)

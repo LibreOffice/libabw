@@ -41,11 +41,8 @@ public:
 
   // collector functions
 
-  void openParagraph();
   void closeParagraph();
-  void openSpan();
   void closeSpan();
-  void startSection();
   void endSection();
   void startDocument();
   void endDocument();
