@@ -15,6 +15,24 @@
 namespace libabw
 {
 
+class ABWParsingState
+{
+public:
+  ABWParsingState();
+  ~ABWParsingState();
+
+  bool m_isDocumentStarted;
+  bool m_isPageSpanOpened;
+  bool m_isSectionOpened;
+
+  bool m_isSpanOpened;
+  bool m_isParagraphOpened;
+
+private:
+  ABWParsingState(const ABWParsingState &);
+  ABWParsingState &operator=(const ABWParsingState &);
+};
+
 class ABWCollector
 {
 public:
@@ -40,7 +58,24 @@ private:
   ABWCollector(const ABWCollector &);
   ABWCollector &operator=(const ABWCollector &);
 
+  void _openPageSpan();
+  void _closePageSpan();
+
+  void _openSection();
+  void _closeSection();
+
+  void _openParagraph();
+  void _closeParagraph();
+
+  void _openListElement();
+  void _closeListElement();
+
+  void _openSpan();
+  void _closeSpan();
+
+  ABWParsingState *m_ps;
   librevenge::RVNGTextInterface *m_iface;
+
 };
 
 } // namespace libabw

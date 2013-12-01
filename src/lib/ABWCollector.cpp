@@ -9,6 +9,7 @@
 
 #include <librevenge/librevenge.h>
 #include "ABWCollector.h"
+#include "libabw_internal.h"
 
 namespace libabw
 {
@@ -49,57 +50,82 @@ static void separateTabsAndInsertText(librevenge::RVNGTextInterface *iface, cons
 
 }
 
+libabw::ABWParsingState::ABWParsingState() :
+  m_isDocumentStarted(false),
+  m_isPageSpanOpened(false),
+  m_isSectionOpened(false),
+
+  m_isSpanOpened(false),
+  m_isParagraphOpened(false)
+{
+}
+
+libabw::ABWParsingState::~ABWParsingState()
+{
+}
+
 libabw::ABWCollector::ABWCollector(librevenge::RVNGTextInterface *iface) :
+  m_ps(new ABWParsingState),
   m_iface(iface)
 {
 }
 
 libabw::ABWCollector::~ABWCollector()
 {
+  DELETEP(m_ps);
 }
 
 void libabw::ABWCollector::startDocument()
 {
-  if (m_iface)
+  if (m_iface && !m_ps->m_isDocumentStarted)
     m_iface->startDocument();
+
+  m_ps->m_isDocumentStarted = true;
 }
 
 void libabw::ABWCollector::endDocument()
 {
+  if (!m_ps->m_isPageSpanOpened)
+    _openSpan();
+
+  if (m_ps->m_isParagraphOpened)
+    _closeParagraph();
+
+  // close the document nice and tight
+  _closeSection();
+  _closePageSpan();
   if (m_iface)
     m_iface->endDocument();
 }
 
 void libabw::ABWCollector::startSection()
 {
+  _openSection();
 }
 
 void libabw::ABWCollector::endSection()
 {
+  _closeSection();
 }
 
 void libabw::ABWCollector::openParagraph()
 {
-  if (m_iface)
-    m_iface->openParagraph(librevenge::RVNGPropertyList());
+  _openParagraph();
 }
 
 void libabw::ABWCollector::closeParagraph()
 {
-  if (m_iface)
-    m_iface->closeParagraph();
+  _closeParagraph();
 }
 
 void libabw::ABWCollector::openSpan()
 {
-  if (m_iface)
-    m_iface->openSpan(librevenge::RVNGPropertyList());
+  _openSpan();
 }
 
 void libabw::ABWCollector::closeSpan()
 {
-  if (m_iface)
-    m_iface->closeSpan();
+  _closeSpan();
 }
 
 void libabw::ABWCollector::insertLineBreak()
@@ -120,6 +146,10 @@ void libabw::ABWCollector::insertText(const librevenge::RVNGString &text)
 {
   if (text.empty())
     return;
+
+  if (!m_ps->m_isSpanOpened)
+    _openSpan();
+
 
   librevenge::RVNGString tmpText;
   int numConsecutiveSpaces = 0;
@@ -150,6 +180,124 @@ void libabw::ABWCollector::insertText(const librevenge::RVNGString &text)
   separateTabsAndInsertText(m_iface, tmpText);
 }
 
+
+void libabw::ABWCollector::_openPageSpan()
+{
+  if (m_ps->m_isPageSpanOpened)
+    return;
+
+  if (!m_ps->m_isDocumentStarted)
+    startDocument();
+
+  librevenge::RVNGPropertyList propList;
+  if (m_iface && !m_ps->m_isPageSpanOpened)
+    m_iface->openPageSpan(propList);
+
+  m_ps->m_isPageSpanOpened = true;
+
+}
+
+void libabw::ABWCollector::_closePageSpan()
+{
+  if (m_ps->m_isPageSpanOpened)
+  {
+    if (m_ps->m_isSectionOpened)
+      _closeSection();
+
+    if (m_iface)
+      m_iface->closePageSpan();
+  }
+
+  m_ps->m_isPageSpanOpened = false;
+}
+
+void libabw::ABWCollector::_openSection()
+{
+  if (!m_ps->m_isSectionOpened)
+  {
+    if (!m_ps->m_isPageSpanOpened)
+      _openPageSpan();
+
+    librevenge::RVNGPropertyList propList;
+
+    librevenge::RVNGPropertyListVector columns;
+    if (columns.count())
+      propList.insert("style:columns", columns);
+    if (!m_ps->m_isSectionOpened)
+      m_iface->openSection(propList);
+
+    m_ps->m_isSectionOpened = true;
+  }
+}
+
+void libabw::ABWCollector::_closeSection()
+{
+  if (m_ps->m_isSectionOpened)
+  {
+    if (m_ps->m_isParagraphOpened)
+      _closeParagraph();
+
+    m_iface->closeSection();
+
+    m_ps->m_isSectionOpened = false;
+  }
+}
+
+void libabw::ABWCollector::_openParagraph()
+{
+  if (!m_ps->m_isParagraphOpened)
+  {
+    if (!m_ps->m_isSectionOpened)
+      _openSection();
+
+    librevenge::RVNGPropertyListVector tabStops;
+
+    librevenge::RVNGPropertyList propList;
+
+    if (tabStops.count())
+      propList.insert("style:tab-stops", tabStops);
+
+    if (m_iface)
+      m_iface->openParagraph(propList);
+
+    m_ps->m_isParagraphOpened = true;
+  }
+}
+
+
+void libabw::ABWCollector::_closeParagraph()
+{
+  if (m_ps->m_isParagraphOpened)
+  {
+    if (m_ps->m_isSpanOpened)
+      _closeSpan();
+
+    m_iface->closeParagraph();
+  }
+
+  m_ps->m_isParagraphOpened = false;
+}
+
+
+void libabw::ABWCollector::_openSpan()
+{
+  if (!m_ps->m_isParagraphOpened)
+    _openParagraph();
+
+  librevenge::RVNGPropertyList propList;
+  if (!m_ps->m_isSpanOpened)
+    m_iface->openSpan(propList);
+
+  m_ps->m_isSpanOpened = true;
+}
+
+void libabw::ABWCollector::_closeSpan()
+{
+  if (m_ps->m_isSpanOpened)
+    m_iface->closeSpan();
+
+  m_ps->m_isSpanOpened = false;
+}
 
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */
