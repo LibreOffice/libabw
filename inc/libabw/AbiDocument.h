@@ -12,6 +12,9 @@
 
 #include <librevenge/librevenge.h>
 
+namespace libabw
+{
+
 /**
 This class provides all the functions an application would need to parse
 AbiWord documents.
@@ -23,6 +26,8 @@ public:
   static bool isFileFormatSupported(librevenge::RVNGInputStream *input);
   static bool parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *documentInterface);
 };
+
+} // namespace libabw
 
 #endif /* ABIDOCUMENT_H */
 /* vim:set shiftwidth=4 softtabstop=4 noexpandtab: */

@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 
   librevenge::RVNGFileStream input(file);
 
-  if (!AbiDocument::isFileFormatSupported(&input))
+  if (!libabw::AbiDocument::isFileFormatSupported(&input))
   {
     fprintf(stderr, "ERROR: Unsupported file format!\n");
     return 1;
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 
   librevenge::RVNGString document;
   librevenge::RVNGHTMLTextGenerator documentGenerator(document);
-  if (!AbiDocument::parse(&input, &documentGenerator))
+  if (!libabw::AbiDocument::parse(&input, &documentGenerator))
     return 1;
 
   printf("%s", document.cstr());

@@ -33,7 +33,7 @@ Analyzes the content of an input stream to see if it can be parsed
 \return A confidence value which represents the likelyhood that the content from
 the input stream can be parsed
 */
-bool AbiDocument::isFileFormatSupported(librevenge::RVNGInputStream *input)
+bool libabw::AbiDocument::isFileFormatSupported(librevenge::RVNGInputStream *input)
 {
   ABW_DEBUG_MSG(("AbiDocument::isFileFormatSupported\n"));
   if (!input)
@@ -103,7 +103,7 @@ is not protected
 \return A value that indicates whether the conversion was successful and in case it
 was not, it indicates the reason of the error
 */
-bool AbiDocument::parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *textInterface)
+bool libabw::AbiDocument::parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *textInterface)
 {
   ABW_DEBUG_MSG(("AbiDocument::parse\n"));
   input->seek(0, librevenge::RVNG_SEEK_SET);

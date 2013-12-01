@@ -68,14 +68,14 @@ int main(int argc, char *argv[])
 
   librevenge::RVNGFileStream input(file);
 
-  if (!AbiDocument::isFileFormatSupported(&input))
+  if (!libabw::AbiDocument::isFileFormatSupported(&input))
   {
     fprintf(stderr, "ERROR: Unsupported file format!\n");
     return 1;
   }
 
   librevenge::RVNGRawTextGenerator documentGenerator(printIndentLevel);
-  if (AbiDocument::parse(&input, &documentGenerator))
+  if (libabw::AbiDocument::parse(&input, &documentGenerator))
     return 0;
   return 1;
 }
