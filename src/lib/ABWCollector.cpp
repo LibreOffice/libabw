@@ -37,6 +37,18 @@ static void separateTabsAndInsertText(librevenge::RVNGTextInterface *iface, cons
       if (iface)
         iface->insertTab();
     }
+    else if (*(i()) == '\n')
+    {
+      if (!tmpText.empty())
+      {
+        if (iface)
+          iface->insertText(tmpText);
+        tmpText.clear();
+      }
+
+      if (iface)
+        iface->insertLineBreak();
+    }
     else
     {
       tmpText.append(i());
@@ -46,9 +58,47 @@ static void separateTabsAndInsertText(librevenge::RVNGTextInterface *iface, cons
     iface->insertText(tmpText);
 }
 
+static void separateSpacesAndInsertText(librevenge::RVNGTextInterface *iface, const librevenge::RVNGString &text)
+{
+  if (!iface)
+    return;
+  if (text.empty())
+  {
+    iface->insertText(text);
+    return;
+  }
+  librevenge::RVNGString tmpText;
+  int numConsecutiveSpaces = 0;
+  librevenge::RVNGString::Iter i(text);
+  for (i.rewind(); i.next();)
+  {
+    if (*(i()) == ' ')
+      numConsecutiveSpaces++;
+    else
+      numConsecutiveSpaces = 0;
+
+    if (numConsecutiveSpaces > 1)
+    {
+      if (!tmpText.empty())
+      {
+        separateTabsAndInsertText(iface, tmpText);
+        tmpText.clear();
+      }
+
+      if (iface)
+        iface->insertSpace();
+    }
+    else
+    {
+      tmpText.append(i());
+    }
+  }
+  separateTabsAndInsertText(iface, tmpText);
 }
 
-}
+} // anonymous namespace
+
+} // namespace libabw
 
 libabw::ABWParsingState::ABWParsingState() :
   m_isDocumentStarted(false),
@@ -136,40 +186,11 @@ void libabw::ABWCollector::insertPageBreak()
 
 void libabw::ABWCollector::insertText(const librevenge::RVNGString &text)
 {
-  if (text.empty())
-    return;
-
   if (!m_ps->m_isSpanOpened)
     _openSpan();
 
-
-  librevenge::RVNGString tmpText;
-  int numConsecutiveSpaces = 0;
-  librevenge::RVNGString::Iter i(text);
-  for (i.rewind(); i.next();)
-  {
-    if (*(i()) == ' ')
-      numConsecutiveSpaces++;
-    else
-      numConsecutiveSpaces = 0;
-
-    if (numConsecutiveSpaces > 1)
-    {
-      if (!tmpText.empty())
-      {
-        separateTabsAndInsertText(m_iface, tmpText);
-        tmpText.clear();
-      }
-
-      if (m_iface)
-        m_iface->insertSpace();
-    }
-    else
-    {
-      tmpText.append(i());
-    }
-  }
-  separateTabsAndInsertText(m_iface, tmpText);
+  if (m_iface)
+    separateSpacesAndInsertText(m_iface, text);
 }
 
 
