@@ -8,7 +8,10 @@
  */
 
 #include <string.h>
+#include <map>
+#include <vector>
 #include <boost/spirit/include/classic.hpp>
+#include <boost/algorithm/string.hpp>
 #include <librevenge/librevenge.h>
 #include "ABWCollector.h"
 #include "libabw_internal.h"
@@ -90,6 +93,8 @@ bool findDouble(const char *str, double &res, ABWUnit &unit)
     res = res / 25.4;
     unit = ABW_IN;
   }
+  if (unit == ABW_NONE)
+    unit = ABW_PERCENT;
 
   return true;
 }
@@ -130,6 +135,22 @@ bool findBool(const char *str, bool &res)
                ) >> end_p,
                //  End grammar
                space_p).full;
+}
+
+void parsePropString(const char *str, std::map<std::string, std::string> &props)
+{
+  if (!str || !strlen(str))
+    return;
+
+  std::string propString(str);
+  std::vector<std::string> strVec;
+  boost::algorithm::split(strVec, propString, boost::is_any_of(":;"), boost::token_compress_on);
+  for (std::vector<std::string>::size_type i = 0; i < strVec.size() / 2; ++i)
+  {
+    boost::algorithm::trim(strVec[2*i]);
+    boost::algorithm::trim(strVec[2*i+1]);
+    props[strVec[2*i]] = strVec[2*i+1];
+  }
 }
 
 static void separateTabsAndInsertText(librevenge::RVNGTextInterface *iface, const librevenge::RVNGString &text)
@@ -240,20 +261,28 @@ libabw::ABWCollector::~ABWCollector()
   DELETEP(m_ps);
 }
 
-void libabw::ABWCollector::collectParagraphStyle(const char * /* name */, const char * /* basedon */, const char * /* followedby */, const char * /* props */)
+void libabw::ABWCollector::collectParagraphStyle(const char * /* name */, const char * /* basedon */, const char * /* followedby */, const char *props)
 {
+  std::map<std::string, std::string> pstring;
+  parsePropString(props, pstring);
 }
 
-void libabw::ABWCollector::collectCharacterStyle(const char * /* name */, const char * /* basedon */, const char * /* followedby */, const char * /* props */)
+void libabw::ABWCollector::collectCharacterStyle(const char * /* name */, const char * /* basedon */, const char * /* followedby */, const char *props)
 {
+  std::map<std::string, std::string> pstring;
+  parsePropString(props, pstring);
 }
 
-void libabw::ABWCollector::collectParagraphProperties(const char * /* style */, const char * /* props */)
+void libabw::ABWCollector::collectParagraphProperties(const char * /* style */, const char *props)
 {
+  std::map<std::string, std::string> pstring;
+  parsePropString(props, pstring);
 }
 
-void libabw::ABWCollector::collectCharacterProperties(const char * /* style */, const char * /* props */)
+void libabw::ABWCollector::collectCharacterProperties(const char * /* style */, const char *props)
 {
+  std::map<std::string, std::string> pstring;
+  parsePropString(props, pstring);
 }
 
 void libabw::ABWCollector::collectPageSize(const char * /* width */, const char * /* height */, const char * /* units */, const char * /* pageScale */)

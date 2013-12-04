@@ -239,7 +239,8 @@ AC_SUBST([LIBXML2_LIBS])
 # Find boost headers
 # ==================
 AC_CHECK_HEADERS(
-		boost/spirit/include/classic.hpp,
+	boost/algorithm/string.hpp \
+	boost/spirit/include/classic.hpp,
 	[],
 	[AC_MSG_ERROR([Required boost headers not found.])],
 	[]
