@@ -7,6 +7,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <string.h>
+#include <boost/spirit/include/classic.hpp>
 #include <librevenge/librevenge.h>
 #include "ABWCollector.h"
 #include "libabw_internal.h"
@@ -16,6 +18,119 @@ namespace libabw
 
 namespace
 {
+
+enum ABWUnit
+{
+  ABW_NONE,
+  ABW_CM,
+  ABW_IN,
+  ABW_MM,
+  ABW_PI,
+  ABW_PT,
+  ABW_PX,
+  ABW_PERCENT
+};
+
+bool findDouble(const char *str, double &res, ABWUnit &unit)
+{
+  using namespace ::boost::spirit::classic;
+
+  if (!str || !strlen(str))
+    return false;
+
+  unit = ABW_NONE;
+
+  if (!parse(str,
+             //  Begin grammar
+             (
+               real_p[assign_a(res)] >>
+               (
+                 str_p("cm")[assign_a(unit,ABW_CM)]
+                 |
+                 str_p("in")[assign_a(unit,ABW_IN)]
+                 |
+                 str_p("mm")[assign_a(unit,ABW_MM)]
+                 |
+                 str_p("pi")[assign_a(unit,ABW_PI)]
+                 |
+                 str_p("pt")[assign_a(unit,ABW_PT)]
+                 |
+                 str_p("px")[assign_a(unit,ABW_PT)]
+                 |
+                 str_p("%")[assign_a(unit,ABW_PERCENT)]
+                 |
+                 eps_p
+               )
+             ) >> end_p,
+             //  End grammar
+             space_p).full)
+  {
+    return false;
+  }
+
+  if (unit == ABW_PERCENT)
+    res /= 100.0;
+  if (unit == ABW_PI)
+  {
+    res = res / 6.0;
+    unit = ABW_IN;
+  }
+  if (unit == ABW_PT || unit == ABW_PX)
+  {
+    res = res / 72.0;
+    unit = ABW_IN;
+  }
+  if (unit == ABW_CM)
+  {
+    res = res / 2.54;
+    unit = ABW_IN;
+  }
+  if (unit == ABW_MM)
+  {
+    res = res / 25.4;
+    unit = ABW_IN;
+  }
+
+  return true;
+}
+
+bool findInt(const char *str, int &res)
+{
+  using namespace ::boost::spirit::classic;
+
+  if (!str || !strlen(str))
+    return false;
+
+  return parse(str,
+               //  Begin grammar
+               (
+                 int_p[assign_a(res)]
+               ) >> end_p,
+               //  End grammar
+               space_p).full;
+}
+
+bool findBool(const char *str, bool &res)
+{
+  using namespace ::boost::spirit::classic;
+
+  if (!str || !strlen(str))
+    return false;
+
+  return parse(str,
+               //  Begin grammar
+               (
+                 str_p("true")[assign_a(res,true)]
+                 |
+                 str_p("false")[assign_a(res,false)]
+                 |
+                 str_p("TRUE")[assign_a(res,true)]
+                 |
+                 str_p("FALSE")[assign_a(res,false)]
+               ) >> end_p,
+               //  End grammar
+               space_p).full;
+}
 
 static void separateTabsAndInsertText(librevenge::RVNGTextInterface *iface, const librevenge::RVNGString &text)
 {
@@ -123,6 +238,26 @@ libabw::ABWCollector::ABWCollector(librevenge::RVNGTextInterface *iface) :
 libabw::ABWCollector::~ABWCollector()
 {
   DELETEP(m_ps);
+}
+
+void libabw::ABWCollector::collectParagraphStyle(const char * /* name */, const char * /* basedon */, const char * /* followedby */, const char * /* props */)
+{
+}
+
+void libabw::ABWCollector::collectCharacterStyle(const char * /* name */, const char * /* basedon */, const char * /* followedby */, const char * /* props */)
+{
+}
+
+void libabw::ABWCollector::collectParagraphProperties(const char * /* style */, const char * /* props */)
+{
+}
+
+void libabw::ABWCollector::collectCharacterProperties(const char * /* style */, const char * /* props */)
+{
+}
+
+void libabw::ABWCollector::collectPageSize(const char * /* width */, const char * /* height */, const char * /* units */, const char * /* pageScale */)
+{
 }
 
 void libabw::ABWCollector::startDocument()

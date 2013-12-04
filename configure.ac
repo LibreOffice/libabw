@@ -235,6 +235,16 @@ PKG_CHECK_MODULES([LIBXML2],[
 AC_SUBST([LIBXML2_CFLAGS])
 AC_SUBST([LIBXML2_LIBS])
 
+# ==================
+# Find boost headers
+# ==================
+AC_CHECK_HEADERS(
+		boost/spirit/include/classic.hpp,
+	[],
+	[AC_MSG_ERROR([Required boost headers not found.])],
+	[]
+)
+
 # =====
 # Tools
 # =====

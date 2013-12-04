@@ -313,6 +313,21 @@ void libabw::ABWParser::readLists(xmlTextReaderPtr reader)
 
 void libabw::ABWParser::readPageSize(xmlTextReaderPtr reader)
 {
+  xmlChar *width = xmlTextReaderGetAttribute(reader, BAD_CAST("width"));
+  xmlChar *height = xmlTextReaderGetAttribute(reader, BAD_CAST("height"));
+  xmlChar *units = xmlTextReaderGetAttribute(reader, BAD_CAST("units"));
+  xmlChar *pageScale = xmlTextReaderGetAttribute(reader, BAD_CAST("page-scale"));
+  if (m_collector)
+    m_collector->collectPageSize((const char *)width, (const char *)height, (const char *)units, (const char *)pageScale);
+  if (width)
+    xmlFree(width);
+  if (height)
+    xmlFree(height);
+  if (units)
+    xmlFree(units);
+  if (pageScale)
+    xmlFree(pageScale);
+
   xmlTextReaderRead(reader);
 }
 
@@ -435,6 +450,38 @@ void libabw::ABWParser::readVersion(xmlTextReaderPtr reader)
 
 void libabw::ABWParser::readS(xmlTextReaderPtr reader)
 {
+  xmlChar *type = xmlTextReaderGetAttribute(reader, BAD_CAST("type"));
+  xmlChar *name = xmlTextReaderGetAttribute(reader, BAD_CAST("name"));
+  xmlChar *basedon = xmlTextReaderGetAttribute(reader, BAD_CAST("basedon"));
+  xmlChar *followedby = xmlTextReaderGetAttribute(reader, BAD_CAST("followedby"));
+  xmlChar *props = xmlTextReaderGetAttribute(reader, BAD_CAST("props"));
+  if (type)
+  {
+    if (m_collector)
+    {
+      switch (type[0])
+      {
+      case 'P':
+        m_collector->collectParagraphStyle((const char *)name, (const char *)basedon, (const char *)followedby, (const char *)props);
+        break;
+      case 'C':
+        m_collector->collectCharacterStyle((const char *)name, (const char *)basedon, (const char *)followedby, (const char *)props);
+        break;
+      default:
+        break;
+      }
+    }
+    xmlFree(type);
+  }
+  if (name)
+    xmlFree(name);
+  if (basedon)
+    xmlFree(basedon);
+  if (followedby)
+    xmlFree(followedby);
+  if (props)
+    xmlFree(props);
+
   xmlTextReaderRead(reader);
 }
 
@@ -445,6 +492,15 @@ void libabw::ABWParser::readL(xmlTextReaderPtr reader)
 
 void libabw::ABWParser::readP(xmlTextReaderPtr reader)
 {
+  xmlChar *style = xmlTextReaderGetAttribute(reader, BAD_CAST("style"));
+  xmlChar *props = xmlTextReaderGetAttribute(reader, BAD_CAST("props"));
+  if (m_collector)
+    m_collector->collectParagraphProperties((const char *)style, (const char *)props);
+  if (style)
+    xmlFree(style);
+  if (props)
+    xmlFree(props);
+
   int ret = 1;
   int tokenId = XML_TOKEN_INVALID;
   int tokenType = -1;
@@ -493,6 +549,15 @@ void libabw::ABWParser::readP(xmlTextReaderPtr reader)
 
 void libabw::ABWParser::readC(xmlTextReaderPtr reader)
 {
+  xmlChar *style = xmlTextReaderGetAttribute(reader, BAD_CAST("style"));
+  xmlChar *props = xmlTextReaderGetAttribute(reader, BAD_CAST("props"));
+  if (m_collector)
+    m_collector->collectCharacterProperties((const char *)style, (const char *)props);
+  if (style)
+    xmlFree(style);
+  if (props)
+    xmlFree(props);
+
   int ret = 1;
   int tokenId = XML_TOKEN_INVALID;
   int tokenType = -1;
