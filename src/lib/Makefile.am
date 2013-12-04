@@ -38,7 +38,6 @@ libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_SOURCES = \
 	\
 	ABWCollector.h \
 	ABWParser.h \
-	ABWStyles.h \
 	ABWXMLHelper.h \
 	ABWXMLTokenMap.h \
 	libabw_internal.h \

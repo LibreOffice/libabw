@@ -8,8 +8,6 @@
  */
 
 #include <string.h>
-#include <map>
-#include <vector>
 #include <boost/spirit/include/classic.hpp>
 #include <boost/algorithm/string.hpp>
 #include <librevenge/librevenge.h>
@@ -245,7 +243,16 @@ libabw::ABWParsingState::ABWParsingState() :
   m_isSectionOpened(false),
 
   m_isSpanOpened(false),
-  m_isParagraphOpened(false)
+  m_isParagraphOpened(false),
+
+  m_currentParagraphStyle(),
+  m_currentCharacterStyle(),
+
+  m_paragraphStyles(),
+  m_characterStyles(),
+
+  m_pageWidth(0.0),
+  m_pageHeight(0.0)
 {
 }
 
@@ -264,32 +271,75 @@ libabw::ABWCollector::~ABWCollector()
   DELETEP(m_ps);
 }
 
-void libabw::ABWCollector::collectParagraphStyle(const char * /* name */, const char * /* basedon */, const char * /* followedby */, const char *props)
+void libabw::ABWCollector::collectParagraphStyle(const char *name, const char *basedon, const char *followedby, const char *props)
 {
-  std::map<std::string, std::string> pstring;
-  parsePropString(props, pstring);
+  ABWStyle style;
+  style.basedon = basedon ? basedon : "";
+  style.followedby = followedby ? followedby : "";
+  parsePropString(props, style.properties);
+  m_ps->m_paragraphStyles[name] = style;
 }
 
-void libabw::ABWCollector::collectCharacterStyle(const char * /* name */, const char * /* basedon */, const char * /* followedby */, const char *props)
+void libabw::ABWCollector::collectCharacterStyle(const char *name, const char *basedon, const char *followedby, const char *props)
 {
-  std::map<std::string, std::string> pstring;
-  parsePropString(props, pstring);
+  ABWStyle style;
+  style.basedon = basedon ? basedon : "";
+  style.followedby = followedby ? followedby : "";
+  parsePropString(props, style.properties);
+  m_ps->m_characterStyles[name] = style;
 }
 
-void libabw::ABWCollector::collectParagraphProperties(const char * /* style */, const char *props)
+void libabw::ABWCollector::collectParagraphProperties(const char *style, const char *props)
 {
+  m_ps->m_currentParagraphStyle.clear();
+  if (style)
+  {
+    std::map<std::string, ABWStyle>::const_iterator iter = m_ps->m_paragraphStyles.find(style);
+    if (iter != m_ps->m_paragraphStyles.end())
+      m_ps->m_currentParagraphStyle = iter->second.properties;
+  }
   std::map<std::string, std::string> pstring;
   parsePropString(props, pstring);
+  for (std::map<std::string, std::string>::const_iterator iter = pstring.begin(); iter != pstring.end(); ++iter)
+    m_ps->m_currentParagraphStyle[iter->first] = iter->second;
 }
 
-void libabw::ABWCollector::collectCharacterProperties(const char * /* style */, const char *props)
+void libabw::ABWCollector::collectCharacterProperties(const char *style, const char *props)
 {
+  m_ps->m_currentCharacterStyle.clear();
+  if (style)
+  {
+    std::map<std::string, ABWStyle>::const_iterator iter = m_ps->m_characterStyles.find(style);
+    if (iter != m_ps->m_characterStyles.end())
+      m_ps->m_currentCharacterStyle = iter->second.properties;
+  }
   std::map<std::string, std::string> pstring;
   parsePropString(props, pstring);
+  for (std::map<std::string, std::string>::const_iterator iter = pstring.begin(); iter != pstring.end(); ++iter)
+    m_ps->m_currentCharacterStyle[iter->first] = iter->second;
 }
 
-void libabw::ABWCollector::collectPageSize(const char * /* width */, const char * /* height */, const char * /* units */, const char * /* pageScale */)
+void libabw::ABWCollector::collectPageSize(const char *width, const char *height, const char *units, const char * /* pageScale */)
 {
+  std::string widthStr(width);
+  std::string heightStr(height);
+  if (units)
+  {
+    widthStr.append(units);
+    heightStr.append(units);
+  }
+  ABWUnit unit;
+  double value;
+  if (findDouble(widthStr.c_str(), value, unit))
+  {
+    if (unit == ABW_IN)
+      m_ps->m_pageWidth = value;
+  }
+  if (findDouble(heightStr.c_str(), value, unit))
+  {
+    if (unit == ABW_IN)
+      m_ps->m_pageHeight = value;
+  }
 }
 
 void libabw::ABWCollector::startDocument()
@@ -370,6 +420,9 @@ void libabw::ABWCollector::_openPageSpan()
     startDocument();
 
   librevenge::RVNGPropertyList propList;
+  propList.insert("fo:page-width", m_ps->m_pageWidth);
+  propList.insert("fo:page-height", m_ps->m_pageHeight);
+
   if (m_iface && !m_ps->m_isPageSpanOpened)
     m_iface->openPageSpan(propList);
 

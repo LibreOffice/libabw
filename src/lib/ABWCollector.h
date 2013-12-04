@@ -10,10 +10,22 @@
 #ifndef __ABWCOLLECTOR_H__
 #define __ABWCOLLECTOR_H__
 
+#include <map>
+#include <vector>
+#include <string>
 #include <librevenge/librevenge.h>
 
 namespace libabw
 {
+
+struct ABWStyle
+{
+  ABWStyle() : basedon(), followedby(), properties() {}
+  ~ABWStyle() {}
+  std::string basedon;
+  std::string followedby;
+  std::map<std::string, std::string> properties;
+};
 
 class ABWParsingState
 {
@@ -27,6 +39,15 @@ public:
 
   bool m_isSpanOpened;
   bool m_isParagraphOpened;
+
+  std::map<std::string, std::string> m_currentParagraphStyle;
+  std::map<std::string, std::string> m_currentCharacterStyle;
+
+  std::map<std::string, ABWStyle> m_paragraphStyles;
+  std::map<std::string, ABWStyle> m_characterStyles;
+
+  double m_pageWidth;
+  double m_pageHeight;
 
 private:
   ABWParsingState(const ABWParsingState &);
