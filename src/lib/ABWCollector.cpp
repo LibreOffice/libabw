@@ -143,13 +143,16 @@ void parsePropString(const char *str, std::map<std::string, std::string> &props)
     return;
 
   std::string propString(str);
+  boost::trim(propString);
   std::vector<std::string> strVec;
-  boost::algorithm::split(strVec, propString, boost::is_any_of(":;"), boost::token_compress_on);
-  for (std::vector<std::string>::size_type i = 0; i < strVec.size() / 2; ++i)
+  boost::algorithm::split(strVec, propString, boost::is_any_of(";"), boost::token_compress_on);
+  for (std::vector<std::string>::size_type i = 0; i < strVec.size(); ++i)
   {
-    boost::algorithm::trim(strVec[2*i]);
-    boost::algorithm::trim(strVec[2*i+1]);
-    props[strVec[2*i]] = strVec[2*i+1];
+    boost::algorithm::trim(strVec[i]);
+    std::vector<std::string> tmpVec;
+    boost::algorithm::split(tmpVec, strVec[i], boost::is_any_of(":"), boost::token_compress_on);
+    if (tmpVec.size() == 2)
+      props[tmpVec[0]] = tmpVec[1];
   }
 }
 
