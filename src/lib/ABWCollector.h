@@ -40,6 +40,7 @@ public:
   bool m_isSpanOpened;
   bool m_isParagraphOpened;
 
+  std::map<std::string, std::string> m_currentSectionStyle;
   std::map<std::string, std::string> m_currentParagraphStyle;
   std::map<std::string, std::string> m_currentCharacterStyle;
 
@@ -48,6 +49,10 @@ public:
 
   double m_pageWidth;
   double m_pageHeight;
+  double m_pageMarginTop;
+  double m_pageMarginBottom;
+  double m_pageMarginLeft;
+  double m_pageMarginRight;
 
 private:
   ABWParsingState(const ABWParsingState &);

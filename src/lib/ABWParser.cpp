@@ -333,6 +333,12 @@ void libabw::ABWParser::readPageSize(xmlTextReaderPtr reader)
 
 void libabw::ABWParser::readSection(xmlTextReaderPtr reader)
 {
+  xmlChar *props = xmlTextReaderGetAttribute(reader, BAD_CAST("props"));
+  if (m_collector)
+    m_collector->collectSectionProperties((const char *)props);
+  if (props)
+    xmlFree(props);
+
   int ret = 1;
   int tokenId = XML_TOKEN_INVALID;
   int tokenType = -1;
@@ -366,6 +372,8 @@ void libabw::ABWParser::readSection(xmlTextReaderPtr reader)
     }
   }
   while ((XML_SECTION != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
+  if (m_collector)
+    m_collector->endSection();
 }
 
 void libabw::ABWParser::readData(xmlTextReaderPtr reader)

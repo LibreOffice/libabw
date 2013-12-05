@@ -14,6 +14,8 @@
 #include "ABWCollector.h"
 #include "libabw_internal.h"
 
+#define ABW_EPSILON 1.0E-06
+
 namespace libabw
 {
 
@@ -245,6 +247,7 @@ libabw::ABWParsingState::ABWParsingState() :
   m_isSpanOpened(false),
   m_isParagraphOpened(false),
 
+  m_currentSectionStyle(),
   m_currentParagraphStyle(),
   m_currentCharacterStyle(),
 
@@ -252,7 +255,11 @@ libabw::ABWParsingState::ABWParsingState() :
   m_characterStyles(),
 
   m_pageWidth(0.0),
-  m_pageHeight(0.0)
+  m_pageHeight(0.0),
+  m_pageMarginTop(0.0),
+  m_pageMarginBottom(0.0),
+  m_pageMarginLeft(0.0),
+  m_pageMarginRight(0.0)
 {
 }
 
@@ -274,19 +281,21 @@ libabw::ABWCollector::~ABWCollector()
 void libabw::ABWCollector::collectParagraphStyle(const char *name, const char *basedon, const char *followedby, const char *props)
 {
   ABWStyle style;
-  style.basedon = basedon ? basedon : "";
-  style.followedby = followedby ? followedby : "";
+  style.basedon = basedon ? basedon : std::string();
+  style.followedby = followedby ? followedby : std::string();
   parsePropString(props, style.properties);
-  m_ps->m_paragraphStyles[name] = style;
+  if (name)
+    m_ps->m_paragraphStyles[name] = style;
 }
 
 void libabw::ABWCollector::collectCharacterStyle(const char *name, const char *basedon, const char *followedby, const char *props)
 {
   ABWStyle style;
-  style.basedon = basedon ? basedon : "";
-  style.followedby = followedby ? followedby : "";
+  style.basedon = basedon ? basedon : std::string();
+  style.followedby = followedby ? followedby : std::string();
   parsePropString(props, style.properties);
-  m_ps->m_characterStyles[name] = style;
+  if (name)
+    m_ps->m_characterStyles[name] = style;
 }
 
 void libabw::ABWCollector::collectParagraphProperties(const char *style, const char *props)
@@ -317,6 +326,44 @@ void libabw::ABWCollector::collectCharacterProperties(const char *style, const c
   parsePropString(props, pstring);
   for (std::map<std::string, std::string>::const_iterator iter = pstring.begin(); iter != pstring.end(); ++iter)
     m_ps->m_currentCharacterStyle[iter->first] = iter->second;
+}
+
+void libabw::ABWCollector::collectSectionProperties(const char *props)
+{
+  m_ps->m_currentSectionStyle.clear();
+  std::map<std::string, std::string> pstring;
+  parsePropString(props, pstring);
+  for (std::map<std::string, std::string>::const_iterator iter = pstring.begin(); iter != pstring.end(); ++iter)
+  {
+    ABWUnit unit(ABW_NONE);
+    double value(0.0);
+    if (iter->first == "page-margin-right" && !iter->second.empty() && fabs(m_ps->m_pageMarginRight) < ABW_EPSILON)
+    {
+      findDouble(iter->second.c_str(), value, unit);
+      if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
+        m_ps->m_pageMarginRight = value;
+    }
+    else if (iter->first == "page-margin-left" && !iter->second.empty() && fabs(m_ps->m_pageMarginLeft) < ABW_EPSILON)
+    {
+      findDouble(iter->second.c_str(), value, unit);
+      if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
+        m_ps->m_pageMarginLeft = value;
+    }
+    else if (iter->first == "page-margin-top" && !iter->second.empty() && fabs(m_ps->m_pageMarginTop) < ABW_EPSILON)
+    {
+      findDouble(iter->second.c_str(), value, unit);
+      if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
+        m_ps->m_pageMarginTop = value;
+    }
+    else if (iter->first == "page-margin-bottom" && !iter->second.empty() && fabs(m_ps->m_pageMarginBottom) < ABW_EPSILON)
+    {
+      findDouble(iter->second.c_str(), value, unit);
+      if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
+        m_ps->m_pageMarginBottom = value;
+    }
+
+    m_ps->m_currentSectionStyle[iter->first] = iter->second;
+  }
 }
 
 void libabw::ABWCollector::collectPageSize(const char *width, const char *height, const char *units, const char * /* pageScale */)
@@ -367,7 +414,7 @@ void libabw::ABWCollector::endDocument()
 
 void libabw::ABWCollector::endSection()
 {
-  _closeSection();
+  _closePageSpan();
 }
 
 void libabw::ABWCollector::closeParagraph()
@@ -422,6 +469,10 @@ void libabw::ABWCollector::_openPageSpan()
   librevenge::RVNGPropertyList propList;
   propList.insert("fo:page-width", m_ps->m_pageWidth);
   propList.insert("fo:page-height", m_ps->m_pageHeight);
+  propList.insert("fo:margin-left", m_ps->m_pageMarginLeft);
+  propList.insert("fo:margin-right", m_ps->m_pageMarginRight);
+  propList.insert("fo:margin-top", m_ps->m_pageMarginTop);
+  propList.insert("fo:margin-bottom", m_ps->m_pageMarginBottom);
 
   if (m_iface && !m_ps->m_isPageSpanOpened)
     m_iface->openPageSpan(propList);
