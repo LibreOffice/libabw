@@ -633,7 +633,10 @@ void libabw::ABWCollector::_openSection()
             columns.append(column);
           }
           if (columns.count())
+          {
             propList.insert("style:columns", columns);
+            propList.insert("text:dont-balance-text-columns", true);
+          }
         }
       }
     }
