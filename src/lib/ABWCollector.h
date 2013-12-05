@@ -54,6 +54,9 @@ public:
   double m_pageMarginLeft;
   double m_pageMarginRight;
 
+  bool m_deferredPageBreak;
+  bool m_deferredColumnBreak;
+
 private:
   ABWParsingState(const ABWParsingState &);
   ABWParsingState &operator=(const ABWParsingState &);

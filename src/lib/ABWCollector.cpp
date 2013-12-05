@@ -276,7 +276,10 @@ libabw::ABWParsingState::ABWParsingState() :
   m_pageMarginTop(0.0),
   m_pageMarginBottom(0.0),
   m_pageMarginLeft(0.0),
-  m_pageMarginRight(0.0)
+  m_pageMarginRight(0.0),
+
+  m_deferredPageBreak(false),
+  m_deferredColumnBreak(false)
 {
 }
 
@@ -520,14 +523,14 @@ void libabw::ABWCollector::insertLineBreak()
 
 void libabw::ABWCollector::insertColumnBreak()
 {
-  if (!m_ps->m_isSpanOpened)
-    _openSpan();
+  _closeParagraph();
+  m_ps->m_deferredColumnBreak = true;
 }
 
 void libabw::ABWCollector::insertPageBreak()
 {
-  if (!m_ps->m_isSpanOpened)
-    _openSpan();
+  _closeParagraph();
+  m_ps->m_deferredPageBreak = true;
 }
 
 void libabw::ABWCollector::insertText(const librevenge::RVNGString &text)
@@ -726,6 +729,12 @@ void libabw::ABWCollector::_openParagraph()
           propList.insert(propName.c_str(), value, librevenge::RVNG_PERCENT);
       }
     }
+    if (m_ps->m_deferredPageBreak)
+      propList.insert("fo:break-before", "page");
+    else if (m_ps->m_deferredColumnBreak)
+      propList.insert("fo:break-before", "column");
+    m_ps->m_deferredPageBreak = false;
+    m_ps->m_deferredColumnBreak = false;
 
     librevenge::RVNGPropertyListVector tabStops;
 
