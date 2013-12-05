@@ -137,6 +137,23 @@ bool findBool(const char *str, bool &res)
                space_p).full;
 }
 
+static std::string getColor(const std::string &s)
+{
+  if (s[0] == '#')
+  {
+    if (s.length() != 7)
+      return std::string();
+    else
+      return s;
+  }
+  else if (s.length() != 6)
+    return std::string();
+
+  std::string out = ("#");
+  out.append(s);
+  return out;
+}
+
 void parsePropString(const char *str, std::map<std::string, std::string> &props)
 {
   if (!str || !strlen(str))
@@ -588,19 +605,6 @@ void libabw::ABWCollector::_openSection()
   }
 }
 
-void libabw::ABWCollector::_closeSection()
-{
-  if (m_ps->m_isSectionOpened)
-  {
-    if (m_ps->m_isParagraphOpened)
-      _closeParagraph();
-
-    m_iface->closeSection();
-
-    m_ps->m_isSectionOpened = false;
-  }
-}
-
 void libabw::ABWCollector::_openParagraph()
 {
   if (!m_ps->m_isParagraphOpened)
@@ -698,6 +702,199 @@ void libabw::ABWCollector::_openParagraph()
   }
 }
 
+void libabw::ABWCollector::_openSpan()
+{
+  if (!m_ps->m_isSpanOpened)
+  {
+    if (!m_ps->m_isParagraphOpened)
+      _openParagraph();
+
+    librevenge::RVNGPropertyList propList;
+    ABWUnit unit(ABW_NONE);
+    double value(0.0);
+
+    std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentCharacterStyle.find("font-size");
+    if (iter != m_ps->m_currentCharacterStyle.end())
+    {
+      if (findDouble(iter->second.c_str(), value, unit))
+      {
+        if (unit == ABW_IN)
+          propList.insert("fo:font-size", value);
+      }
+    }
+    else
+    {
+      iter = m_ps->m_currentParagraphStyle.find("font-size");
+      if (iter != m_ps->m_currentParagraphStyle.end())
+      {
+        if (findDouble(iter->second.c_str(), value, unit))
+        {
+          if (unit == ABW_IN)
+            propList.insert("fo:font-size", value);
+        }
+      }
+    }
+
+    iter = m_ps->m_currentCharacterStyle.find("font-family");
+    if (iter != m_ps->m_currentCharacterStyle.end())
+    {
+      if (!iter->second.empty())
+        propList.insert("style:font-name", iter->second.c_str());
+    }
+    else
+    {
+      iter = m_ps->m_currentParagraphStyle.find("font-family");
+      if (iter != m_ps->m_currentParagraphStyle.end())
+      {
+        {
+          if (!iter->second.empty())
+            propList.insert("style:font-name", iter->second.c_str());
+        }
+      }
+    }
+
+    iter = m_ps->m_currentCharacterStyle.find("font-style");
+    if (iter != m_ps->m_currentCharacterStyle.end())
+    {
+      if (!iter->second.empty() && iter->second != "normal")
+        propList.insert("fo:font-style", iter->second.c_str());
+    }
+    else
+    {
+      iter = m_ps->m_currentParagraphStyle.find("font-style");
+      if (iter != m_ps->m_currentParagraphStyle.end())
+      {
+        {
+          if (!iter->second.empty() && iter->second != "normal")
+            propList.insert("fo:font-style", iter->second.c_str());
+        }
+      }
+    }
+
+    iter = m_ps->m_currentCharacterStyle.find("font-weight");
+    if (iter != m_ps->m_currentCharacterStyle.end())
+    {
+      if (!iter->second.empty() && iter->second != "normal")
+        propList.insert("fo:font-weight", iter->second.c_str());
+    }
+    else
+    {
+      iter = m_ps->m_currentParagraphStyle.find("font-weight");
+      if (iter != m_ps->m_currentParagraphStyle.end())
+      {
+        {
+          if (!iter->second.empty() && iter->second != "normal")
+            propList.insert("fo:font-weight", iter->second.c_str());
+        }
+      }
+    }
+
+    iter = m_ps->m_currentCharacterStyle.find("text-decoration");
+    if (iter != m_ps->m_currentCharacterStyle.end())
+    {
+      if (!iter->second.empty())
+      {
+        if (iter->second == "underline")
+          propList.insert("style:text-underline-type", "solid");
+        else if (iter->second == "line-through")
+          propList.insert("style:text-line-through-type", "single");
+      }
+    }
+    else
+    {
+      iter = m_ps->m_currentParagraphStyle.find("text-decoration");
+      if (iter != m_ps->m_currentParagraphStyle.end())
+      {
+        if (!iter->second.empty())
+        {
+          if (iter->second == "underline")
+            propList.insert("style:text-underline-type", "solid");
+          else if (iter->second == "line-through")
+            propList.insert("style:text-line-through-type", "single");
+        }
+      }
+    }
+
+    iter = m_ps->m_currentCharacterStyle.find("color");
+    if (iter != m_ps->m_currentCharacterStyle.end())
+    {
+      std::string color = getColor(iter->second);
+      if (!color.empty())
+        propList.insert("fo:color", color.c_str());
+    }
+    else
+    {
+      iter = m_ps->m_currentParagraphStyle.find("color");
+      if (iter != m_ps->m_currentParagraphStyle.end())
+      {
+        std::string color = getColor(iter->second);
+        if (!color.empty())
+          propList.insert("fo:color", color.c_str());
+      }
+    }
+
+    iter = m_ps->m_currentCharacterStyle.find("bgcolor");
+    if (iter != m_ps->m_currentCharacterStyle.end())
+    {
+      std::string color = getColor(iter->second);
+      if (!color.empty())
+        propList.insert("fo:background-color", color.c_str());
+    }
+    else
+    {
+      iter = m_ps->m_currentParagraphStyle.find("bgcolor");
+      if (iter != m_ps->m_currentParagraphStyle.end())
+      {
+        std::string color = getColor(iter->second);
+        if (!color.empty())
+          propList.insert("fo:background-color", color.c_str());
+      }
+    }
+
+    iter = m_ps->m_currentCharacterStyle.find("text-position");
+    if (iter != m_ps->m_currentCharacterStyle.end())
+    {
+      if (!iter->second.empty())
+      {
+        if (iter->second == "subscript")
+          propList.insert("style:text-position", "sub");
+        else if (iter->second == "superscript")
+          propList.insert("style:text-position", "super");
+      }
+    }
+    else
+    {
+      iter = m_ps->m_currentParagraphStyle.find("text-position");
+      if (iter != m_ps->m_currentParagraphStyle.end())
+      {
+        if (!iter->second.empty())
+        {
+          if (iter->second == "subscript")
+            propList.insert("style:text-position", "sub");
+          else if (iter->second == "superscript")
+            propList.insert("style:text-position", "super");
+        }
+      }
+    }
+
+    if (m_iface)
+      m_iface->openSpan(propList);
+  }
+  m_ps->m_isSpanOpened = true;
+}
+
+void libabw::ABWCollector::_closeSection()
+{
+  if (m_ps->m_isSectionOpened)
+  {
+    if (m_ps->m_isParagraphOpened)
+      _closeParagraph();
+
+    m_iface->closeSection();
+
+    m_ps->m_isSectionOpened = false;
+  }
+}
 
 void libabw::ABWCollector::_closeParagraph()
 {
@@ -713,20 +910,6 @@ void libabw::ABWCollector::_closeParagraph()
   m_ps->m_isParagraphOpened = false;
 }
 
-
-void libabw::ABWCollector::_openSpan()
-{
-  if (!m_ps->m_isSpanOpened)
-  {
-    if (!m_ps->m_isParagraphOpened)
-      _openParagraph();
-
-    librevenge::RVNGPropertyList propList;
-    if (m_iface)
-      m_iface->openSpan(propList);
-  }
-  m_ps->m_isSpanOpened = true;
-}
 
 void libabw::ABWCollector::_closeSpan()
 {
