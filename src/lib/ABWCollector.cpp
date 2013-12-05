@@ -617,6 +617,15 @@ void libabw::ABWCollector::_openSection()
           propList.insert("librevenge:margin-bottom", value);
       }
     }
+    iter = m_ps->m_currentSectionStyle.find("dom-dir");
+    if (iter != m_ps->m_currentSectionStyle.end())
+    {
+      if (iter->second == "ltr")
+        propList.insert("style:writing-mode", "lr-tb");
+      else if (iter->second == "rtl")
+        propList.insert("style:writing-mode", "rl-tb");
+    }
+
     iter = m_ps->m_currentSectionStyle.find("columns");
     if (iter != m_ps->m_currentSectionStyle.end())
     {
@@ -658,6 +667,8 @@ void libabw::ABWCollector::_openParagraph()
     librevenge::RVNGPropertyList propList;
     ABWUnit unit(ABW_NONE);
     double value(0.0);
+    int intValue(0);
+
     std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentParagraphStyle.find("margin-right");
     if (iter != m_ps->m_currentParagraphStyle.end())
     {
@@ -732,6 +743,28 @@ void libabw::ABWCollector::_openParagraph()
           propList.insert(propName.c_str(), value, librevenge::RVNG_PERCENT);
       }
     }
+    iter = m_ps->m_currentParagraphStyle.find("orphans");
+    if (iter != m_ps->m_currentParagraphStyle.end())
+    {
+      if (findInt(iter->second.c_str(), intValue))
+        propList.insert("fo:orphans", intValue);
+    }
+    iter = m_ps->m_currentParagraphStyle.find("widows");
+    if (iter != m_ps->m_currentParagraphStyle.end())
+    {
+      if (findInt(iter->second.c_str(), intValue))
+        propList.insert("fo:widows", intValue);
+    }
+
+    iter = m_ps->m_currentParagraphStyle.find("dom-dir");
+    if (iter != m_ps->m_currentParagraphStyle.end())
+    {
+      if (iter->second == "ltr")
+        propList.insert("style:writing-mode", "lr-tb");
+      else if (iter->second == "rtl")
+        propList.insert("style:writing-mode", "rl-tb");
+    }
+
     if (m_ps->m_deferredPageBreak)
       propList.insert("fo:break-before", "page");
     else if (m_ps->m_deferredColumnBreak)
