@@ -34,7 +34,7 @@ enum ABWUnit
   ABW_PERCENT
 };
 
-bool findDouble(const char *str, double &res, ABWUnit &unit)
+static bool findDouble(const char *str, double &res, ABWUnit &unit)
 {
   using namespace ::boost::spirit::classic;
 
@@ -154,7 +154,7 @@ static std::string getColor(const std::string &s)
   return out;
 }
 
-void parsePropString(const char *str, std::map<std::string, std::string> &props)
+static void parsePropString(const char *str, std::map<std::string, std::string> &props)
 {
   if (!str || !strlen(str))
     return;
