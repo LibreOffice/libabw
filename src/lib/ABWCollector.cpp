@@ -394,6 +394,14 @@ void libabw::ABWCollector::collectSectionProperties(const char *props)
 
     m_ps->m_currentSectionStyle[iter->first] = iter->second;
   }
+  if (fabs(m_ps->m_pageMarginRight) < ABW_EPSILON)
+    m_ps->m_pageMarginRight = 1.0;
+  if (fabs(m_ps->m_pageMarginLeft) < ABW_EPSILON)
+    m_ps->m_pageMarginLeft = 1.0;
+  if (fabs(m_ps->m_pageMarginTop) < ABW_EPSILON)
+    m_ps->m_pageMarginTop = 1.0;
+  if (fabs(m_ps->m_pageMarginBottom) < ABW_EPSILON)
+    m_ps->m_pageMarginBottom = 1.0;
 
   if (fabs(pageMarginLeft-m_ps->m_pageMarginLeft) > ABW_EPSILON ||
       fabs(pageMarginRight-m_ps->m_pageMarginRight) > ABW_EPSILON ||
@@ -465,11 +473,13 @@ void libabw::ABWCollector::closeParagraph()
   if (!m_ps->m_isParagraphOpened)
     _openSpan();
   _closeParagraph();
+  m_ps->m_currentParagraphStyle.clear();
 }
 
 void libabw::ABWCollector::closeSpan()
 {
   _closeSpan();
+  m_ps->m_currentCharacterStyle.clear();
 }
 
 void libabw::ABWCollector::insertLineBreak()
