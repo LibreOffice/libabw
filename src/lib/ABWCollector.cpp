@@ -307,9 +307,9 @@ void libabw::ABWCollector::collectParagraphProperties(const char *style, const c
     if (iter != m_ps->m_paragraphStyles.end())
       m_ps->m_currentParagraphStyle = iter->second.properties;
   }
-  std::map<std::string, std::string> pstring;
-  parsePropString(props, pstring);
-  for (std::map<std::string, std::string>::const_iterator iter = pstring.begin(); iter != pstring.end(); ++iter)
+  std::map<std::string, std::string> tmpProps;
+  parsePropString(props, tmpProps);
+  for (std::map<std::string, std::string>::const_iterator iter = tmpProps.begin(); iter != tmpProps.end(); ++iter)
     m_ps->m_currentParagraphStyle[iter->first] = iter->second;
 }
 
@@ -322,9 +322,9 @@ void libabw::ABWCollector::collectCharacterProperties(const char *style, const c
     if (iter != m_ps->m_characterStyles.end())
       m_ps->m_currentCharacterStyle = iter->second.properties;
   }
-  std::map<std::string, std::string> pstring;
-  parsePropString(props, pstring);
-  for (std::map<std::string, std::string>::const_iterator iter = pstring.begin(); iter != pstring.end(); ++iter)
+  std::map<std::string, std::string> tmpProps;
+  parsePropString(props, tmpProps);
+  for (std::map<std::string, std::string>::const_iterator iter = tmpProps.begin(); iter != tmpProps.end(); ++iter)
     m_ps->m_currentCharacterStyle[iter->first] = iter->second;
 }
 
@@ -336,45 +336,58 @@ void libabw::ABWCollector::collectSectionProperties(const char *props)
   double pageMarginBottom = m_ps->m_pageMarginBottom;
 
   m_ps->m_currentSectionStyle.clear();
-  std::map<std::string, std::string> pstring;
-  parsePropString(props, pstring);
-  for (std::map<std::string, std::string>::const_iterator iter = pstring.begin(); iter != pstring.end(); ++iter)
+  std::map<std::string, std::string> tmpProps;
+  parsePropString(props, tmpProps);
+  ABWUnit unit(ABW_NONE);
+  double value(0.0);
+  for (std::map<std::string, std::string>::const_iterator iter = tmpProps.begin(); iter != tmpProps.end(); ++iter)
   {
-    ABWUnit unit(ABW_NONE);
-    double value(0.0);
     if (iter->first == "page-margin-right" && !iter->second.empty() && fabs(m_ps->m_pageMarginRight) < ABW_EPSILON)
     {
-      findDouble(iter->second.c_str(), value, unit);
-      if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
-        m_ps->m_pageMarginRight = value;
+      if (findDouble(iter->second.c_str(), value, unit))
+      {
+        if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
+          m_ps->m_pageMarginRight = value;
+      }
     }
     else if (iter->first == "page-margin-left" && !iter->second.empty() && fabs(m_ps->m_pageMarginLeft) < ABW_EPSILON)
     {
-      findDouble(iter->second.c_str(), value, unit);
-      if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
-        m_ps->m_pageMarginLeft = value;
+      if (findDouble(iter->second.c_str(), value, unit))
+      {
+        if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
+          m_ps->m_pageMarginLeft = value;
+      }
     }
     else if (iter->first == "page-margin-top" && !iter->second.empty() && fabs(m_ps->m_pageMarginTop) < ABW_EPSILON)
     {
-      findDouble(iter->second.c_str(), value, unit);
-      if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
-        m_ps->m_pageMarginTop = value;
+      if (findDouble(iter->second.c_str(), value, unit))
+      {
+        if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
+          m_ps->m_pageMarginTop = value;
+      }
     }
     else if (iter->first == "page-margin-bottom" && !iter->second.empty() && fabs(m_ps->m_pageMarginBottom) < ABW_EPSILON)
     {
-      findDouble(iter->second.c_str(), value, unit);
-      if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
-        m_ps->m_pageMarginBottom = value;
+      if (findDouble(iter->second.c_str(), value, unit))
+      {
+        if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
+          m_ps->m_pageMarginBottom = value;
+      }
     }
 
     m_ps->m_currentSectionStyle[iter->first] = iter->second;
   }
+
   if (fabs(pageMarginLeft-m_ps->m_pageMarginLeft) > ABW_EPSILON ||
       fabs(pageMarginRight-m_ps->m_pageMarginRight) > ABW_EPSILON ||
       fabs(pageMarginTop-m_ps->m_pageMarginTop) > ABW_EPSILON ||
       fabs(pageMarginBottom-m_ps->m_pageMarginBottom) > ABW_EPSILON)
   {
     _closePageSpan();
+  }
+  else
+  {
+    _closeSection();
   }
 }
 
@@ -472,25 +485,25 @@ void libabw::ABWCollector::insertText(const librevenge::RVNGString &text)
 
 void libabw::ABWCollector::_openPageSpan()
 {
-  if (m_ps->m_isPageSpanOpened)
-    return;
+  if (!m_ps->m_isPageSpanOpened)
+  {
 
-  if (!m_ps->m_isDocumentStarted)
-    startDocument();
+    if (!m_ps->m_isDocumentStarted)
+      startDocument();
 
-  librevenge::RVNGPropertyList propList;
-  propList.insert("fo:page-width", m_ps->m_pageWidth);
-  propList.insert("fo:page-height", m_ps->m_pageHeight);
-  propList.insert("fo:margin-left", m_ps->m_pageMarginLeft);
-  propList.insert("fo:margin-right", m_ps->m_pageMarginRight);
-  propList.insert("fo:margin-top", m_ps->m_pageMarginTop);
-  propList.insert("fo:margin-bottom", m_ps->m_pageMarginBottom);
+    librevenge::RVNGPropertyList propList;
+    propList.insert("fo:page-width", m_ps->m_pageWidth);
+    propList.insert("fo:page-height", m_ps->m_pageHeight);
+    propList.insert("fo:margin-left", m_ps->m_pageMarginLeft);
+    propList.insert("fo:margin-right", m_ps->m_pageMarginRight);
+    propList.insert("fo:margin-top", m_ps->m_pageMarginTop);
+    propList.insert("fo:margin-bottom", m_ps->m_pageMarginBottom);
 
-  if (m_iface && !m_ps->m_isPageSpanOpened)
-    m_iface->openPageSpan(propList);
+    if (m_iface && !m_ps->m_isPageSpanOpened)
+      m_iface->openPageSpan(propList);
 
-  m_ps->m_isPageSpanOpened = true;
-
+    m_ps->m_isPageSpanOpened = true;
+  }
 }
 
 void libabw::ABWCollector::_closePageSpan()
@@ -503,7 +516,6 @@ void libabw::ABWCollector::_closePageSpan()
     if (m_iface)
       m_iface->closePageSpan();
   }
-
   m_ps->m_isPageSpanOpened = false;
 }
 
@@ -516,9 +528,27 @@ void libabw::ABWCollector::_openSection()
 
     librevenge::RVNGPropertyList propList;
 
-    librevenge::RVNGPropertyListVector columns;
-    if (columns.count())
-      propList.insert("style:columns", columns);
+    ABWUnit unit(ABW_NONE);
+    double value(0.0);
+    std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentSectionStyle.find("page-margin-right");
+    if (iter != m_ps->m_currentSectionStyle.end())
+    {
+      if (findDouble(iter->second.c_str(), value, unit))
+      {
+        if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
+          propList.insert("fo:margin-right", value - m_ps->m_pageMarginRight);
+      }
+    }
+    iter = m_ps->m_currentSectionStyle.find("page-margin-left");
+    if (iter != m_ps->m_currentSectionStyle.end())
+    {
+      if (findDouble(iter->second.c_str(), value, unit))
+      {
+        if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
+          propList.insert("fo:margin-left", value - m_ps->m_pageMarginLeft);
+      }
+    }
+
     if (!m_ps->m_isSectionOpened)
       m_iface->openSection(propList);
 
