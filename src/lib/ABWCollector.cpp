@@ -330,6 +330,11 @@ void libabw::ABWCollector::collectCharacterProperties(const char *style, const c
 
 void libabw::ABWCollector::collectSectionProperties(const char *props)
 {
+  double pageMarginLeft = m_ps->m_pageMarginLeft;
+  double pageMarginRight = m_ps->m_pageMarginRight;
+  double pageMarginTop = m_ps->m_pageMarginTop;
+  double pageMarginBottom = m_ps->m_pageMarginBottom;
+
   m_ps->m_currentSectionStyle.clear();
   std::map<std::string, std::string> pstring;
   parsePropString(props, pstring);
@@ -363,6 +368,13 @@ void libabw::ABWCollector::collectSectionProperties(const char *props)
     }
 
     m_ps->m_currentSectionStyle[iter->first] = iter->second;
+  }
+  if (fabs(pageMarginLeft-m_ps->m_pageMarginLeft) > ABW_EPSILON ||
+      fabs(pageMarginRight-m_ps->m_pageMarginRight) > ABW_EPSILON ||
+      fabs(pageMarginTop-m_ps->m_pageMarginTop) > ABW_EPSILON ||
+      fabs(pageMarginBottom-m_ps->m_pageMarginBottom) > ABW_EPSILON)
+  {
+    _closePageSpan();
   }
 }
 
@@ -414,7 +426,7 @@ void libabw::ABWCollector::endDocument()
 
 void libabw::ABWCollector::endSection()
 {
-  _closePageSpan();
+  _closeSection();
 }
 
 void libabw::ABWCollector::closeParagraph()
