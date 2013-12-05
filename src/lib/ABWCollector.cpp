@@ -444,6 +444,9 @@ void libabw::ABWCollector::endSection()
 
 void libabw::ABWCollector::closeParagraph()
 {
+  // we have an empty paragraph, insert it
+  if (!m_ps->m_isParagraphOpened)
+    _openSpan();
   _closeParagraph();
 }
 
@@ -535,7 +538,7 @@ void libabw::ABWCollector::_openSection()
     {
       if (findDouble(iter->second.c_str(), value, unit))
       {
-        if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
+        if (unit == ABW_IN)
           propList.insert("fo:margin-right", value - m_ps->m_pageMarginRight);
       }
     }
@@ -544,7 +547,7 @@ void libabw::ABWCollector::_openSection()
     {
       if (findDouble(iter->second.c_str(), value, unit))
       {
-        if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
+        if (unit == ABW_IN)
           propList.insert("fo:margin-left", value - m_ps->m_pageMarginLeft);
       }
     }
@@ -553,7 +556,7 @@ void libabw::ABWCollector::_openSection()
     {
       if (findDouble(iter->second.c_str(), value, unit))
       {
-        if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
+        if (unit == ABW_IN)
           propList.insert("librevenge:margin-bottom", value);
       }
     }
@@ -605,9 +608,85 @@ void libabw::ABWCollector::_openParagraph()
     if (!m_ps->m_isSectionOpened)
       _openSection();
 
-    librevenge::RVNGPropertyListVector tabStops;
-
     librevenge::RVNGPropertyList propList;
+    ABWUnit unit(ABW_NONE);
+    double value(0.0);
+    std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentParagraphStyle.find("margin-right");
+    if (iter != m_ps->m_currentParagraphStyle.end())
+    {
+      if (findDouble(iter->second.c_str(), value, unit))
+      {
+        if (unit == ABW_IN)
+          propList.insert("fo:margin-right", value);
+      }
+    }
+    iter = m_ps->m_currentParagraphStyle.find("margin-left");
+    if (iter != m_ps->m_currentParagraphStyle.end())
+    {
+      if (findDouble(iter->second.c_str(), value, unit))
+      {
+        if (unit == ABW_IN)
+          propList.insert("fo:margin-left", value);
+      }
+    }
+    iter = m_ps->m_currentParagraphStyle.find("margin-top");
+    if (iter != m_ps->m_currentParagraphStyle.end())
+    {
+      if (findDouble(iter->second.c_str(), value, unit))
+      {
+        if (unit == ABW_IN)
+          propList.insert("fo:margin-top", value);
+      }
+    }
+    iter = m_ps->m_currentParagraphStyle.find("margin-left");
+    if (iter != m_ps->m_currentParagraphStyle.end())
+    {
+      if (findDouble(iter->second.c_str(), value, unit))
+      {
+        if (unit == ABW_IN)
+          propList.insert("fo:margin-left", value);
+      }
+    }
+    iter = m_ps->m_currentParagraphStyle.find("text-indent");
+    if (iter != m_ps->m_currentParagraphStyle.end())
+    {
+      if (findDouble(iter->second.c_str(), value, unit))
+      {
+        if (unit == ABW_IN)
+          propList.insert("fo:text-indent", value);
+      }
+    }
+    iter = m_ps->m_currentParagraphStyle.find("text-align");
+    if (iter != m_ps->m_currentParagraphStyle.end())
+    {
+      if (iter->second == "left")
+        propList.insert("fo:text-align", "start");
+      else if (iter->second == "right")
+        propList.insert("fo:text-align", "end");
+      else
+        propList.insert("fo:text-align", iter->second.c_str());
+    }
+    iter = m_ps->m_currentParagraphStyle.find("line-height");
+    if (iter != m_ps->m_currentParagraphStyle.end())
+    {
+      std::string propName("fo:line-height");
+      std::string lineHeight = iter->second;
+      size_t position = lineHeight.find_last_of('+');
+      if (position && position != std::string::npos)
+      {
+        propName = "style:line-height-at-least";
+        lineHeight.erase(position);
+      }
+      if (findDouble(lineHeight.c_str(), value, unit))
+      {
+        if (ABW_IN == unit)
+          propList.insert(propName.c_str(), value);
+        else if (ABW_PERCENT == unit)
+          propList.insert(propName.c_str(), value, librevenge::RVNG_PERCENT);
+      }
+    }
+
+    librevenge::RVNGPropertyListVector tabStops;
 
     if (tabStops.count())
       propList.insert("style:tab-stops", tabStops);
@@ -627,7 +706,8 @@ void libabw::ABWCollector::_closeParagraph()
     if (m_ps->m_isSpanOpened)
       _closeSpan();
 
-    m_iface->closeParagraph();
+    if (m_iface)
+      m_iface->closeParagraph();
   }
 
   m_ps->m_isParagraphOpened = false;
@@ -636,19 +716,21 @@ void libabw::ABWCollector::_closeParagraph()
 
 void libabw::ABWCollector::_openSpan()
 {
-  if (!m_ps->m_isParagraphOpened)
-    _openParagraph();
-
-  librevenge::RVNGPropertyList propList;
   if (!m_ps->m_isSpanOpened)
-    m_iface->openSpan(propList);
+  {
+    if (!m_ps->m_isParagraphOpened)
+      _openParagraph();
 
+    librevenge::RVNGPropertyList propList;
+    if (m_iface)
+      m_iface->openSpan(propList);
+  }
   m_ps->m_isSpanOpened = true;
 }
 
 void libabw::ABWCollector::_closeSpan()
 {
-  if (m_ps->m_isSpanOpened)
+  if (m_ps->m_isSpanOpened && m_iface)
     m_iface->closeSpan();
 
   m_ps->m_isSpanOpened = false;
