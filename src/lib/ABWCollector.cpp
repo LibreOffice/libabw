@@ -548,6 +548,35 @@ void libabw::ABWCollector::_openSection()
           propList.insert("fo:margin-left", value - m_ps->m_pageMarginLeft);
       }
     }
+    iter = m_ps->m_currentSectionStyle.find("section-space-after");
+    if (iter != m_ps->m_currentSectionStyle.end())
+    {
+      if (findDouble(iter->second.c_str(), value, unit))
+      {
+        if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
+          propList.insert("librevenge:margin-bottom", value);
+      }
+    }
+    iter = m_ps->m_currentSectionStyle.find("columns");
+    if (iter != m_ps->m_currentSectionStyle.end())
+    {
+      int intValue(0);
+      if (findInt(iter->second.c_str(), intValue))
+      {
+        if (intValue > 1)
+        {
+          librevenge::RVNGPropertyListVector columns;
+          for (int i = 0; i < intValue; ++i)
+          {
+            librevenge::RVNGPropertyList column;
+            column.insert("style:rel-width", 1.0 / (double)intValue, librevenge::RVNG_PERCENT);
+            columns.append(column);
+          }
+          if (columns.count())
+            propList.insert("style:columns", columns);
+        }
+      }
+    }
 
     if (!m_ps->m_isSectionOpened)
       m_iface->openSection(propList);
