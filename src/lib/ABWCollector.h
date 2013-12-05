@@ -75,6 +75,8 @@ public:
   void collectPageSize(const char *width, const char *height, const char *units, const char *pageScale);
   void closeParagraph();
   void closeSpan();
+  void openLink(const char *href);
+  void closeLink();
   void endSection();
   void startDocument();
   void endDocument();

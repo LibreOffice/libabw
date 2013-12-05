@@ -64,6 +64,7 @@ private:
   void readBr(xmlTextReaderPtr reader);
   void readCbr(xmlTextReaderPtr reader);
   void readPbr(xmlTextReaderPtr reader);
+  void readA(xmlTextReaderPtr reader);
 
   librevenge::RVNGInputStream *m_input;
   librevenge::RVNGTextInterface *m_iface;

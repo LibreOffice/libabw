@@ -476,6 +476,33 @@ void libabw::ABWCollector::closeParagraph()
   m_ps->m_currentParagraphStyle.clear();
 }
 
+void libabw::ABWCollector::openLink(const char *href)
+{
+  if (m_ps->m_isSpanOpened)
+    _closeSpan();
+  if (!m_ps->m_isParagraphOpened)
+    _openParagraph();
+  librevenge::RVNGPropertyList propList;
+  if (href)
+  {
+    std::string sHref(href);
+    boost::ireplace_first(sHref, "%3a", ":");
+    propList.insert("xlink:href", sHref.c_str());
+  }
+  if (m_iface)
+    m_iface->openLink(propList);
+  if (!m_ps->m_isSpanOpened)
+    _openSpan();
+}
+
+void libabw::ABWCollector::closeLink()
+{
+  if (m_ps->m_isSpanOpened)
+    _closeSpan();
+  if (m_iface)
+    m_iface->closeLink();
+}
+
 void libabw::ABWCollector::closeSpan()
 {
   _closeSpan();

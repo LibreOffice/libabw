@@ -493,6 +493,15 @@ void libabw::ABWParser::readS(xmlTextReaderPtr reader)
   xmlTextReaderRead(reader);
 }
 
+void libabw::ABWParser::readA(xmlTextReaderPtr reader)
+{
+  xmlChar *href = xmlTextReaderGetAttribute(reader, BAD_CAST("xlink:href"));
+  if (m_collector)
+    m_collector->openLink((const char *)href);
+  if (href)
+    xmlFree(href);
+}
+
 void libabw::ABWParser::readL(xmlTextReaderPtr reader)
 {
   xmlTextReaderRead(reader);
@@ -544,6 +553,12 @@ void libabw::ABWParser::readP(xmlTextReaderPtr reader)
     case XML_BR:
       if (XML_READER_TYPE_ELEMENT == tokenType)
         m_collector->insertLineBreak();
+      break;
+    case XML_A:
+      if (XML_READER_TYPE_ELEMENT == tokenType)
+        readA(reader);
+      else if (XML_READER_TYPE_END_ELEMENT == tokenType)
+        m_collector->closeLink();
       break;
     default:
       break;
@@ -598,6 +613,12 @@ void libabw::ABWParser::readC(xmlTextReaderPtr reader)
     case XML_BR:
       if (m_collector && XML_READER_TYPE_ELEMENT == tokenType)
         m_collector->insertLineBreak();
+      break;
+    case XML_A:
+      if (XML_READER_TYPE_ELEMENT == tokenType)
+        readA(reader);
+      else if (XML_READER_TYPE_END_ELEMENT == tokenType)
+        m_collector->closeLink();
       break;
     default:
       break;
