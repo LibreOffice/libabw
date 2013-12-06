@@ -79,6 +79,7 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
     return;
   int tokenId = getElementToken(reader);
   int tokenType = xmlTextReaderNodeType(reader);
+  int emptyToken = xmlTextReaderIsEmptyElement(reader);
   if (XML_READER_TYPE_TEXT == tokenType)
   {
     librevenge::RVNGString text((const char *)xmlTextReaderConstValue(reader));
@@ -119,7 +120,7 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
   case XML_SECTION:
     if (XML_READER_TYPE_ELEMENT == tokenType)
       readSection(reader);
-    else if (XML_READER_TYPE_END_ELEMENT == tokenType)
+    if (XML_READER_TYPE_END_ELEMENT == tokenType || emptyToken > 0)
       if (m_collector)
         m_collector->endSection();
     break;
@@ -133,27 +134,17 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
       readP(reader);
       m_inParagraph = true;
     }
-    else if (XML_READER_TYPE_END_ELEMENT == tokenType)
+    if (XML_READER_TYPE_END_ELEMENT == tokenType || emptyToken > 0)
     {
       m_inParagraph = false;
       if (m_collector)
         m_collector->closeParagraph();
     }
     break;
-#if 0
-  case XML_TABLE:
-    if (XML_READER_TYPE_ELEMENT == tokenType)
-      readTable(reader);
-    break;
-  case XML_FRAME:
-    if (XML_READER_TYPE_ELEMENT == tokenType)
-      readFrame(reader);
-    break;
-#endif
   case XML_C:
     if (XML_READER_TYPE_ELEMENT == tokenType)
       readC(reader);
-    else if (XML_READER_TYPE_END_ELEMENT == tokenType)
+    if (XML_READER_TYPE_END_ELEMENT == tokenType || emptyToken > 0)
       if (m_collector)
         m_collector->closeSpan();
     break;
@@ -172,19 +163,19 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
   case XML_A:
     if (XML_READER_TYPE_ELEMENT == tokenType)
       readA(reader);
-    else if (XML_READER_TYPE_END_ELEMENT == tokenType)
+    if (XML_READER_TYPE_END_ELEMENT == tokenType || emptyToken > 0)
       m_collector->closeLink();
     break;
   case XML_FOOT:
     if (XML_READER_TYPE_ELEMENT == tokenType)
       readFoot(reader);
-    else if (XML_READER_TYPE_END_ELEMENT == tokenType)
+    if (XML_READER_TYPE_END_ELEMENT == tokenType || emptyToken > 0)
       m_collector->closeFoot();
     break;
   case XML_ENDNOTE:
     if (XML_READER_TYPE_ELEMENT == tokenType)
       readEndnote(reader);
-    else if (XML_READER_TYPE_END_ELEMENT == tokenType)
+    if (XML_READER_TYPE_END_ELEMENT == tokenType || emptyToken > 0)
       m_collector->closeEndnote();
     break;
   default:
