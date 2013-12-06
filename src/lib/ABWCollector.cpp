@@ -139,6 +139,9 @@ bool findBool(const char *str, bool &res)
 
 static std::string getColor(const std::string &s)
 {
+  if (s.empty())
+    return s;
+
   if (s[0] == '#')
   {
     if (s.length() != 7)
@@ -821,14 +824,13 @@ void libabw::ABWCollector::_openParagraph()
     if (!sValue.empty())
     {
       std::string propName("fo:line-height");
-      std::string lineHeight = sValue;
-      size_t position = lineHeight.find_last_of('+');
+      size_t position = sValue.find_last_of('+');
       if (position && position != std::string::npos)
       {
         propName = "style:line-height-at-least";
-        lineHeight.erase(position);
+        sValue.erase(position);
       }
-      if (findDouble(lineHeight.c_str(), value, unit))
+      if (findDouble(sValue.c_str(), value, unit))
       {
         if (ABW_IN == unit)
           propList.insert(propName.c_str(), value);
@@ -850,13 +852,10 @@ void libabw::ABWCollector::_openParagraph()
     }
 
     sValue = _findParagraphProperty("dom-dir");
-    if (!sValue.empty())
-    {
-      if (sValue == "ltr")
-        propList.insert("style:writing-mode", "lr-tb");
-      else if (sValue == "rtl")
-        propList.insert("style:writing-mode", "rl-tb");
-    }
+    if (sValue == "ltr")
+      propList.insert("style:writing-mode", "lr-tb");
+    else if (sValue == "rtl")
+      propList.insert("style:writing-mode", "rl-tb");
 
     if (m_ps->m_deferredPageBreak)
       propList.insert("fo:break-before", "page");
@@ -911,13 +910,10 @@ void libabw::ABWCollector::_openSpan()
       propList.insert("fo:font-weight", sValue.c_str());
 
     sValue = _findCharacterProperty("text-decoration");
-    if (!sValue.empty())
-    {
-      if (sValue == "underline")
-        propList.insert("style:text-underline-type", "solid");
-      else if (sValue == "line-through")
-        propList.insert("style:text-line-through-type", "single");
-    }
+    if (sValue == "underline")
+      propList.insert("style:text-underline-type", "solid");
+    else if (sValue == "line-through")
+      propList.insert("style:text-line-through-type", "single");
 
     sValue = getColor(_findCharacterProperty("color"));
     if (!sValue.empty())
@@ -928,13 +924,10 @@ void libabw::ABWCollector::_openSpan()
       propList.insert("fo:background-color", sValue.c_str());
 
     sValue = _findCharacterProperty("text-position");
-    if (!sValue.empty())
-    {
-      if (sValue == "subscript")
-        propList.insert("style:text-position", "sub");
-      else if (sValue == "superscript")
-        propList.insert("style:text-position", "super");
-    }
+    if (sValue == "subscript")
+      propList.insert("style:text-position", "sub");
+    else if (sValue == "superscript")
+      propList.insert("style:text-position", "super");
 
     if (m_iface)
       m_iface->openSpan(propList);
