@@ -584,10 +584,7 @@ void libabw::ABWCollector::openLink(const char *href)
     _openParagraph();
   librevenge::RVNGPropertyList propList;
   if (href)
-  {
-    std::string sHref = decodeUrl(href);
-    propList.insert("xlink:href", sHref.c_str());
-  }
+    propList.insert("xlink:href", decodeUrl(href).c_str());
   if (m_iface)
     m_iface->openLink(propList);
   if (!m_ps->m_isSpanOpened)
