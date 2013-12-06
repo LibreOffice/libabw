@@ -73,7 +73,11 @@ bool libabw::AbiDocument::isFileFormatSupported(librevenge::RVNGInputStream *inp
     if (!nsname)
     {
       xmlFreeTextReader(reader);
+#if 1
+      return true; // Have seen some abiword files without NS declaration
+#else
       return false;
+#endif
     }
     if (!xmlStrEqual(nsname, BAD_CAST("http://www.abisource.com/awml.dtd")))
     {
