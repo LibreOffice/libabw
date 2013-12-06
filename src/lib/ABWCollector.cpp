@@ -398,6 +398,26 @@ void libabw::ABWCollector::_recurseTextProperties(const char *name, std::map<std
     m_dontLoop.clear();
 }
 
+
+std::string libabw::ABWCollector::_findParagraphProperty(const char *name)
+{
+  std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentParagraphStyle.find(name);
+  if (iter != m_ps->m_currentParagraphStyle.end())
+    return iter->second;
+  return std::string();
+}
+
+std::string libabw::ABWCollector::_findCharacterProperty(const char *name)
+{
+  std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentCharacterStyle.find(name);
+  if (iter != m_ps->m_currentCharacterStyle.end())
+    return iter->second;
+  iter = m_ps->m_currentParagraphStyle.find(name);
+  if (iter != m_ps->m_currentParagraphStyle.end())
+    return iter->second;
+  return std::string();
+}
+
 void libabw::ABWCollector::collectParagraphProperties(const char *style, const char *props)
 {
   m_ps->m_currentParagraphStyle.clear();
@@ -742,66 +762,66 @@ void libabw::ABWCollector::_openParagraph()
     double value(0.0);
     int intValue(0);
 
-    std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentParagraphStyle.find("margin-right");
-    if (iter != m_ps->m_currentParagraphStyle.end())
+    std::string sValue = _findParagraphProperty("margin-right");
+    if (!sValue.empty())
     {
-      if (findDouble(iter->second.c_str(), value, unit))
+      if (findDouble(sValue.c_str(), value, unit))
       {
         if (unit == ABW_IN)
           propList.insert("fo:margin-right", value);
       }
     }
-    iter = m_ps->m_currentParagraphStyle.find("margin-left");
-    if (iter != m_ps->m_currentParagraphStyle.end())
+    sValue = _findParagraphProperty("margin-left");
+    if (!sValue.empty())
     {
-      if (findDouble(iter->second.c_str(), value, unit))
+      if (findDouble(sValue.c_str(), value, unit))
       {
         if (unit == ABW_IN)
           propList.insert("fo:margin-left", value);
       }
     }
-    iter = m_ps->m_currentParagraphStyle.find("margin-top");
-    if (iter != m_ps->m_currentParagraphStyle.end())
+    sValue = _findParagraphProperty("margin-top");
+    if (!sValue.empty())
     {
-      if (findDouble(iter->second.c_str(), value, unit))
+      if (findDouble(sValue.c_str(), value, unit))
       {
         if (unit == ABW_IN)
           propList.insert("fo:margin-top", value);
       }
     }
-    iter = m_ps->m_currentParagraphStyle.find("margin-left");
-    if (iter != m_ps->m_currentParagraphStyle.end())
+    sValue = _findParagraphProperty("margin-left");
+    if (!sValue.empty())
     {
-      if (findDouble(iter->second.c_str(), value, unit))
+      if (findDouble(sValue.c_str(), value, unit))
       {
         if (unit == ABW_IN)
           propList.insert("fo:margin-left", value);
       }
     }
-    iter = m_ps->m_currentParagraphStyle.find("text-indent");
-    if (iter != m_ps->m_currentParagraphStyle.end())
+    sValue = _findParagraphProperty("text-indent");
+    if (!sValue.empty())
     {
-      if (findDouble(iter->second.c_str(), value, unit))
+      if (findDouble(sValue.c_str(), value, unit))
       {
         if (unit == ABW_IN)
           propList.insert("fo:text-indent", value);
       }
     }
-    iter = m_ps->m_currentParagraphStyle.find("text-align");
-    if (iter != m_ps->m_currentParagraphStyle.end())
+    sValue = _findParagraphProperty("text-align");
+    if (!sValue.empty())
     {
-      if (iter->second == "left")
+      if (sValue == "left")
         propList.insert("fo:text-align", "start");
-      else if (iter->second == "right")
+      else if (sValue == "right")
         propList.insert("fo:text-align", "end");
       else
-        propList.insert("fo:text-align", iter->second.c_str());
+        propList.insert("fo:text-align", sValue.c_str());
     }
-    iter = m_ps->m_currentParagraphStyle.find("line-height");
-    if (iter != m_ps->m_currentParagraphStyle.end())
+    sValue = _findParagraphProperty("line-height");
+    if (!sValue.empty())
     {
       std::string propName("fo:line-height");
-      std::string lineHeight = iter->second;
+      std::string lineHeight = sValue;
       size_t position = lineHeight.find_last_of('+');
       if (position && position != std::string::npos)
       {
@@ -816,25 +836,25 @@ void libabw::ABWCollector::_openParagraph()
           propList.insert(propName.c_str(), value, librevenge::RVNG_PERCENT);
       }
     }
-    iter = m_ps->m_currentParagraphStyle.find("orphans");
-    if (iter != m_ps->m_currentParagraphStyle.end())
+    sValue = _findParagraphProperty("orphans");
+    if (!sValue.empty())
     {
-      if (findInt(iter->second.c_str(), intValue))
+      if (findInt(sValue.c_str(), intValue))
         propList.insert("fo:orphans", intValue);
     }
-    iter = m_ps->m_currentParagraphStyle.find("widows");
-    if (iter != m_ps->m_currentParagraphStyle.end())
+    sValue = _findParagraphProperty("widows");
+    if (!sValue.empty())
     {
-      if (findInt(iter->second.c_str(), intValue))
+      if (findInt(sValue.c_str(), intValue))
         propList.insert("fo:widows", intValue);
     }
 
-    iter = m_ps->m_currentParagraphStyle.find("dom-dir");
-    if (iter != m_ps->m_currentParagraphStyle.end())
+    sValue = _findParagraphProperty("dom-dir");
+    if (!sValue.empty())
     {
-      if (iter->second == "ltr")
+      if (sValue == "ltr")
         propList.insert("style:writing-mode", "lr-tb");
-      else if (iter->second == "rtl")
+      else if (sValue == "rtl")
         propList.insert("style:writing-mode", "rl-tb");
     }
 
@@ -868,168 +888,52 @@ void libabw::ABWCollector::_openSpan()
     ABWUnit unit(ABW_NONE);
     double value(0.0);
 
-    std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentCharacterStyle.find("font-size");
-    if (iter != m_ps->m_currentCharacterStyle.end())
+    std::string sValue = _findCharacterProperty("font-size");
+    if (!sValue.empty())
     {
-      if (findDouble(iter->second.c_str(), value, unit))
+      if (findDouble(sValue.c_str(), value, unit))
       {
         if (unit == ABW_IN)
           propList.insert("fo:font-size", value);
       }
     }
-    else
+
+    sValue = _findCharacterProperty("font-family");
+    if (!sValue.empty())
+      propList.insert("style:font-name", sValue.c_str());
+
+    sValue = _findCharacterProperty("font-style");
+    if (!sValue.empty() && sValue != "normal")
+      propList.insert("fo:font-style", sValue.c_str());
+
+    sValue = _findCharacterProperty("font-weight");
+    if (!sValue.empty() && sValue != "normal")
+      propList.insert("fo:font-weight", sValue.c_str());
+
+    sValue = _findCharacterProperty("text-decoration");
+    if (!sValue.empty())
     {
-      iter = m_ps->m_currentParagraphStyle.find("font-size");
-      if (iter != m_ps->m_currentParagraphStyle.end())
-      {
-        if (findDouble(iter->second.c_str(), value, unit))
-        {
-          if (unit == ABW_IN)
-            propList.insert("fo:font-size", value);
-        }
-      }
+      if (sValue == "underline")
+        propList.insert("style:text-underline-type", "solid");
+      else if (sValue == "line-through")
+        propList.insert("style:text-line-through-type", "single");
     }
 
-    iter = m_ps->m_currentCharacterStyle.find("font-family");
-    if (iter != m_ps->m_currentCharacterStyle.end())
-    {
-      if (!iter->second.empty())
-        propList.insert("style:font-name", iter->second.c_str());
-    }
-    else
-    {
-      iter = m_ps->m_currentParagraphStyle.find("font-family");
-      if (iter != m_ps->m_currentParagraphStyle.end())
-      {
-        {
-          if (!iter->second.empty())
-            propList.insert("style:font-name", iter->second.c_str());
-        }
-      }
-    }
+    sValue = getColor(_findCharacterProperty("color"));
+    if (!sValue.empty())
+      propList.insert("fo:color", sValue.c_str());
 
-    iter = m_ps->m_currentCharacterStyle.find("font-style");
-    if (iter != m_ps->m_currentCharacterStyle.end())
-    {
-      if (!iter->second.empty() && iter->second != "normal")
-        propList.insert("fo:font-style", iter->second.c_str());
-    }
-    else
-    {
-      iter = m_ps->m_currentParagraphStyle.find("font-style");
-      if (iter != m_ps->m_currentParagraphStyle.end())
-      {
-        {
-          if (!iter->second.empty() && iter->second != "normal")
-            propList.insert("fo:font-style", iter->second.c_str());
-        }
-      }
-    }
+    sValue = getColor(_findCharacterProperty("bgcolor"));
+    if (!sValue.empty())
+      propList.insert("fo:background-color", sValue.c_str());
 
-    iter = m_ps->m_currentCharacterStyle.find("font-weight");
-    if (iter != m_ps->m_currentCharacterStyle.end())
+    sValue = _findCharacterProperty("text-position");
+    if (!sValue.empty())
     {
-      if (!iter->second.empty() && iter->second != "normal")
-        propList.insert("fo:font-weight", iter->second.c_str());
-    }
-    else
-    {
-      iter = m_ps->m_currentParagraphStyle.find("font-weight");
-      if (iter != m_ps->m_currentParagraphStyle.end())
-      {
-        {
-          if (!iter->second.empty() && iter->second != "normal")
-            propList.insert("fo:font-weight", iter->second.c_str());
-        }
-      }
-    }
-
-    iter = m_ps->m_currentCharacterStyle.find("text-decoration");
-    if (iter != m_ps->m_currentCharacterStyle.end())
-    {
-      if (!iter->second.empty())
-      {
-        if (iter->second == "underline")
-          propList.insert("style:text-underline-type", "solid");
-        else if (iter->second == "line-through")
-          propList.insert("style:text-line-through-type", "single");
-      }
-    }
-    else
-    {
-      iter = m_ps->m_currentParagraphStyle.find("text-decoration");
-      if (iter != m_ps->m_currentParagraphStyle.end())
-      {
-        if (!iter->second.empty())
-        {
-          if (iter->second == "underline")
-            propList.insert("style:text-underline-type", "solid");
-          else if (iter->second == "line-through")
-            propList.insert("style:text-line-through-type", "single");
-        }
-      }
-    }
-
-    iter = m_ps->m_currentCharacterStyle.find("color");
-    if (iter != m_ps->m_currentCharacterStyle.end())
-    {
-      std::string color = getColor(iter->second);
-      if (!color.empty())
-        propList.insert("fo:color", color.c_str());
-    }
-    else
-    {
-      iter = m_ps->m_currentParagraphStyle.find("color");
-      if (iter != m_ps->m_currentParagraphStyle.end())
-      {
-        std::string color = getColor(iter->second);
-        if (!color.empty())
-          propList.insert("fo:color", color.c_str());
-      }
-    }
-
-    iter = m_ps->m_currentCharacterStyle.find("bgcolor");
-    if (iter != m_ps->m_currentCharacterStyle.end())
-    {
-      std::string color = getColor(iter->second);
-      if (!color.empty())
-        propList.insert("fo:background-color", color.c_str());
-    }
-    else
-    {
-      iter = m_ps->m_currentParagraphStyle.find("bgcolor");
-      if (iter != m_ps->m_currentParagraphStyle.end())
-      {
-        std::string color = getColor(iter->second);
-        if (!color.empty())
-          propList.insert("fo:background-color", color.c_str());
-      }
-    }
-
-    iter = m_ps->m_currentCharacterStyle.find("text-position");
-    if (iter != m_ps->m_currentCharacterStyle.end())
-    {
-      if (!iter->second.empty())
-      {
-        if (iter->second == "subscript")
-          propList.insert("style:text-position", "sub");
-        else if (iter->second == "superscript")
-          propList.insert("style:text-position", "super");
-      }
-    }
-    else
-    {
-      iter = m_ps->m_currentParagraphStyle.find("text-position");
-      if (iter != m_ps->m_currentParagraphStyle.end())
-      {
-        if (!iter->second.empty())
-        {
-          if (iter->second == "subscript")
-            propList.insert("style:text-position", "sub");
-          else if (iter->second == "superscript")
-            propList.insert("style:text-position", "super");
-        }
-      }
+      if (sValue == "subscript")
+        propList.insert("style:text-position", "sub");
+      else if (sValue == "superscript")
+        propList.insert("style:text-position", "super");
     }
 
     if (m_iface)

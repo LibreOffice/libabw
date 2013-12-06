@@ -109,6 +109,8 @@ private:
   void _closeSpan();
 
   void _recurseTextProperties(const char *name, std::map<std::string, std::string> &styleProps);
+  std::string _findParagraphProperty(const char *name);
+  std::string _findCharacterProperty(const char *name);
 
   ABWParsingState *m_ps;
   librevenge::RVNGTextInterface *m_iface;
