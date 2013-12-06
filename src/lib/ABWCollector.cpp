@@ -313,8 +313,7 @@ libabw::ABWParsingState::ABWParsingState() :
   m_currentParagraphStyle(),
   m_currentCharacterStyle(),
 
-  m_paragraphStyles(),
-  m_characterStyles(),
+  m_textStyles(),
 
   m_pageWidth(0.0),
   m_pageHeight(0.0),
@@ -328,13 +327,41 @@ libabw::ABWParsingState::ABWParsingState() :
 {
 }
 
+libabw::ABWParsingState::ABWParsingState(const ABWParsingState &ps) :
+  m_isDocumentStarted(ps.m_isDocumentStarted),
+  m_isPageSpanOpened(ps.m_isPageSpanOpened),
+  m_isSectionOpened(ps.m_isSectionOpened),
+
+  m_isSpanOpened(ps.m_isSpanOpened),
+  m_isParagraphOpened(ps.m_isParagraphOpened),
+
+  m_currentSectionStyle(ps.m_currentSectionStyle),
+  m_currentParagraphStyle(ps.m_currentParagraphStyle),
+  m_currentCharacterStyle(ps.m_currentCharacterStyle),
+
+  m_textStyles(ps.m_textStyles),
+
+  m_pageWidth(ps.m_pageWidth),
+  m_pageHeight(ps.m_pageHeight),
+  m_pageMarginTop(ps.m_pageMarginTop),
+  m_pageMarginBottom(ps.m_pageMarginBottom),
+  m_pageMarginLeft(ps.m_pageMarginLeft),
+  m_pageMarginRight(ps.m_pageMarginRight),
+
+  m_deferredPageBreak(ps.m_deferredPageBreak),
+  m_deferredColumnBreak(ps.m_deferredColumnBreak)
+{
+}
+
 libabw::ABWParsingState::~ABWParsingState()
 {
 }
 
 libabw::ABWCollector::ABWCollector(librevenge::RVNGTextInterface *iface) :
   m_ps(new ABWParsingState),
-  m_iface(iface)
+  m_iface(iface),
+  m_parsingStates(),
+  m_dontLoop()
 {
 }
 
@@ -343,35 +370,46 @@ libabw::ABWCollector::~ABWCollector()
   DELETEP(m_ps);
 }
 
-void libabw::ABWCollector::collectParagraphStyle(const char *name, const char *basedon, const char *followedby, const char *props)
+void libabw::ABWCollector::collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props)
 {
   ABWStyle style;
   style.basedon = basedon ? basedon : std::string();
   style.followedby = followedby ? followedby : std::string();
   parsePropString(props, style.properties);
   if (name)
-    m_ps->m_paragraphStyles[name] = style;
+    m_ps->m_textStyles[name] = style;
 }
 
-void libabw::ABWCollector::collectCharacterStyle(const char *name, const char *basedon, const char *followedby, const char *props)
+void libabw::ABWCollector::_recurseTextProperties(const char *name, std::map<std::string, std::string> &styleProps)
 {
-  ABWStyle style;
-  style.basedon = basedon ? basedon : std::string();
-  style.followedby = followedby ? followedby : std::string();
-  parsePropString(props, style.properties);
   if (name)
-    m_ps->m_characterStyles[name] = style;
+  {
+    m_dontLoop.insert(name);
+    std::map<std::string, ABWStyle>::const_iterator iter = m_ps->m_textStyles.find(name);
+    if (iter != m_ps->m_textStyles.end())
+    {
+      if (!(iter->second.basedon.empty()) && !m_dontLoop.count(iter->second.basedon))
+        _recurseTextProperties(iter->second.basedon.c_str(), styleProps);
+      else
+      {
+        for (std::map<std::string, std::string>::const_iterator i = iter->second.properties.begin(); i != iter->second.properties.end(); ++i)
+        {
+          printf("%s --> %s\n", i->first.c_str(), i->second.c_str());
+          styleProps[i->first] = i->second;
+        }
+      }
+    }
+  }
+  if (!m_dontLoop.empty())
+    m_dontLoop.clear();
 }
 
 void libabw::ABWCollector::collectParagraphProperties(const char *style, const char *props)
 {
   m_ps->m_currentParagraphStyle.clear();
   if (style)
-  {
-    std::map<std::string, ABWStyle>::const_iterator iter = m_ps->m_paragraphStyles.find(style);
-    if (iter != m_ps->m_paragraphStyles.end())
-      m_ps->m_currentParagraphStyle = iter->second.properties;
-  }
+    _recurseTextProperties(style, m_ps->m_currentParagraphStyle);
+
   std::map<std::string, std::string> tmpProps;
   parsePropString(props, tmpProps);
   for (std::map<std::string, std::string>::const_iterator iter = tmpProps.begin(); iter != tmpProps.end(); ++iter)
@@ -382,11 +420,8 @@ void libabw::ABWCollector::collectCharacterProperties(const char *style, const c
 {
   m_ps->m_currentCharacterStyle.clear();
   if (style)
-  {
-    std::map<std::string, ABWStyle>::const_iterator iter = m_ps->m_characterStyles.find(style);
-    if (iter != m_ps->m_characterStyles.end())
-      m_ps->m_currentCharacterStyle = iter->second.properties;
-  }
+    _recurseTextProperties(style, m_ps->m_currentCharacterStyle);
+
   std::map<std::string, std::string> tmpProps;
   parsePropString(props, tmpProps);
   for (std::map<std::string, std::string>::const_iterator iter = tmpProps.begin(); iter != tmpProps.end(); ++iter)
@@ -1044,6 +1079,76 @@ void libabw::ABWCollector::_closeSpan()
 
   m_ps->m_isSpanOpened = false;
 }
+
+void libabw::ABWCollector::openFoot(const char *id)
+{
+  if (!m_ps->m_isParagraphOpened)
+    _openSpan();
+  _closeSpan();
+
+  m_parsingStates.push(m_ps);
+  m_ps = new ABWParsingState(*(m_parsingStates.top()));
+  m_ps->m_isParagraphOpened = false;
+  m_ps->m_currentParagraphStyle.clear();
+  m_ps->m_currentCharacterStyle.clear();
+  m_ps->m_deferredPageBreak = false;
+  m_ps->m_deferredColumnBreak = false;
+
+  librevenge::RVNGPropertyList propList;
+  if (id)
+    propList.insert("librevenge:number", id);
+  if (m_iface)
+    m_iface->openFootnote(propList);
+}
+
+void libabw::ABWCollector::closeFoot()
+{
+  if (m_iface)
+    m_iface->closeFootnote();
+
+  if (!m_parsingStates.empty())
+  {
+    delete m_ps;
+    m_ps = m_parsingStates.top();
+    m_parsingStates.pop();
+  }
+}
+
+void libabw::ABWCollector::openEndnote(const char *id)
+{
+  if (!m_ps->m_isParagraphOpened)
+    _openSpan();
+  _closeSpan();
+
+  m_parsingStates.push(m_ps);
+  m_ps = new ABWParsingState(*(m_parsingStates.top()));
+  m_ps->m_isParagraphOpened = false;
+  m_ps->m_currentParagraphStyle.clear();
+  m_ps->m_currentCharacterStyle.clear();
+  m_ps->m_deferredPageBreak = false;
+  m_ps->m_deferredColumnBreak = false;
+
+  librevenge::RVNGPropertyList propList;
+  if (id)
+    propList.insert("librevenge:number", id);
+  if (m_iface)
+    m_iface->openEndnote(propList);
+}
+
+void libabw::ABWCollector::closeEndnote()
+{
+  if (m_iface)
+    m_iface->closeEndnote();
+
+  if (!m_parsingStates.empty())
+  {
+    delete m_ps;
+    m_ps = m_parsingStates.top();
+    m_parsingStates.pop();
+  }
+}
+
+
 
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

@@ -49,26 +49,20 @@ private:
   void readSection(xmlTextReaderPtr reader);
   void readData(xmlTextReaderPtr reader);
 
-  void readM(xmlTextReaderPtr reader);
-  void readIw(xmlTextReaderPtr reader);
-  void readVersion(xmlTextReaderPtr reader);
   void readS(xmlTextReaderPtr reader);
-  void readL(xmlTextReaderPtr reader);
-  void readD(xmlTextReaderPtr reader);
 
   void readP(xmlTextReaderPtr reader);
-  void readTable(xmlTextReaderPtr reader);
-  void readFrame(xmlTextReaderPtr reader);
 
   void readC(xmlTextReaderPtr reader);
-  void readBr(xmlTextReaderPtr reader);
-  void readCbr(xmlTextReaderPtr reader);
-  void readPbr(xmlTextReaderPtr reader);
   void readA(xmlTextReaderPtr reader);
+
+  void readEndnote(xmlTextReaderPtr reader);
+  void readFoot(xmlTextReaderPtr reader);
 
   librevenge::RVNGInputStream *m_input;
   librevenge::RVNGTextInterface *m_iface;
   ABWCollector *m_collector;
+  bool m_inParagraph;
 };
 
 } // namespace libabw

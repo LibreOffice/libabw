@@ -8,8 +8,10 @@ cbr
 cell
 d
 data
+endnote
 f
 field
+foot
 frame
 history
 i

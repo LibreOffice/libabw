@@ -12,6 +12,8 @@
 
 #include <map>
 #include <vector>
+#include <stack>
+#include <set>
 #include <string>
 #include <librevenge/librevenge.h>
 
@@ -31,6 +33,7 @@ class ABWParsingState
 {
 public:
   ABWParsingState();
+  ABWParsingState(const ABWParsingState &ps);
   ~ABWParsingState();
 
   bool m_isDocumentStarted;
@@ -44,8 +47,7 @@ public:
   std::map<std::string, std::string> m_currentParagraphStyle;
   std::map<std::string, std::string> m_currentCharacterStyle;
 
-  std::map<std::string, ABWStyle> m_paragraphStyles;
-  std::map<std::string, ABWStyle> m_characterStyles;
+  std::map<std::string, ABWStyle> m_textStyles;
 
   double m_pageWidth;
   double m_pageHeight;
@@ -56,10 +58,6 @@ public:
 
   bool m_deferredPageBreak;
   bool m_deferredColumnBreak;
-
-private:
-  ABWParsingState(const ABWParsingState &);
-  ABWParsingState &operator=(const ABWParsingState &);
 };
 
 class ABWCollector
@@ -70,8 +68,7 @@ public:
 
   // collector functions
 
-  void collectParagraphStyle(const char *name, const char *basedon, const char *followedby, const char *props);
-  void collectCharacterStyle(const char *name, const char *basedon, const char *followedby, const char *props);
+  void collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props);
   void collectParagraphProperties(const char *style, const char *props);
   void collectSectionProperties(const char *props);
   void collectCharacterProperties(const char *style, const char *props);
@@ -80,6 +77,10 @@ public:
   void closeSpan();
   void openLink(const char *href);
   void closeLink();
+  void openFoot(const char *id);
+  void closeFoot();
+  void openEndnote(const char *id);
+  void closeEndnote();
   void endSection();
   void startDocument();
   void endDocument();
@@ -107,8 +108,12 @@ private:
   void _openSpan();
   void _closeSpan();
 
+  void _recurseTextProperties(const char *name, std::map<std::string, std::string> &styleProps);
+
   ABWParsingState *m_ps;
   librevenge::RVNGTextInterface *m_iface;
+  std::stack<ABWParsingState *> m_parsingStates;
+  std::set<std::string> m_dontLoop;
 
 };
 
