@@ -252,6 +252,33 @@ static void separateSpacesAndInsertText(librevenge::RVNGTextInterface *iface, co
   separateTabsAndInsertText(iface, tmpText);
 }
 
+void parseTableColumns(const char *str, librevenge::RVNGPropertyListVector &columns)
+{
+  if (!str || !strlen(str))
+    return;
+
+  std::string propString(str);
+  boost::trim(propString);
+  std::vector<std::string> strVec;
+  boost::algorithm::split(strVec, propString, boost::is_any_of("/"), boost::token_compress_on);
+  std::vector<double> doubleVec;
+  for (std::vector<std::string>::size_type i = 0; i < strVec.size(); ++i)
+  {
+    ABWUnit unit(ABW_NONE);
+	double value(0.0);
+    boost::algorithm::trim(strVec[i]);
+	if (!findDouble(strVec[i].c_str(), value, unit) || ABW_IN != unit)
+	  return;
+	doubleVec.push_back(value);
+  }
+  for (std::vector<double>::const_iterator iter = doubleVec.begin(); iter != doubleVec.end(); ++iter)
+  {
+    librevenge::RVNGPropertyList propList;
+	propList.insert("style:column-width", *iter);
+	columns.append(propList);
+  }
+}
+
 } // anonymous namespace
 
 } // namespace libabw
