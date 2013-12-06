@@ -43,19 +43,15 @@ private:
   void readHistory(xmlTextReaderPtr reader);
   void readRevisions(xmlTextReaderPtr reader);
   void readIgnoredWords(xmlTextReaderPtr reader);
-  void readStyles(xmlTextReaderPtr reader);
   void readLists(xmlTextReaderPtr reader);
   void readPageSize(xmlTextReaderPtr reader);
   void readSection(xmlTextReaderPtr reader);
   void readData(xmlTextReaderPtr reader);
 
   void readS(xmlTextReaderPtr reader);
-
   void readP(xmlTextReaderPtr reader);
-
   void readC(xmlTextReaderPtr reader);
   void readA(xmlTextReaderPtr reader);
-
   void readEndnote(xmlTextReaderPtr reader);
   void readFoot(xmlTextReaderPtr reader);
 

@@ -386,18 +386,12 @@ void libabw::ABWCollector::_recurseTextProperties(const char *name, std::map<std
   {
     m_dontLoop.insert(name);
     std::map<std::string, ABWStyle>::const_iterator iter = m_ps->m_textStyles.find(name);
+    if (iter != m_ps->m_textStyles.end() && !(iter->second.basedon.empty()) && !m_dontLoop.count(iter->second.basedon))
+      _recurseTextProperties(iter->second.basedon.c_str(), styleProps);
     if (iter != m_ps->m_textStyles.end())
     {
-      if (!(iter->second.basedon.empty()) && !m_dontLoop.count(iter->second.basedon))
-        _recurseTextProperties(iter->second.basedon.c_str(), styleProps);
-      else
-      {
-        for (std::map<std::string, std::string>::const_iterator i = iter->second.properties.begin(); i != iter->second.properties.end(); ++i)
-        {
-          printf("%s --> %s\n", i->first.c_str(), i->second.c_str());
-          styleProps[i->first] = i->second;
-        }
-      }
+      for (std::map<std::string, std::string>::const_iterator i = iter->second.properties.begin(); i != iter->second.properties.end(); ++i)
+        styleProps[i->first] = i->second;
     }
   }
   if (!m_dontLoop.empty())

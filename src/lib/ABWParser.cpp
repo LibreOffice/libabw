@@ -104,9 +104,9 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
     if (XML_READER_TYPE_ELEMENT == tokenType)
       readIgnoredWords(reader);
     break;
-  case XML_STYLES:
+  case XML_S:
     if (XML_READER_TYPE_ELEMENT == tokenType)
-      readStyles(reader);
+      readS(reader);
     break;
   case XML_LISTS:
     if (XML_READER_TYPE_ELEMENT == tokenType)
@@ -313,10 +313,6 @@ void libabw::ABWParser::readIgnoredWords(xmlTextReaderPtr reader)
     }
   }
   while ((XML_IGNOREDWORDS != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
-}
-
-void libabw::ABWParser::readStyles(xmlTextReaderPtr /* reader */)
-{
 }
 
 void libabw::ABWParser::readLists(xmlTextReaderPtr reader)
