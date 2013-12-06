@@ -265,18 +265,36 @@ void parseTableColumns(const char *str, librevenge::RVNGPropertyListVector &colu
   for (std::vector<std::string>::size_type i = 0; i < strVec.size(); ++i)
   {
     ABWUnit unit(ABW_NONE);
-	double value(0.0);
+    double value(0.0);
     boost::algorithm::trim(strVec[i]);
-	if (!findDouble(strVec[i].c_str(), value, unit) || ABW_IN != unit)
-	  return;
-	doubleVec.push_back(value);
+    if (!findDouble(strVec[i].c_str(), value, unit) || ABW_IN != unit)
+      return;
+    doubleVec.push_back(value);
   }
   for (std::vector<double>::const_iterator iter = doubleVec.begin(); iter != doubleVec.end(); ++iter)
   {
     librevenge::RVNGPropertyList propList;
-	propList.insert("style:column-width", *iter);
-	columns.append(propList);
+    propList.insert("style:column-width", *iter);
+    columns.append(propList);
   }
+}
+
+std::string decodeUrl(const std::string src)
+{
+  std::string result;
+  for (unsigned i=0; i < src.length(); ++i)
+  {
+    if (src[i]=='%')
+    {
+      unsigned ii;
+      sscanf(src.substr(i+1,2).c_str(), "%x", &ii);
+      result += static_cast<char>(ii);
+      i=i+2;
+    }
+    else
+      result+=src[i];
+  }
+  return result;
 }
 
 } // anonymous namespace
@@ -515,8 +533,7 @@ void libabw::ABWCollector::openLink(const char *href)
   librevenge::RVNGPropertyList propList;
   if (href)
   {
-    std::string sHref(href);
-    boost::ireplace_first(sHref, "%3a", ":");
+    std::string sHref = decodeUrl(href);
     propList.insert("xlink:href", sHref.c_str());
   }
   if (m_iface)
