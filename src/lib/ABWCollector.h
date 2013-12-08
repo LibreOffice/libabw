@@ -58,6 +58,17 @@ public:
 
   bool m_deferredPageBreak;
   bool m_deferredColumnBreak;
+
+  int m_currentTableCol;
+  int m_currentTableRow;
+  int m_currentTableCellNumberInRow;
+  bool m_isTableOpened;
+  bool m_isTableRowOpened;
+  bool m_isTableColumnOpened;
+  bool m_isTableCellOpened;
+  bool m_wasHeaderRow;
+  bool m_isCellWithoutParagraph;
+  bool m_isRowWithoutCell;
 };
 
 class ABWCollector
@@ -107,6 +118,13 @@ private:
 
   void _openSpan();
   void _closeSpan();
+
+  void _openTable();
+  void _closeTable();
+  void _openTableRow();
+  void _closeTableRow();
+  void _openTableCell();
+  void _closeTableCell();
 
   void _recurseTextProperties(const char *name, std::map<std::string, std::string> &styleProps);
   std::string _findParagraphProperty(const char *name);

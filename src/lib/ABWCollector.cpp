@@ -413,7 +413,18 @@ libabw::ABWParsingState::ABWParsingState() :
   m_pageMarginRight(0.0),
 
   m_deferredPageBreak(false),
-  m_deferredColumnBreak(false)
+  m_deferredColumnBreak(false),
+
+  m_currentTableCol(-1),
+  m_currentTableRow(-1),
+  m_currentTableCellNumberInRow(-1),
+  m_isTableOpened(false),
+  m_isTableRowOpened(false),
+  m_isTableColumnOpened(false),
+  m_isTableCellOpened(false),
+  m_wasHeaderRow(false),
+  m_isCellWithoutParagraph(false),
+  m_isRowWithoutCell(false)
 {
 }
 
@@ -439,7 +450,18 @@ libabw::ABWParsingState::ABWParsingState(const ABWParsingState &ps) :
   m_pageMarginRight(ps.m_pageMarginRight),
 
   m_deferredPageBreak(ps.m_deferredPageBreak),
-  m_deferredColumnBreak(ps.m_deferredColumnBreak)
+  m_deferredColumnBreak(ps.m_deferredColumnBreak),
+
+  m_currentTableCol(ps.m_currentTableCol),
+  m_currentTableRow(ps.m_currentTableRow),
+  m_currentTableCellNumberInRow(ps.m_currentTableCellNumberInRow),
+  m_isTableOpened(ps.m_isTableOpened),
+  m_isTableRowOpened(ps.m_isTableRowOpened),
+  m_isTableColumnOpened(ps.m_isTableColumnOpened),
+  m_isTableCellOpened(ps.m_isTableCellOpened),
+  m_wasHeaderRow(ps.m_wasHeaderRow),
+  m_isCellWithoutParagraph(ps.m_isCellWithoutParagraph),
+  m_isRowWithoutCell(ps.m_isRowWithoutCell)
 {
 }
 
@@ -1063,6 +1085,121 @@ void libabw::ABWCollector::_closeSpan()
   m_ps->m_isSpanOpened = false;
 }
 
+void libabw::ABWCollector::_openTable()
+{
+  _closeTable();
+
+  librevenge::RVNGPropertyList propList;
+  if (m_ps->m_deferredPageBreak)
+    propList.insert("fo:break-before", "page");
+  else if (m_ps->m_deferredColumnBreak)
+    propList.insert("fo:break-before", "column");
+  m_ps->m_deferredPageBreak = false;
+  m_ps->m_deferredColumnBreak = false;
+
+
+  if (m_iface)
+    m_iface->openTable(propList);
+  m_ps->m_isTableOpened = true;
+
+  m_ps->m_currentTableRow = (-1);
+  m_ps->m_currentTableCol = (-1);
+  m_ps->m_currentTableCellNumberInRow = (-1);
+}
+
+void libabw::ABWCollector::_closeTable()
+{
+  if (m_ps->m_isTableOpened)
+  {
+    if (m_ps->m_isTableRowOpened)
+      _closeTableRow();
+
+    if (m_iface)
+      m_iface->closeTable();
+  }
+
+  m_ps->m_currentTableRow = (-1);
+  m_ps->m_currentTableCol = (-1);
+  m_ps->m_currentTableCellNumberInRow = (-1);
+  m_ps->m_isTableOpened = false;
+  m_ps->m_wasHeaderRow = false;
+
+  _closeParagraph();
+}
+
+void libabw::ABWCollector::_openTableRow()
+{
+  if (!m_ps->m_isTableOpened)
+    _openTable();
+
+  if (m_ps->m_isTableRowOpened)
+    _closeTableRow();
+
+  m_ps->m_currentTableCol = 0;
+  m_ps->m_currentTableCellNumberInRow = 0;
+
+  librevenge::RVNGPropertyList propList;
+#if 0
+  if (isMinimumHeight && height != 0.0) // minimum height kind of stupid if it's not set, right?
+    propList.insert("style:min-row-height", height);
+  else if (height != 0.0) // this indicates that wordperfect didn't set a height
+    propList.insert("style:row-height", height);
+
+  // Only the first "Header Row" in a table is the actual "Header Row"
+  // The following "Header Row" flags are ignored
+  if (isHeaderRow & !m_ps->m_wasHeaderRow)
+  {
+    propList.insert("librevenge:is-header-row", true);
+    m_ps->m_wasHeaderRow = true;
+  }
+  else
+    propList.insert("librevenge:is-header-row", false);
+#endif
+
+  if (m_iface)
+    m_iface->openTableRow(propList);
+
+  m_ps->m_isTableRowOpened = true;
+  m_ps->m_isRowWithoutCell = true;
+  m_ps->m_currentTableRow++;
+}
+
+void libabw::ABWCollector::_closeTableRow()
+{
+  if (m_ps->m_isTableRowOpened)
+  {
+    if (m_ps->m_isTableCellOpened)
+      _closeTableCell();
+
+    if (m_ps->m_isRowWithoutCell)
+    {
+      m_ps->m_isRowWithoutCell = false;
+      if (m_iface)
+        m_iface->insertCoveredTableCell(librevenge::RVNGPropertyList());
+    }
+    if (m_iface)
+      m_iface->closeTableRow();
+  }
+  m_ps->m_isTableRowOpened = false;
+}
+
+
+void libabw::ABWCollector::_closeTableCell()
+{
+  if (m_ps->m_isTableCellOpened)
+  {
+    if (m_ps->m_isCellWithoutParagraph)
+      _openSpan();
+    if (m_ps->m_isParagraphOpened)
+      _closeParagraph();
+
+    if (m_iface)
+      m_iface->closeTableCell();
+  }
+  m_ps->m_isTableCellOpened = false;
+}
+
+
 void libabw::ABWCollector::openFoot(const char *id)
 {
   if (!m_ps->m_isParagraphOpened)
@@ -1130,8 +1267,5 @@ void libabw::ABWCollector::closeEndnote()
     m_parsingStates.pop();
   }
 }
-
-
-
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */
