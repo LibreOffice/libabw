@@ -7,7 +7,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <string.h>
 #include <boost/spirit/include/classic.hpp>
 #include <boost/algorithm/string.hpp>
 #include <librevenge/librevenge.h>
@@ -34,16 +33,16 @@ enum ABWUnit
   ABW_PERCENT
 };
 
-static bool findDouble(const char *str, double &res, ABWUnit &unit)
+static bool findDouble(const std::string &str, double &res, ABWUnit &unit)
 {
   using namespace ::boost::spirit::classic;
 
-  if (!str || !strlen(str))
+  if (str.empty())
     return false;
 
   unit = ABW_NONE;
 
-  if (!parse(str,
+  if (!parse(str.c_str(),
              //  Begin grammar
              (
                real_p[assign_a(res)] >>
@@ -99,14 +98,14 @@ static bool findDouble(const char *str, double &res, ABWUnit &unit)
   return true;
 }
 
-bool findInt(const char *str, int &res)
+bool findInt(const std::string &str, int &res)
 {
   using namespace ::boost::spirit::classic;
 
-  if (!str || !strlen(str))
+  if (str.empty())
     return false;
 
-  return parse(str,
+  return parse(str.c_str(),
                //  Begin grammar
                (
                  int_p[assign_a(res)]
@@ -115,14 +114,14 @@ bool findInt(const char *str, int &res)
                space_p).full;
 }
 
-bool findBool(const char *str, bool &res)
+bool findBool(const std::string &str, bool &res)
 {
   using namespace ::boost::spirit::classic;
 
-  if (!str || !strlen(str))
+  if (str.empty())
     return false;
 
-  return parse(str,
+  return parse(str.c_str(),
                //  Begin grammar
                (
                  str_p("true")[assign_a(res,true)]
@@ -157,9 +156,9 @@ static std::string getColor(const std::string &s)
   return out;
 }
 
-static void parsePropString(const char *str, std::map<std::string, std::string> &props)
+static void parsePropString(const std::string &str, std::map<std::string, std::string> &props)
 {
-  if (!str || !strlen(str))
+  if (str.empty())
     return;
 
   std::string propString(str);
@@ -255,9 +254,9 @@ static void separateSpacesAndInsertText(librevenge::RVNGTextInterface *iface, co
   separateTabsAndInsertText(iface, tmpText);
 }
 
-void parseTableColumns(const char *str, librevenge::RVNGPropertyListVector &columns)
+void parseTableColumns(const std::string &str, librevenge::RVNGPropertyListVector &columns)
 {
-  if (!str || !strlen(str))
+  if (str.empty())
     return;
 
   std::string propString(str);
