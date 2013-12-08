@@ -387,6 +387,40 @@ std::string decodeUrl(const std::string &str)
 
 } // namespace libabw
 
+libabw::ABWTableState::ABWTableState() :
+  m_currentTableProperties(),
+  m_currentCellProperties(),
+
+  m_currentTableCol(-1),
+  m_currentTableRow(-1),
+  m_currentTableCellNumberInRow(-1),
+  m_isTableRowOpened(false),
+  m_isTableColumnOpened(false),
+  m_isTableCellOpened(false),
+  m_isCellWithoutParagraph(false),
+  m_isRowWithoutCell(false)
+{
+}
+
+libabw::ABWTableState::ABWTableState(const ABWTableState &ps) :
+  m_currentTableProperties(ps.m_currentTableProperties),
+  m_currentCellProperties(ps.m_currentCellProperties),
+
+  m_currentTableCol(ps.m_currentTableCol),
+  m_currentTableRow(ps.m_currentTableRow),
+  m_currentTableCellNumberInRow(ps.m_currentTableCellNumberInRow),
+  m_isTableRowOpened(ps.m_isTableRowOpened),
+  m_isTableColumnOpened(ps.m_isTableColumnOpened),
+  m_isTableCellOpened(ps.m_isTableCellOpened),
+  m_isCellWithoutParagraph(ps.m_isCellWithoutParagraph),
+  m_isRowWithoutCell(ps.m_isRowWithoutCell)
+{
+}
+
+libabw::ABWTableState::~ABWTableState()
+{
+}
+
 libabw::ABWParsingState::ABWParsingState() :
   m_isDocumentStarted(false),
   m_isPageSpanOpened(false),
@@ -398,8 +432,6 @@ libabw::ABWParsingState::ABWParsingState() :
   m_currentSectionStyle(),
   m_currentParagraphStyle(),
   m_currentCharacterStyle(),
-  m_currentTableProperties(),
-  m_currentCellProperties(),
 
   m_pageWidth(0.0),
   m_pageHeight(0.0),
@@ -411,17 +443,9 @@ libabw::ABWParsingState::ABWParsingState() :
   m_deferredPageBreak(false),
   m_deferredColumnBreak(false),
 
-  m_currentTableCol(-1),
-  m_currentTableRow(-1),
-  m_currentTableCellNumberInRow(-1),
-  m_isTableOpened(false),
-  m_isTableRowOpened(false),
-  m_isTableColumnOpened(false),
-  m_isTableCellOpened(false),
-  m_isCellWithoutParagraph(false),
-  m_isRowWithoutCell(false),
+  m_isNote(false),
 
-  m_isNote(false)
+  m_tableStates()
 {
 }
 
@@ -436,8 +460,6 @@ libabw::ABWParsingState::ABWParsingState(const ABWParsingState &ps) :
   m_currentSectionStyle(ps.m_currentSectionStyle),
   m_currentParagraphStyle(ps.m_currentParagraphStyle),
   m_currentCharacterStyle(ps.m_currentCharacterStyle),
-  m_currentTableProperties(ps.m_currentTableProperties),
-  m_currentCellProperties(ps.m_currentCellProperties),
 
   m_pageWidth(ps.m_pageWidth),
   m_pageHeight(ps.m_pageHeight),
@@ -449,17 +471,9 @@ libabw::ABWParsingState::ABWParsingState(const ABWParsingState &ps) :
   m_deferredPageBreak(ps.m_deferredPageBreak),
   m_deferredColumnBreak(ps.m_deferredColumnBreak),
 
-  m_currentTableCol(ps.m_currentTableCol),
-  m_currentTableRow(ps.m_currentTableRow),
-  m_currentTableCellNumberInRow(ps.m_currentTableCellNumberInRow),
-  m_isTableOpened(ps.m_isTableOpened),
-  m_isTableRowOpened(ps.m_isTableRowOpened),
-  m_isTableColumnOpened(ps.m_isTableColumnOpened),
-  m_isTableCellOpened(ps.m_isTableCellOpened),
-  m_isCellWithoutParagraph(ps.m_isCellWithoutParagraph),
-  m_isRowWithoutCell(ps.m_isRowWithoutCell),
+  m_isNote(ps.m_isNote),
 
-  m_isNote(ps.m_isNote)
+  m_tableStates(ps.m_tableStates)
 {
 }
 
@@ -520,16 +534,16 @@ std::string libabw::ABWCollector::_findParagraphProperty(const char *name)
 
 std::string libabw::ABWCollector::_findTableProperty(const char *name)
 {
-  std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentTableProperties.find(name);
-  if (iter != m_ps->m_currentTableProperties.end())
+  std::map<std::string, std::string>::const_iterator iter = m_ps->m_tableStates.top().m_currentTableProperties.find(name);
+  if (iter != m_ps->m_tableStates.top().m_currentTableProperties.end())
     return iter->second;
   return std::string();
 }
 
 std::string libabw::ABWCollector::_findCellProperty(const char *name)
 {
-  std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentCellProperties.find(name);
-  if (iter != m_ps->m_currentCellProperties.end())
+  std::map<std::string, std::string>::const_iterator iter = m_ps->m_tableStates.top().m_currentCellProperties.find(name);
+  if (iter != m_ps->m_tableStates.top().m_currentCellProperties.end())
     return iter->second;
   return std::string();
 }
@@ -668,7 +682,7 @@ void libabw::ABWCollector::collectPageSize(const char *width, const char *height
 
 void libabw::ABWCollector::startDocument()
 {
-  if (!m_ps->m_isNote && !m_ps->m_isTableOpened)
+  if (!m_ps->m_isNote && m_ps->m_tableStates.empty())
   {
 
     if (m_iface && !m_ps->m_isDocumentStarted)
@@ -687,7 +701,7 @@ void libabw::ABWCollector::endDocument()
 
     if (m_ps->m_isParagraphOpened)
       _closeParagraph();
-    if (m_ps->m_isTableOpened)
+    if (!m_ps->m_tableStates.empty())
       _closeTable();
 
     // close the document nice and tight
@@ -773,7 +787,7 @@ void libabw::ABWCollector::insertText(const librevenge::RVNGString &text)
 
 void libabw::ABWCollector::_openPageSpan()
 {
-  if (!m_ps->m_isPageSpanOpened && !m_ps->m_isNote && !m_ps->m_isTableOpened)
+  if (!m_ps->m_isPageSpanOpened && !m_ps->m_isNote && m_ps->m_tableStates.empty())
   {
 
     if (!m_ps->m_isDocumentStarted)
@@ -808,7 +822,7 @@ void libabw::ABWCollector::_closePageSpan()
 
 void libabw::ABWCollector::_openSection()
 {
-  if (!m_ps->m_isSectionOpened && !m_ps->m_isNote && !m_ps->m_isTableOpened)
+  if (!m_ps->m_isSectionOpened && !m_ps->m_isNote && m_ps->m_tableStates.empty())
   {
     if (!m_ps->m_isPageSpanOpened)
       _openPageSpan();
@@ -887,7 +901,7 @@ void libabw::ABWCollector::_openParagraph()
 {
   if (!m_ps->m_isParagraphOpened)
   {
-    if (m_ps->m_isTableOpened && !m_ps->m_isTableCellOpened)
+    if (!m_ps->m_tableStates.empty() && !m_ps->m_tableStates.top().m_isTableCellOpened)
       _openTableCell();
 
     if (!m_ps->m_isSectionOpened)
@@ -987,7 +1001,8 @@ void libabw::ABWCollector::_openParagraph()
       m_iface->openParagraph(propList);
 
     m_ps->m_isParagraphOpened = true;
-    m_ps->m_isCellWithoutParagraph = false;
+    if (!m_ps->m_tableStates.empty())
+      m_ps->m_tableStates.top().m_isCellWithoutParagraph = false;
   }
 }
 
@@ -1047,7 +1062,7 @@ void libabw::ABWCollector::_closeSection()
 {
   if (m_ps->m_isSectionOpened)
   {
-    if (m_ps->m_isTableOpened)
+    if (!m_ps->m_tableStates.empty())
       _closeTable();
 
     if (m_ps->m_isParagraphOpened)
@@ -1114,81 +1129,79 @@ void libabw::ABWCollector::_openTable()
 
   if (m_iface)
     m_iface->openTable(propList);
-  m_ps->m_isTableOpened = true;
 
-  m_ps->m_currentTableRow = (-1);
-  m_ps->m_currentTableCol = (-1);
-  m_ps->m_currentTableCellNumberInRow = (-1);
+  m_ps->m_tableStates.top().m_currentTableRow = (-1);
+  m_ps->m_tableStates.top().m_currentTableCol = (-1);
+  m_ps->m_tableStates.top().m_currentTableCellNumberInRow = (-1);
 }
 
 void libabw::ABWCollector::_closeTable()
 {
-  if (m_ps->m_isTableOpened)
+  if (!m_ps->m_tableStates.empty())
   {
-    if (m_ps->m_isTableRowOpened)
+    if (m_ps->m_tableStates.top().m_isTableRowOpened)
       _closeTableRow();
 
     if (m_iface)
       m_iface->closeTable();
   }
 
-  m_ps->m_currentTableRow = (-1);
-  m_ps->m_currentTableCol = (-1);
-  m_ps->m_currentTableCellNumberInRow = (-1);
-  m_ps->m_isTableOpened = false;
+  m_ps->m_tableStates.top().m_currentTableRow = (-1);
+  m_ps->m_tableStates.top().m_currentTableCol = (-1);
+  m_ps->m_tableStates.top().m_currentTableCellNumberInRow = (-1);
 }
 
 void libabw::ABWCollector::_openTableRow()
 {
-  if (m_ps->m_isTableRowOpened)
+  if (m_ps->m_tableStates.top().m_isTableRowOpened)
     _closeTableRow();
 
-  m_ps->m_currentTableCol = 0;
-  m_ps->m_currentTableCellNumberInRow = 0;
+  m_ps->m_tableStates.top().m_currentTableCol = 0;
+  m_ps->m_tableStates.top().m_currentTableCellNumberInRow = 0;
 
   if (m_iface)
     m_iface->openTableRow(librevenge::RVNGPropertyList());
 
-  m_ps->m_isTableRowOpened = true;
-  m_ps->m_isRowWithoutCell = true;
-  m_ps->m_currentTableRow++;
+  m_ps->m_tableStates.top().m_isTableRowOpened = true;
+  m_ps->m_tableStates.top().m_isRowWithoutCell = true;
+  m_ps->m_tableStates.top().m_currentTableRow++;
 }
 
 void libabw::ABWCollector::_closeTableRow()
 {
-  if (m_ps->m_isTableRowOpened)
+  if (m_ps->m_tableStates.top().m_isTableRowOpened)
   {
-    if (m_ps->m_isTableCellOpened)
+    if (m_ps->m_tableStates.top().m_isTableCellOpened)
       _closeTableCell();
 
-    if (m_ps->m_isRowWithoutCell)
+    if (m_ps->m_tableStates.top().m_isRowWithoutCell)
     {
-      m_ps->m_isRowWithoutCell = false;
+      m_ps->m_tableStates.top().m_isRowWithoutCell = false;
       if (m_iface)
         m_iface->insertCoveredTableCell(librevenge::RVNGPropertyList());
     }
     if (m_iface)
       m_iface->closeTableRow();
   }
-  m_ps->m_isTableRowOpened = false;
+  m_ps->m_tableStates.top().m_isTableRowOpened = false;
 }
 
 void libabw::ABWCollector::_openTableCell()
 {
-  if (m_ps->m_isTableCellOpened)
+  if (m_ps->m_tableStates.top().m_isTableCellOpened)
     _closeTableCell();
 
   librevenge::RVNGPropertyList propList;
-  propList.insert("librevenge:column", m_ps->m_currentTableCol);
-  propList.insert("librevenge:row", m_ps->m_currentTableRow);
+  propList.insert("librevenge:column", m_ps->m_tableStates.top().m_currentTableCol);
+  propList.insert("librevenge:row", m_ps->m_tableStates.top().m_currentTableRow);
 
   int rightAttach(0);
   if (findInt(_findCellProperty("right-attach"), rightAttach))
-    propList.insert("table:number-columns-spanned", rightAttach - m_ps->m_currentTableCol);
+    propList.insert("table:number-columns-spanned", rightAttach - m_ps->m_tableStates.top().m_currentTableCol);
 
   int botAttach(0);
   if (findInt(_findCellProperty("bot-attach"), botAttach))
-    propList.insert("table:number-rows-spanned", botAttach - m_ps->m_currentTableRow);
+    propList.insert("table:number-rows-spanned", botAttach - m_ps->m_tableStates.top().m_currentTableRow);
 
   std::string bgColor = getColor(_findCellProperty("background-color"));
   if (!bgColor.empty())
@@ -1197,17 +1210,17 @@ void libabw::ABWCollector::_openTableCell()
   if (m_iface)
     m_iface->openTableCell(propList);
 
-  m_ps->m_currentTableCellNumberInRow++;
-  m_ps->m_isTableCellOpened = true;
-  m_ps->m_isCellWithoutParagraph = true;
-  m_ps->m_isRowWithoutCell = false;
+  m_ps->m_tableStates.top().m_currentTableCellNumberInRow++;
+  m_ps->m_tableStates.top().m_isTableCellOpened = true;
+  m_ps->m_tableStates.top().m_isCellWithoutParagraph = true;
+  m_ps->m_tableStates.top().m_isRowWithoutCell = false;
 }
 
 void libabw::ABWCollector::_closeTableCell()
 {
-  if (m_ps->m_isTableCellOpened)
+  if (m_ps->m_tableStates.top().m_isTableCellOpened)
   {
-    if (m_ps->m_isCellWithoutParagraph)
+    if (m_ps->m_tableStates.top().m_isCellWithoutParagraph)
       _openSpan();
     if (m_ps->m_isParagraphOpened)
       _closeParagraph();
@@ -1215,7 +1228,7 @@ void libabw::ABWCollector::_closeTableCell()
     if (m_iface)
       m_iface->closeTableCell();
   }
-  m_ps->m_isTableCellOpened = false;
+  m_ps->m_tableStates.top().m_isTableCellOpened = false;
 }
 
 void libabw::ABWCollector::openFoot(const char *id)
@@ -1282,8 +1295,12 @@ void libabw::ABWCollector::closeEndnote()
 
 void libabw::ABWCollector::openTable(const char *props)
 {
+  if (!m_ps->m_isSectionOpened && m_ps->m_tableStates.empty())
+    _openSection();
+
+  m_ps->m_tableStates.push(ABWTableState());
   if (props)
-    parsePropString(props, m_ps->m_currentTableProperties);
+    parsePropString(props, m_ps->m_tableStates.top().m_currentTableProperties);
 
   _openTable();
 }
@@ -1291,31 +1308,33 @@ void libabw::ABWCollector::openTable(const char *props)
 void libabw::ABWCollector::closeTable()
 {
   _closeTable();
-  m_ps->m_currentTableProperties.clear();
+
+  if (!m_ps->m_tableStates.empty())
+    m_ps->m_tableStates.pop();
 }
 
 void libabw::ABWCollector::openCell(const char *props)
 {
   if (props)
-    parsePropString(props, m_ps->m_currentCellProperties);
+    parsePropString(props, m_ps->m_tableStates.top().m_currentCellProperties);
   int currentRow(0);
   if (!findInt(_findCellProperty("top-attach"), currentRow))
-    currentRow = m_ps->m_currentTableRow + 1;
-  while (m_ps->m_currentTableRow < currentRow)
+    currentRow = m_ps->m_tableStates.top().m_currentTableRow + 1;
+  while (m_ps->m_tableStates.top().m_currentTableRow < currentRow)
   {
-    if (m_ps->m_currentTableRow >= 0)
+    if (m_ps->m_tableStates.top().m_currentTableRow >= 0)
       _closeTableRow();
     _openTableRow();
   }
 
-  if (!findInt(_findCellProperty("left-attach"), m_ps->m_currentTableCol))
-    m_ps->m_currentTableCol++;
+  if (!findInt(_findCellProperty("left-attach"), m_ps->m_tableStates.top().m_currentTableCol))
+    m_ps->m_tableStates.top().m_currentTableCol++;
 }
 
 void libabw::ABWCollector::closeCell()
 {
   _closeTableCell();
-  m_ps->m_currentCellProperties.clear();
+  m_ps->m_tableStates.top().m_currentCellProperties.clear();
 }
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

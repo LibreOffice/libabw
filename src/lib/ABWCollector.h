@@ -29,9 +29,27 @@ struct ABWStyle
   std::map<std::string, std::string> properties;
 };
 
-class ABWParsingState
+struct ABWTableState
 {
-public:
+  ABWTableState();
+  ABWTableState(const ABWTableState &ps);
+  ~ABWTableState();
+
+  std::map<std::string, std::string> m_currentTableProperties;
+  std::map<std::string, std::string> m_currentCellProperties;
+
+  int m_currentTableCol;
+  int m_currentTableRow;
+  int m_currentTableCellNumberInRow;
+  bool m_isTableRowOpened;
+  bool m_isTableColumnOpened;
+  bool m_isTableCellOpened;
+  bool m_isCellWithoutParagraph;
+  bool m_isRowWithoutCell;
+};
+
+struct ABWParsingState
+{
   ABWParsingState();
   ABWParsingState(const ABWParsingState &ps);
   ~ABWParsingState();
@@ -46,8 +64,6 @@ public:
   std::map<std::string, std::string> m_currentSectionStyle;
   std::map<std::string, std::string> m_currentParagraphStyle;
   std::map<std::string, std::string> m_currentCharacterStyle;
-  std::map<std::string, std::string> m_currentTableProperties;
-  std::map<std::string, std::string> m_currentCellProperties;
 
   double m_pageWidth;
   double m_pageHeight;
@@ -59,17 +75,9 @@ public:
   bool m_deferredPageBreak;
   bool m_deferredColumnBreak;
 
-  int m_currentTableCol;
-  int m_currentTableRow;
-  int m_currentTableCellNumberInRow;
-  bool m_isTableOpened;
-  bool m_isTableRowOpened;
-  bool m_isTableColumnOpened;
-  bool m_isTableCellOpened;
-  bool m_isCellWithoutParagraph;
-  bool m_isRowWithoutCell;
-
   bool m_isNote;
+
+  std::stack<ABWTableState> m_tableStates;
 };
 
 class ABWCollector
