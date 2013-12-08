@@ -263,21 +263,17 @@ void parseTableColumns(const std::string &str, librevenge::RVNGPropertyListVecto
   boost::trim(propString);
   std::vector<std::string> strVec;
   boost::algorithm::split(strVec, propString, boost::is_any_of("/"), boost::token_compress_on);
-  std::vector<double> doubleVec;
   for (std::vector<std::string>::size_type i = 0; i < strVec.size(); ++i)
   {
     ABWUnit unit(ABW_NONE);
     double value(0.0);
     boost::algorithm::trim(strVec[i]);
-    if (!findDouble(strVec[i], value, unit) || ABW_IN != unit)
-      return;
-    doubleVec.push_back(value);
-  }
-  for (std::vector<double>::const_iterator iter = doubleVec.begin(); iter != doubleVec.end(); ++iter)
-  {
-    librevenge::RVNGPropertyList propList;
-    propList.insert("style:column-width", *iter);
-    columns.append(propList);
+    if (findDouble(strVec[i], value, unit) || ABW_IN != unit)
+    {
+      librevenge::RVNGPropertyList propList;
+      propList.insert("style:column-width", value);
+      columns.append(propList);
+    }
   }
 }
 
@@ -402,6 +398,8 @@ libabw::ABWParsingState::ABWParsingState() :
   m_currentSectionStyle(),
   m_currentParagraphStyle(),
   m_currentCharacterStyle(),
+  m_currentTableProperties(),
+  m_currentCellProperties(),
 
   m_pageWidth(0.0),
   m_pageHeight(0.0),
@@ -420,7 +418,6 @@ libabw::ABWParsingState::ABWParsingState() :
   m_isTableRowOpened(false),
   m_isTableColumnOpened(false),
   m_isTableCellOpened(false),
-  m_wasHeaderRow(false),
   m_isCellWithoutParagraph(false),
   m_isRowWithoutCell(false),
 
@@ -439,6 +436,8 @@ libabw::ABWParsingState::ABWParsingState(const ABWParsingState &ps) :
   m_currentSectionStyle(ps.m_currentSectionStyle),
   m_currentParagraphStyle(ps.m_currentParagraphStyle),
   m_currentCharacterStyle(ps.m_currentCharacterStyle),
+  m_currentTableProperties(ps.m_currentTableProperties),
+  m_currentCellProperties(ps.m_currentCellProperties),
 
   m_pageWidth(ps.m_pageWidth),
   m_pageHeight(ps.m_pageHeight),
@@ -457,7 +456,6 @@ libabw::ABWParsingState::ABWParsingState(const ABWParsingState &ps) :
   m_isTableRowOpened(ps.m_isTableRowOpened),
   m_isTableColumnOpened(ps.m_isTableColumnOpened),
   m_isTableCellOpened(ps.m_isTableCellOpened),
-  m_wasHeaderRow(ps.m_wasHeaderRow),
   m_isCellWithoutParagraph(ps.m_isCellWithoutParagraph),
   m_isRowWithoutCell(ps.m_isRowWithoutCell),
 
@@ -512,11 +510,26 @@ void libabw::ABWCollector::_recurseTextProperties(const char *name, std::map<std
     m_dontLoop.clear();
 }
 
-
 std::string libabw::ABWCollector::_findParagraphProperty(const char *name)
 {
   std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentParagraphStyle.find(name);
   if (iter != m_ps->m_currentParagraphStyle.end())
+    return iter->second;
+  return std::string();
+}
+
+std::string libabw::ABWCollector::_findTableProperty(const char *name)
+{
+  std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentTableProperties.find(name);
+  if (iter != m_ps->m_currentTableProperties.end())
+    return iter->second;
+  return std::string();
+}
+
+std::string libabw::ABWCollector::_findCellProperty(const char *name)
+{
+  std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentCellProperties.find(name);
+  if (iter != m_ps->m_currentCellProperties.end())
     return iter->second;
   return std::string();
 }
@@ -641,12 +654,12 @@ void libabw::ABWCollector::collectPageSize(const char *width, const char *height
   }
   ABWUnit unit;
   double value;
-  if (findDouble(widthStr.c_str(), value, unit))
+  if (findDouble(widthStr, value, unit))
   {
     if (unit == ABW_IN)
       m_ps->m_pageWidth = value;
   }
-  if (findDouble(heightStr.c_str(), value, unit))
+  if (findDouble(heightStr, value, unit))
   {
     if (unit == ABW_IN)
       m_ps->m_pageHeight = value;
@@ -667,13 +680,15 @@ void libabw::ABWCollector::startDocument()
 
 void libabw::ABWCollector::endDocument()
 {
-  if (!m_ps->m_isNote && !m_ps->m_isTableOpened)
+  if (!m_ps->m_isNote)
   {
     if (!m_ps->m_isPageSpanOpened)
       _openSpan();
 
     if (m_ps->m_isParagraphOpened)
       _closeParagraph();
+    if (m_ps->m_isTableOpened)
+      _closeTable();
 
     // close the document nice and tight
     _closeSection();
@@ -756,7 +771,6 @@ void libabw::ABWCollector::insertText(const librevenge::RVNGString &text)
     separateSpacesAndInsertText(m_iface, text);
 }
 
-
 void libabw::ABWCollector::_openPageSpan()
 {
   if (!m_ps->m_isPageSpanOpened && !m_ps->m_isNote && !m_ps->m_isTableOpened)
@@ -781,7 +795,7 @@ void libabw::ABWCollector::_openPageSpan()
 
 void libabw::ABWCollector::_closePageSpan()
 {
-  if (m_ps->m_isPageSpanOpened && !m_ps->m_isNote && !m_ps->m_isTableOpened)
+  if (m_ps->m_isPageSpanOpened)
   {
     if (m_ps->m_isSectionOpened)
       _closeSection();
@@ -873,6 +887,9 @@ void libabw::ABWCollector::_openParagraph()
 {
   if (!m_ps->m_isParagraphOpened)
   {
+    if (m_ps->m_isTableOpened && !m_ps->m_isTableCellOpened)
+      _openTableCell();
+
     if (!m_ps->m_isSectionOpened)
       _openSection();
 
@@ -881,52 +898,37 @@ void libabw::ABWCollector::_openParagraph()
     double value(0.0);
     int intValue(0);
 
-    std::string sValue = _findParagraphProperty("margin-right");
-    if (!sValue.empty())
+    if (findDouble(_findParagraphProperty("margin-right"), value, unit))
     {
-      if (findDouble(sValue.c_str(), value, unit))
-      {
-        if (unit == ABW_IN)
-          propList.insert("fo:margin-right", value);
-      }
+      if (unit == ABW_IN)
+        propList.insert("fo:margin-right", value);
     }
-    sValue = _findParagraphProperty("margin-left");
-    if (!sValue.empty())
+
+    if (findDouble(_findParagraphProperty("margin-left"), value, unit))
     {
-      if (findDouble(sValue.c_str(), value, unit))
-      {
-        if (unit == ABW_IN)
-          propList.insert("fo:margin-left", value);
-      }
+      if (unit == ABW_IN)
+        propList.insert("fo:margin-left", value);
     }
-    sValue = _findParagraphProperty("margin-top");
-    if (!sValue.empty())
+
+    if (findDouble(_findParagraphProperty("margin-top"), value, unit))
     {
-      if (findDouble(sValue.c_str(), value, unit))
-      {
-        if (unit == ABW_IN)
-          propList.insert("fo:margin-top", value);
-      }
+      if (unit == ABW_IN)
+        propList.insert("fo:margin-top", value);
     }
-    sValue = _findParagraphProperty("margin-left");
-    if (!sValue.empty())
+
+    if (findDouble(_findParagraphProperty("margin-left"), value, unit))
     {
-      if (findDouble(sValue.c_str(), value, unit))
-      {
-        if (unit == ABW_IN)
-          propList.insert("fo:margin-left", value);
-      }
+      if (unit == ABW_IN)
+        propList.insert("fo:margin-left", value);
     }
-    sValue = _findParagraphProperty("text-indent");
-    if (!sValue.empty())
+
+    if (findDouble(_findParagraphProperty("text-indent"), value, unit))
     {
-      if (findDouble(sValue.c_str(), value, unit))
-      {
-        if (unit == ABW_IN)
-          propList.insert("fo:text-indent", value);
-      }
+      if (unit == ABW_IN)
+        propList.insert("fo:text-indent", value);
     }
-    sValue = _findParagraphProperty("text-align");
+
+    std::string sValue = _findParagraphProperty("text-align");
     if (!sValue.empty())
     {
       if (sValue == "left")
@@ -936,6 +938,7 @@ void libabw::ABWCollector::_openParagraph()
       else
         propList.insert("fo:text-align", sValue.c_str());
     }
+
     sValue = _findParagraphProperty("line-height");
     if (!sValue.empty())
     {
@@ -946,7 +949,7 @@ void libabw::ABWCollector::_openParagraph()
         propName = "style:line-height-at-least";
         sValue.erase(position);
       }
-      if (findDouble(sValue.c_str(), value, unit))
+      if (findDouble(sValue, value, unit))
       {
         if (ABW_IN == unit)
           propList.insert(propName.c_str(), value);
@@ -954,27 +957,18 @@ void libabw::ABWCollector::_openParagraph()
           propList.insert(propName.c_str(), value, librevenge::RVNG_PERCENT);
       }
     }
-    sValue = _findParagraphProperty("orphans");
-    if (!sValue.empty())
-    {
-      if (findInt(sValue, intValue))
-        propList.insert("fo:orphans", intValue);
-    }
-    sValue = _findParagraphProperty("widows");
-    if (!sValue.empty())
-    {
-      if (findInt(sValue, intValue))
-        propList.insert("fo:widows", intValue);
-    }
-    sValue = _findParagraphProperty("tabstops");
-    if (!sValue.empty())
-    {
-      librevenge::RVNGPropertyListVector tabStops;
-      parseTabStops(sValue, tabStops);
 
-      if (tabStops.count())
-        propList.insert("style:tab-stops", tabStops);
-    }
+    if (findInt(_findParagraphProperty("orphans"), intValue))
+      propList.insert("fo:orphans", intValue);
+
+    if (findInt(_findParagraphProperty("widows"), intValue))
+      propList.insert("fo:widows", intValue);
+
+    librevenge::RVNGPropertyListVector tabStops;
+    parseTabStops(_findParagraphProperty("tabstops"), tabStops);
+
+    if (tabStops.count())
+      propList.insert("style:tab-stops", tabStops);
 
     sValue = _findParagraphProperty("dom-dir");
     if (sValue == "ltr")
@@ -993,6 +987,7 @@ void libabw::ABWCollector::_openParagraph()
       m_iface->openParagraph(propList);
 
     m_ps->m_isParagraphOpened = true;
+    m_ps->m_isCellWithoutParagraph = false;
   }
 }
 
@@ -1007,17 +1002,10 @@ void libabw::ABWCollector::_openSpan()
     ABWUnit unit(ABW_NONE);
     double value(0.0);
 
-    std::string sValue = _findCharacterProperty("font-size");
-    if (!sValue.empty())
-    {
-      if (findDouble(sValue, value, unit))
-      {
-        if (unit == ABW_IN)
-          propList.insert("fo:font-size", value);
-      }
-    }
+    if (findDouble(_findCharacterProperty("font-size"), value, unit) && unit == ABW_IN)
+      propList.insert("fo:font-size", value);
 
-    sValue = _findCharacterProperty("font-family");
+    std::string sValue = _findCharacterProperty("font-family");
     if (!sValue.empty())
       propList.insert("style:font-name", sValue.c_str());
 
@@ -1057,8 +1045,11 @@ void libabw::ABWCollector::_openSpan()
 
 void libabw::ABWCollector::_closeSection()
 {
-  if (m_ps->m_isSectionOpened && !m_ps->m_isNote && !m_ps->m_isTableOpened)
+  if (m_ps->m_isSectionOpened)
   {
+    if (m_ps->m_isTableOpened)
+      _closeTable();
+
     if (m_ps->m_isParagraphOpened)
       _closeParagraph();
 
@@ -1082,7 +1073,6 @@ void libabw::ABWCollector::_closeParagraph()
   m_ps->m_isParagraphOpened = false;
 }
 
-
 void libabw::ABWCollector::_closeSpan()
 {
   if (m_ps->m_isSpanOpened && m_iface)
@@ -1093,7 +1083,11 @@ void libabw::ABWCollector::_closeSpan()
 
 void libabw::ABWCollector::_openTable()
 {
-  _closeTable();
+  if (m_ps->m_isParagraphOpened)
+    _closeParagraph();
+
+  if (!m_ps->m_isSectionOpened)
+    _openSection();
 
   librevenge::RVNGPropertyList propList;
   if (m_ps->m_deferredPageBreak)
@@ -1103,6 +1097,20 @@ void libabw::ABWCollector::_openTable()
   m_ps->m_deferredPageBreak = false;
   m_ps->m_deferredColumnBreak = false;
 
+  librevenge::RVNGPropertyListVector columns;
+  parseTableColumns(_findTableProperty("table-column-props"), columns);
+  if (columns.count())
+    propList.insert("librevenge:table-columns", columns);
+
+  ABWUnit unit(ABW_NONE);
+  double value(0.0);
+  if (findDouble(_findTableProperty("table-column-leftpos"), value, unit) && unit == ABW_IN)
+  {
+    propList.insert("fo:margin-left", value);
+    propList.insert("table:align", "margins");
+  }
+  else
+    propList.insert("table:align", "left");
 
   if (m_iface)
     m_iface->openTable(propList);
@@ -1128,42 +1136,18 @@ void libabw::ABWCollector::_closeTable()
   m_ps->m_currentTableCol = (-1);
   m_ps->m_currentTableCellNumberInRow = (-1);
   m_ps->m_isTableOpened = false;
-  m_ps->m_wasHeaderRow = false;
-
-  _closeParagraph();
 }
 
 void libabw::ABWCollector::_openTableRow()
 {
-  if (!m_ps->m_isTableOpened)
-    _openTable();
-
   if (m_ps->m_isTableRowOpened)
     _closeTableRow();
 
   m_ps->m_currentTableCol = 0;
   m_ps->m_currentTableCellNumberInRow = 0;
 
-  librevenge::RVNGPropertyList propList;
-#if 0
-  if (isMinimumHeight && height != 0.0) // minimum height kind of stupid if it's not set, right?
-    propList.insert("style:min-row-height", height);
-  else if (height != 0.0) // this indicates that wordperfect didn't set a height
-    propList.insert("style:row-height", height);
-
-  // Only the first "Header Row" in a table is the actual "Header Row"
-  // The following "Header Row" flags are ignored
-  if (isHeaderRow & !m_ps->m_wasHeaderRow)
-  {
-    propList.insert("librevenge:is-header-row", true);
-    m_ps->m_wasHeaderRow = true;
-  }
-  else
-    propList.insert("librevenge:is-header-row", false);
-#endif
-
   if (m_iface)
-    m_iface->openTableRow(propList);
+    m_iface->openTableRow(librevenge::RVNGPropertyList());
 
   m_ps->m_isTableRowOpened = true;
   m_ps->m_isRowWithoutCell = true;
@@ -1189,6 +1173,35 @@ void libabw::ABWCollector::_closeTableRow()
   m_ps->m_isTableRowOpened = false;
 }
 
+void libabw::ABWCollector::_openTableCell()
+{
+  if (m_ps->m_isTableCellOpened)
+    _closeTableCell();
+
+  librevenge::RVNGPropertyList propList;
+  propList.insert("librevenge:column", m_ps->m_currentTableCol);
+  propList.insert("librevenge:row", m_ps->m_currentTableRow);
+
+  int rightAttach(0);
+  if (findInt(_findCellProperty("right-attach"), rightAttach))
+    propList.insert("table:number-columns-spanned", rightAttach - m_ps->m_currentTableCol);
+
+  int botAttach(0);
+  if (findInt(_findCellProperty("bot-attach"), botAttach))
+    propList.insert("table:number-rows-spanned", botAttach - m_ps->m_currentTableRow);
+
+  std::string bgColor = getColor(_findCellProperty("background-color"));
+  if (!bgColor.empty())
+    propList.insert("fo:background-color", bgColor.c_str());
+
+  if (m_iface)
+    m_iface->openTableCell(propList);
+
+  m_ps->m_currentTableCellNumberInRow++;
+  m_ps->m_isTableCellOpened = true;
+  m_ps->m_isCellWithoutParagraph = true;
+  m_ps->m_isRowWithoutCell = false;
+}
 
 void libabw::ABWCollector::_closeTableCell()
 {
@@ -1204,7 +1217,6 @@ void libabw::ABWCollector::_closeTableCell()
   }
   m_ps->m_isTableCellOpened = false;
 }
-
 
 void libabw::ABWCollector::openFoot(const char *id)
 {
@@ -1266,6 +1278,44 @@ void libabw::ABWCollector::closeEndnote()
     m_ps = m_parsingStates.top();
     m_parsingStates.pop();
   }
+}
+
+void libabw::ABWCollector::openTable(const char *props)
+{
+  if (props)
+    parsePropString(props, m_ps->m_currentTableProperties);
+
+  _openTable();
+}
+
+void libabw::ABWCollector::closeTable()
+{
+  _closeTable();
+  m_ps->m_currentTableProperties.clear();
+}
+
+void libabw::ABWCollector::openCell(const char *props)
+{
+  if (props)
+    parsePropString(props, m_ps->m_currentCellProperties);
+  int currentRow(0);
+  if (!findInt(_findCellProperty("top-attach"), currentRow))
+    currentRow = m_ps->m_currentTableRow + 1;
+  while (m_ps->m_currentTableRow < currentRow)
+  {
+    if (m_ps->m_currentTableRow >= 0)
+      _closeTableRow();
+    _openTableRow();
+  }
+
+  if (!findInt(_findCellProperty("left-attach"), m_ps->m_currentTableCol))
+    m_ps->m_currentTableCol++;
+}
+
+void libabw::ABWCollector::closeCell()
+{
+  _closeTableCell();
+  m_ps->m_currentCellProperties.clear();
 }
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

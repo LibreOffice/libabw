@@ -178,6 +178,18 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
     if (XML_READER_TYPE_END_ELEMENT == tokenType || emptyToken > 0)
       m_collector->closeEndnote();
     break;
+  case XML_TABLE:
+    if (XML_READER_TYPE_ELEMENT == tokenType)
+      readTable(reader);
+    if (XML_READER_TYPE_END_ELEMENT == tokenType || emptyToken > 0)
+      m_collector->closeTable();
+    break;
+  case XML_CELL:
+    if (XML_READER_TYPE_ELEMENT == tokenType)
+      readCell(reader);
+    if (XML_READER_TYPE_END_ELEMENT == tokenType || emptyToken > 0)
+      m_collector->closeCell();
+    break;
   default:
     break;
   }
@@ -464,6 +476,22 @@ void libabw::ABWParser::readFoot(xmlTextReaderPtr reader)
     xmlFree(id);
 }
 
+void libabw::ABWParser::readTable(xmlTextReaderPtr reader)
+{
+  xmlChar *props = xmlTextReaderGetAttribute(reader, BAD_CAST("props"));
+  if (m_collector)
+    m_collector->openTable((const char *)props);
+  if (props)
+    xmlFree(props);
+}
 
+void libabw::ABWParser::readCell(xmlTextReaderPtr reader)
+{
+  xmlChar *props = xmlTextReaderGetAttribute(reader, BAD_CAST("props"));
+  if (m_collector)
+    m_collector->openCell((const char *)props);
+  if (props)
+    xmlFree(props);
+}
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

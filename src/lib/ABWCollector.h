@@ -46,6 +46,8 @@ public:
   std::map<std::string, std::string> m_currentSectionStyle;
   std::map<std::string, std::string> m_currentParagraphStyle;
   std::map<std::string, std::string> m_currentCharacterStyle;
+  std::map<std::string, std::string> m_currentTableProperties;
+  std::map<std::string, std::string> m_currentCellProperties;
 
   double m_pageWidth;
   double m_pageHeight;
@@ -64,7 +66,6 @@ public:
   bool m_isTableRowOpened;
   bool m_isTableColumnOpened;
   bool m_isTableCellOpened;
-  bool m_wasHeaderRow;
   bool m_isCellWithoutParagraph;
   bool m_isRowWithoutCell;
 
@@ -100,6 +101,12 @@ public:
   void insertPageBreak();
   void insertText(const librevenge::RVNGString &text);
 
+  void openTable(const char *props);
+  void closeTable();
+  void openCell(const char *props);
+  void closeCell();
+
+
 private:
   ABWCollector(const ABWCollector &);
   ABWCollector &operator=(const ABWCollector &);
@@ -129,6 +136,8 @@ private:
   void _recurseTextProperties(const char *name, std::map<std::string, std::string> &styleProps);
   std::string _findParagraphProperty(const char *name);
   std::string _findCharacterProperty(const char *name);
+  std::string _findTableProperty(const char *name);
+  std::string _findCellProperty(const char *name);
 
   ABWParsingState *m_ps;
   librevenge::RVNGTextInterface *m_iface;
