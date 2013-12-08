@@ -403,8 +403,6 @@ libabw::ABWParsingState::ABWParsingState() :
   m_currentParagraphStyle(),
   m_currentCharacterStyle(),
 
-  m_textStyles(),
-
   m_pageWidth(0.0),
   m_pageHeight(0.0),
   m_pageMarginTop(0.0),
@@ -424,7 +422,9 @@ libabw::ABWParsingState::ABWParsingState() :
   m_isTableCellOpened(false),
   m_wasHeaderRow(false),
   m_isCellWithoutParagraph(false),
-  m_isRowWithoutCell(false)
+  m_isRowWithoutCell(false),
+
+  m_isNote(false)
 {
 }
 
@@ -439,8 +439,6 @@ libabw::ABWParsingState::ABWParsingState(const ABWParsingState &ps) :
   m_currentSectionStyle(ps.m_currentSectionStyle),
   m_currentParagraphStyle(ps.m_currentParagraphStyle),
   m_currentCharacterStyle(ps.m_currentCharacterStyle),
-
-  m_textStyles(ps.m_textStyles),
 
   m_pageWidth(ps.m_pageWidth),
   m_pageHeight(ps.m_pageHeight),
@@ -461,7 +459,9 @@ libabw::ABWParsingState::ABWParsingState(const ABWParsingState &ps) :
   m_isTableCellOpened(ps.m_isTableCellOpened),
   m_wasHeaderRow(ps.m_wasHeaderRow),
   m_isCellWithoutParagraph(ps.m_isCellWithoutParagraph),
-  m_isRowWithoutCell(ps.m_isRowWithoutCell)
+  m_isRowWithoutCell(ps.m_isRowWithoutCell),
+
+  m_isNote(ps.m_isNote)
 {
 }
 
@@ -473,7 +473,8 @@ libabw::ABWCollector::ABWCollector(librevenge::RVNGTextInterface *iface) :
   m_ps(new ABWParsingState),
   m_iface(iface),
   m_parsingStates(),
-  m_dontLoop()
+  m_dontLoop(),
+  m_textStyles()
 {
 }
 
@@ -490,7 +491,7 @@ void libabw::ABWCollector::collectTextStyle(const char *name, const char *basedo
   if (props)
     parsePropString(props, style.properties);
   if (name)
-    m_ps->m_textStyles[name] = style;
+    m_textStyles[name] = style;
 }
 
 void libabw::ABWCollector::_recurseTextProperties(const char *name, std::map<std::string, std::string> &styleProps)
@@ -498,10 +499,10 @@ void libabw::ABWCollector::_recurseTextProperties(const char *name, std::map<std
   if (name)
   {
     m_dontLoop.insert(name);
-    std::map<std::string, ABWStyle>::const_iterator iter = m_ps->m_textStyles.find(name);
-    if (iter != m_ps->m_textStyles.end() && !(iter->second.basedon.empty()) && !m_dontLoop.count(iter->second.basedon))
+    std::map<std::string, ABWStyle>::const_iterator iter = m_textStyles.find(name);
+    if (iter != m_textStyles.end() && !(iter->second.basedon.empty()) && !m_dontLoop.count(iter->second.basedon))
       _recurseTextProperties(iter->second.basedon.c_str(), styleProps);
-    if (iter != m_ps->m_textStyles.end())
+    if (iter != m_textStyles.end())
     {
       for (std::map<std::string, std::string>::const_iterator i = iter->second.properties.begin(); i != iter->second.properties.end(); ++i)
         styleProps[i->first] = i->second;
@@ -654,25 +655,32 @@ void libabw::ABWCollector::collectPageSize(const char *width, const char *height
 
 void libabw::ABWCollector::startDocument()
 {
-  if (m_iface && !m_ps->m_isDocumentStarted)
-    m_iface->startDocument();
+  if (!m_ps->m_isNote && !m_ps->m_isTableOpened)
+  {
 
-  m_ps->m_isDocumentStarted = true;
+    if (m_iface && !m_ps->m_isDocumentStarted)
+      m_iface->startDocument();
+
+    m_ps->m_isDocumentStarted = true;
+  }
 }
 
 void libabw::ABWCollector::endDocument()
 {
-  if (!m_ps->m_isPageSpanOpened)
-    _openSpan();
+  if (!m_ps->m_isNote && !m_ps->m_isTableOpened)
+  {
+    if (!m_ps->m_isPageSpanOpened)
+      _openSpan();
 
-  if (m_ps->m_isParagraphOpened)
-    _closeParagraph();
+    if (m_ps->m_isParagraphOpened)
+      _closeParagraph();
 
-  // close the document nice and tight
-  _closeSection();
-  _closePageSpan();
-  if (m_iface)
-    m_iface->endDocument();
+    // close the document nice and tight
+    _closeSection();
+    _closePageSpan();
+    if (m_iface)
+      m_iface->endDocument();
+  }
 }
 
 void libabw::ABWCollector::endSection()
@@ -751,7 +759,7 @@ void libabw::ABWCollector::insertText(const librevenge::RVNGString &text)
 
 void libabw::ABWCollector::_openPageSpan()
 {
-  if (!m_ps->m_isPageSpanOpened)
+  if (!m_ps->m_isPageSpanOpened && !m_ps->m_isNote && !m_ps->m_isTableOpened)
   {
 
     if (!m_ps->m_isDocumentStarted)
@@ -767,14 +775,13 @@ void libabw::ABWCollector::_openPageSpan()
 
     if (m_iface && !m_ps->m_isPageSpanOpened)
       m_iface->openPageSpan(propList);
-
-    m_ps->m_isPageSpanOpened = true;
   }
+  m_ps->m_isPageSpanOpened = true;
 }
 
 void libabw::ABWCollector::_closePageSpan()
 {
-  if (m_ps->m_isPageSpanOpened)
+  if (m_ps->m_isPageSpanOpened && !m_ps->m_isNote && !m_ps->m_isTableOpened)
   {
     if (m_ps->m_isSectionOpened)
       _closeSection();
@@ -787,7 +794,7 @@ void libabw::ABWCollector::_closePageSpan()
 
 void libabw::ABWCollector::_openSection()
 {
-  if (!m_ps->m_isSectionOpened)
+  if (!m_ps->m_isSectionOpened && !m_ps->m_isNote && !m_ps->m_isTableOpened)
   {
     if (!m_ps->m_isPageSpanOpened)
       _openPageSpan();
@@ -858,9 +865,8 @@ void libabw::ABWCollector::_openSection()
 
     if (!m_ps->m_isSectionOpened)
       m_iface->openSection(propList);
-
-    m_ps->m_isSectionOpened = true;
   }
+  m_ps->m_isSectionOpened = true;
 }
 
 void libabw::ABWCollector::_openParagraph()
@@ -1051,7 +1057,7 @@ void libabw::ABWCollector::_openSpan()
 
 void libabw::ABWCollector::_closeSection()
 {
-  if (m_ps->m_isSectionOpened)
+  if (m_ps->m_isSectionOpened && !m_ps->m_isNote && !m_ps->m_isTableOpened)
   {
     if (m_ps->m_isParagraphOpened)
       _closeParagraph();
@@ -1206,19 +1212,16 @@ void libabw::ABWCollector::openFoot(const char *id)
     _openSpan();
   _closeSpan();
 
-  m_parsingStates.push(m_ps);
-  m_ps = new ABWParsingState(*(m_parsingStates.top()));
-  m_ps->m_isParagraphOpened = false;
-  m_ps->m_currentParagraphStyle.clear();
-  m_ps->m_currentCharacterStyle.clear();
-  m_ps->m_deferredPageBreak = false;
-  m_ps->m_deferredColumnBreak = false;
-
   librevenge::RVNGPropertyList propList;
   if (id)
     propList.insert("librevenge:number", id);
   if (m_iface)
     m_iface->openFootnote(propList);
+
+  m_parsingStates.push(m_ps);
+  m_ps = new ABWParsingState();
+
+  m_ps->m_isNote = true;
 }
 
 void libabw::ABWCollector::closeFoot()
@@ -1240,19 +1243,16 @@ void libabw::ABWCollector::openEndnote(const char *id)
     _openSpan();
   _closeSpan();
 
-  m_parsingStates.push(m_ps);
-  m_ps = new ABWParsingState(*(m_parsingStates.top()));
-  m_ps->m_isParagraphOpened = false;
-  m_ps->m_currentParagraphStyle.clear();
-  m_ps->m_currentCharacterStyle.clear();
-  m_ps->m_deferredPageBreak = false;
-  m_ps->m_deferredColumnBreak = false;
-
   librevenge::RVNGPropertyList propList;
   if (id)
     propList.insert("librevenge:number", id);
   if (m_iface)
     m_iface->openEndnote(propList);
+
+  m_parsingStates.push(m_ps);
+  m_ps = new ABWParsingState();
+
+  m_ps->m_isNote = true;
 }
 
 void libabw::ABWCollector::closeEndnote()

@@ -47,8 +47,6 @@ public:
   std::map<std::string, std::string> m_currentParagraphStyle;
   std::map<std::string, std::string> m_currentCharacterStyle;
 
-  std::map<std::string, ABWStyle> m_textStyles;
-
   double m_pageWidth;
   double m_pageHeight;
   double m_pageMarginTop;
@@ -69,6 +67,8 @@ public:
   bool m_wasHeaderRow;
   bool m_isCellWithoutParagraph;
   bool m_isRowWithoutCell;
+
+  bool m_isNote;
 };
 
 class ABWCollector
@@ -134,7 +134,7 @@ private:
   librevenge::RVNGTextInterface *m_iface;
   std::stack<ABWParsingState *> m_parsingStates;
   std::set<std::string> m_dontLoop;
-
+  std::map<std::string, ABWStyle> m_textStyles;
 };
 
 } // namespace libabw
