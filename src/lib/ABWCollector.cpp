@@ -282,22 +282,35 @@ void parseTableColumns(const char *str, librevenge::RVNGPropertyListVector &colu
   }
 }
 
-std::string decodeUrl(const std::string src)
+std::string decodeUrl(const std::string &str)
 {
-  std::string result;
-  for (unsigned i=0; i < src.length(); ++i)
-  {
-    if (src[i]=='%')
-    {
-      unsigned ii;
-      sscanf(src.substr(i+1,2).c_str(), "%x", &ii);
-      result += static_cast<char>(ii);
-      i=i+2;
-    }
-    else
-      result+=src[i];
-  }
-  return result;
+  using namespace ::boost::spirit::classic;
+
+  if (str.empty())
+    return str;
+
+  uint_parser<char,16,2,2> urlhex_p;
+  std::string decoded_string;
+  if (parse(str.c_str(),
+            //  Begin grammar
+            *(
+              (ch_p('%') >>
+               (
+                 urlhex_p[push_back_a(decoded_string)]
+                 |
+                 ch_p('%')[push_back_a(decoded_string)]
+               )
+              )
+              |
+              (
+                (~ch_p('%'))[push_back_a(decoded_string)]
+              )
+            ) >> end_p,
+            //  End grammar
+            space_p).full)
+    return decoded_string;
+
+  return str;
 }
 
 } // anonymous namespace
