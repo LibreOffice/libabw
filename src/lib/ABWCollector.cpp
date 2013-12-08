@@ -269,7 +269,7 @@ void parseTableColumns(const std::string &str, librevenge::RVNGPropertyListVecto
     ABWUnit unit(ABW_NONE);
     double value(0.0);
     boost::algorithm::trim(strVec[i]);
-    if (!findDouble(strVec[i].c_str(), value, unit) || ABW_IN != unit)
+    if (!findDouble(strVec[i], value, unit) || ABW_IN != unit)
       return;
     doubleVec.push_back(value);
   }
@@ -390,7 +390,8 @@ void libabw::ABWCollector::collectTextStyle(const char *name, const char *basedo
   ABWStyle style;
   style.basedon = basedon ? basedon : std::string();
   style.followedby = followedby ? followedby : std::string();
-  parsePropString(props, style.properties);
+  if (props)
+    parsePropString(props, style.properties);
   if (name)
     m_ps->m_textStyles[name] = style;
 }
@@ -440,7 +441,8 @@ void libabw::ABWCollector::collectParagraphProperties(const char *style, const c
     _recurseTextProperties(style, m_ps->m_currentParagraphStyle);
 
   std::map<std::string, std::string> tmpProps;
-  parsePropString(props, tmpProps);
+  if (props)
+    parsePropString(props, tmpProps);
   for (std::map<std::string, std::string>::const_iterator iter = tmpProps.begin(); iter != tmpProps.end(); ++iter)
     m_ps->m_currentParagraphStyle[iter->first] = iter->second;
 }
@@ -452,7 +454,8 @@ void libabw::ABWCollector::collectCharacterProperties(const char *style, const c
     _recurseTextProperties(style, m_ps->m_currentCharacterStyle);
 
   std::map<std::string, std::string> tmpProps;
-  parsePropString(props, tmpProps);
+  if (props)
+    parsePropString(props, tmpProps);
   for (std::map<std::string, std::string>::const_iterator iter = tmpProps.begin(); iter != tmpProps.end(); ++iter)
     m_ps->m_currentCharacterStyle[iter->first] = iter->second;
 }
@@ -466,14 +469,15 @@ void libabw::ABWCollector::collectSectionProperties(const char *props)
 
   m_ps->m_currentSectionStyle.clear();
   std::map<std::string, std::string> tmpProps;
-  parsePropString(props, tmpProps);
+  if (props)
+    parsePropString(props, tmpProps);
   ABWUnit unit(ABW_NONE);
   double value(0.0);
   for (std::map<std::string, std::string>::const_iterator iter = tmpProps.begin(); iter != tmpProps.end(); ++iter)
   {
     if (iter->first == "page-margin-right" && !iter->second.empty() && fabs(m_ps->m_pageMarginRight) < ABW_EPSILON)
     {
-      if (findDouble(iter->second.c_str(), value, unit))
+      if (findDouble(iter->second, value, unit))
       {
         if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
           m_ps->m_pageMarginRight = value;
@@ -481,7 +485,7 @@ void libabw::ABWCollector::collectSectionProperties(const char *props)
     }
     else if (iter->first == "page-margin-left" && !iter->second.empty() && fabs(m_ps->m_pageMarginLeft) < ABW_EPSILON)
     {
-      if (findDouble(iter->second.c_str(), value, unit))
+      if (findDouble(iter->second, value, unit))
       {
         if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
           m_ps->m_pageMarginLeft = value;
@@ -489,7 +493,7 @@ void libabw::ABWCollector::collectSectionProperties(const char *props)
     }
     else if (iter->first == "page-margin-top" && !iter->second.empty() && fabs(m_ps->m_pageMarginTop) < ABW_EPSILON)
     {
-      if (findDouble(iter->second.c_str(), value, unit))
+      if (findDouble(iter->second, value, unit))
       {
         if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
           m_ps->m_pageMarginTop = value;
@@ -497,7 +501,7 @@ void libabw::ABWCollector::collectSectionProperties(const char *props)
     }
     else if (iter->first == "page-margin-bottom" && !iter->second.empty() && fabs(m_ps->m_pageMarginBottom) < ABW_EPSILON)
     {
-      if (findDouble(iter->second.c_str(), value, unit))
+      if (findDouble(iter->second, value, unit))
       {
         if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
           m_ps->m_pageMarginBottom = value;
@@ -698,7 +702,7 @@ void libabw::ABWCollector::_openSection()
     std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentSectionStyle.find("page-margin-right");
     if (iter != m_ps->m_currentSectionStyle.end())
     {
-      if (findDouble(iter->second.c_str(), value, unit))
+      if (findDouble(iter->second, value, unit))
       {
         if (unit == ABW_IN)
           propList.insert("fo:margin-right", value - m_ps->m_pageMarginRight);
@@ -707,7 +711,7 @@ void libabw::ABWCollector::_openSection()
     iter = m_ps->m_currentSectionStyle.find("page-margin-left");
     if (iter != m_ps->m_currentSectionStyle.end())
     {
-      if (findDouble(iter->second.c_str(), value, unit))
+      if (findDouble(iter->second, value, unit))
       {
         if (unit == ABW_IN)
           propList.insert("fo:margin-left", value - m_ps->m_pageMarginLeft);
@@ -716,7 +720,7 @@ void libabw::ABWCollector::_openSection()
     iter = m_ps->m_currentSectionStyle.find("section-space-after");
     if (iter != m_ps->m_currentSectionStyle.end())
     {
-      if (findDouble(iter->second.c_str(), value, unit))
+      if (findDouble(iter->second, value, unit))
       {
         if (unit == ABW_IN)
           propList.insert("librevenge:margin-bottom", value);
@@ -735,7 +739,7 @@ void libabw::ABWCollector::_openSection()
     if (iter != m_ps->m_currentSectionStyle.end())
     {
       int intValue(0);
-      if (findInt(iter->second.c_str(), intValue))
+      if (findInt(iter->second, intValue))
       {
         if (intValue > 1)
         {
@@ -850,13 +854,13 @@ void libabw::ABWCollector::_openParagraph()
     sValue = _findParagraphProperty("orphans");
     if (!sValue.empty())
     {
-      if (findInt(sValue.c_str(), intValue))
+      if (findInt(sValue, intValue))
         propList.insert("fo:orphans", intValue);
     }
     sValue = _findParagraphProperty("widows");
     if (!sValue.empty())
     {
-      if (findInt(sValue.c_str(), intValue))
+      if (findInt(sValue, intValue))
         propList.insert("fo:widows", intValue);
     }
 
@@ -899,7 +903,7 @@ void libabw::ABWCollector::_openSpan()
     std::string sValue = _findCharacterProperty("font-size");
     if (!sValue.empty())
     {
-      if (findDouble(sValue.c_str(), value, unit))
+      if (findDouble(sValue, value, unit))
       {
         if (unit == ABW_IN)
           propList.insert("fo:font-size", value);
