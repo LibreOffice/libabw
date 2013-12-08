@@ -288,6 +288,7 @@ std::string decodeUrl(const std::string &str)
   if (str.empty())
     return str;
 
+  // look for a hexadecimal number of 2 digits
   uint_parser<char,16,2,2> urlhex_p;
   std::string decoded_string;
   if (parse(str.c_str(),
