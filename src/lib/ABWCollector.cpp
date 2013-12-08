@@ -281,6 +281,80 @@ void parseTableColumns(const std::string &str, librevenge::RVNGPropertyListVecto
   }
 }
 
+bool parseTabStop(const std::string &str, librevenge::RVNGPropertyList &tabStop)
+{
+  if (str.empty())
+    return false;
+  std::vector<std::string> strVec;
+  boost::algorithm::split(strVec, str, boost::is_any_of("/"), boost::token_compress_on);
+  if (strVec.size() < 2)
+    return false;
+  boost::algorithm::trim(strVec[0]);
+  ABWUnit unit(ABW_NONE);
+  double value(0.0);
+  if (!findDouble(strVec[0], value, unit) || ABW_IN != unit)
+    return false;
+  tabStop.insert("style:position", value);
+
+  boost::algorithm::trim(strVec[1]);
+  if (!strVec[1].empty())
+  {
+    switch (strVec[1][0])
+    {
+    case 'L':
+      tabStop.insert("style:type", "left");
+      break;
+    case 'C':
+      tabStop.insert("style:type", "center");
+      break;
+    case 'D':
+      tabStop.insert("style:type", "char");
+      break;
+    case 'R':
+      tabStop.insert("style:type", "right");
+      break;
+    default:
+      tabStop.insert("style:type", "left");
+      break;
+    }
+  }
+
+  if (strVec[1].size() > 1)
+  {
+    switch (strVec[1][1])
+    {
+    case '3':
+      tabStop.insert("style:leader-text", "_");
+      break;
+    case '2':
+      tabStop.insert("style:leader-text", "-");
+      break;
+    case '1':
+      tabStop.insert("style:leader-text", ".");
+      break;
+    default:
+      break;
+    }
+  }
+
+  return true;
+}
+
+void parseTabStops(const std::string &str, librevenge::RVNGPropertyListVector &tabStops)
+{
+  if (str.empty())
+    return;
+  std::vector<std::string> strVec;
+  boost::algorithm::split(strVec, str, boost::is_any_of(","), boost::token_compress_on);
+  for (std::vector<std::string>::size_type i = 0; i < strVec.size(); ++i)
+  {
+    boost::algorithm::trim(strVec[i]);
+    librevenge::RVNGPropertyList tabStop;
+    if (parseTabStop(strVec[i], tabStop))
+      tabStops.append(tabStop);
+  }
+}
+
 std::string decodeUrl(const std::string &str)
 {
   using namespace ::boost::spirit::classic;
@@ -864,6 +938,15 @@ void libabw::ABWCollector::_openParagraph()
       if (findInt(sValue, intValue))
         propList.insert("fo:widows", intValue);
     }
+    sValue = _findParagraphProperty("tabstops");
+    if (!sValue.empty())
+    {
+      librevenge::RVNGPropertyListVector tabStops;
+      parseTabStops(sValue, tabStops);
+
+      if (tabStops.count())
+        propList.insert("style:tab-stops", tabStops);
+    }
 
     sValue = _findParagraphProperty("dom-dir");
     if (sValue == "ltr")
@@ -877,11 +960,6 @@ void libabw::ABWCollector::_openParagraph()
       propList.insert("fo:break-before", "column");
     m_ps->m_deferredPageBreak = false;
     m_ps->m_deferredColumnBreak = false;
-
-    librevenge::RVNGPropertyListVector tabStops;
-
-    if (tabStops.count())
-      propList.insert("style:tab-stops", tabStops);
 
     if (m_iface)
       m_iface->openParagraph(propList);
