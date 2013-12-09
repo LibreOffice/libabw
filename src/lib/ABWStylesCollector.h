@@ -44,7 +44,7 @@ struct ABWStylesParsingState
 class ABWStylesCollector : public ABWCollector
 {
 public:
-  ABWStylesCollector(std::map<int, int> &tableSizes);
+  ABWStylesCollector(std::map<int, int> &tableSizes, std::map<std::string, ABWData> &data);
   virtual ~ABWStylesCollector();
 
   // collector functions
@@ -69,6 +69,7 @@ public:
   void insertColumnBreak();
   void insertPageBreak();
   void insertText(const librevenge::RVNGString &text);
+  void collectData(const char *name, const char *mimeType, const librevenge::RVNGBinaryData &data);
 
   void openTable(const char *props);
   void closeTable();
@@ -84,6 +85,7 @@ private:
 
   ABWStylesParsingState *m_ps;
   std::map<int, int> &m_tableSizes;
+  std::map<std::string, ABWData> &m_data;
   int m_tableCounter;
 };
 

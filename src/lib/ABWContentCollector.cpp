@@ -461,12 +461,13 @@ libabw::ABWContentParsingState::~ABWContentParsingState()
 {
 }
 
-libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes) :
+libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes, const std::map<std::string, ABWData> &data) :
   m_ps(new ABWContentParsingState),
   m_iface(iface),
   m_parsingStates(),
   m_dontLoop(),
   m_textStyles(),
+  m_data(data),
   m_tableSizes(tableSizes),
   m_tableCounter(0)
 {
@@ -1323,6 +1324,10 @@ void libabw::ABWContentCollector::closeCell()
 {
   _closeTableCell();
   m_ps->m_tableStates.top().m_currentCellProperties.clear();
+}
+
+void libabw::ABWContentCollector::collectData(const char *, const char *, const librevenge::RVNGBinaryData &)
+{
 }
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

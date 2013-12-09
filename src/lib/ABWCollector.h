@@ -15,6 +15,20 @@
 namespace libabw
 {
 
+struct ABWData
+{
+  ABWData()
+    : m_mimeType(), m_binaryData() {}
+  ABWData(const ABWData &data)
+    : m_mimeType(data.m_mimeType), m_binaryData(data.m_binaryData) {}
+  ABWData(const librevenge::RVNGString &mimeType, const librevenge::RVNGBinaryData binaryData)
+    : m_mimeType(mimeType), m_binaryData(binaryData) {}
+  ~ABWData() {}
+
+  librevenge::RVNGString m_mimeType;
+  librevenge::RVNGBinaryData m_binaryData;
+};
+
 class ABWCollector
 {
 public:
@@ -43,6 +57,8 @@ public:
   virtual void insertColumnBreak() = 0;
   virtual void insertPageBreak() = 0;
   virtual void insertText(const librevenge::RVNGString &text) = 0;
+
+  virtual void collectData(const char *name, const char *mimeType, const librevenge::RVNGBinaryData &data) = 0;
 
   virtual void openTable(const char *props) = 0;
   virtual void closeTable() = 0;

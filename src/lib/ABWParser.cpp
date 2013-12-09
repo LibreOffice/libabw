@@ -37,14 +37,15 @@ bool libabw::ABWParser::parse()
   try
   {
     std::map<int, int> tableSizes;
-    ABWStylesCollector stylesCollector(tableSizes);
+    std::map<std::string, ABWData> data;
+    ABWStylesCollector stylesCollector(tableSizes, data);
     m_collector = &stylesCollector;
     m_input->seek(0, librevenge::RVNG_SEEK_SET);
     if (!processXmlDocument(m_input))
       return false;
 
-    ABWContentCollector collector(m_iface, tableSizes);
-    m_collector = &collector;
+    ABWContentCollector contentCollector(m_iface, tableSizes, data);
+    m_collector = &contentCollector;
     m_input->seek(0, librevenge::RVNG_SEEK_SET);
     if (!processXmlDocument(m_input))
       return false;

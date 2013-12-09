@@ -106,9 +106,10 @@ libabw::ABWStylesParsingState::~ABWStylesParsingState()
 {
 }
 
-libabw::ABWStylesCollector::ABWStylesCollector(std::map<int, int> &tableSizes) :
+libabw::ABWStylesCollector::ABWStylesCollector(std::map<int, int> &tableSizes, std::map<std::string, ABWData> &data) :
   m_ps(new ABWStylesParsingState),
   m_tableSizes(tableSizes),
+  m_data(data),
   m_tableCounter(0)
 {
 }
@@ -246,6 +247,13 @@ std::string libabw::ABWStylesCollector::_findCellProperty(const char *name)
   if (iter != m_ps->m_tableStates.top().m_currentCellProperties.end())
     return iter->second;
   return std::string();
+}
+
+void libabw::ABWStylesCollector::collectData(const char *name, const char *mimeType, const librevenge::RVNGBinaryData &data)
+{
+  if (!name)
+    return;
+  m_data[name] = ABWData(mimeType, data);
 }
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */
