@@ -46,7 +46,7 @@ private:
   void readLists(xmlTextReaderPtr reader);
   void readPageSize(xmlTextReaderPtr reader);
   void readSection(xmlTextReaderPtr reader);
-  void readData(xmlTextReaderPtr reader);
+  void readD(xmlTextReaderPtr reader);
 
   void readS(xmlTextReaderPtr reader);
   void readP(xmlTextReaderPtr reader);
@@ -54,6 +54,7 @@ private:
   void readA(xmlTextReaderPtr reader);
   void readEndnote(xmlTextReaderPtr reader);
   void readFoot(xmlTextReaderPtr reader);
+  void readImage(xmlTextReaderPtr reader);
 
   void readTable(xmlTextReaderPtr reader);
   void readCell(xmlTextReaderPtr reader);

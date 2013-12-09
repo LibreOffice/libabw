@@ -1330,4 +1330,42 @@ void libabw::ABWContentCollector::collectData(const char *, const char *, const 
 {
 }
 
+void libabw::ABWContentCollector::insertImage(const char *dataid, const char *props)
+{
+  if (!m_ps->m_isSpanOpened)
+    _openSpan();
+
+  std::map<std::string, std::string> properties;
+  if (props)
+    parsePropString(props, properties);
+  if (dataid)
+  {
+    std::map<std::string, ABWData>::const_iterator iter = m_data.find(dataid);
+    if (iter != m_data.end())
+    {
+      librevenge::RVNGPropertyList propList;
+      ABWUnit unit(ABW_NONE);
+      double value(0.0);
+      std::map<std::string, std::string>::const_iterator i = properties.find("height");
+      if (i != properties.end() && findDouble(i->second, value, unit) && ABW_IN == unit)
+        propList.insert("svg:height", value);
+      i = properties.find("width");
+      if (i != properties.end() && findDouble(i->second, value, unit) && ABW_IN == unit)
+        propList.insert("svg:width", value);
+      propList.insert("text:anchor-type", "as-char");
+
+      if (m_iface)
+        m_iface->openFrame(propList);
+
+      propList.clear();
+      propList.insert("librevenge:mime-type", iter->second.m_mimeType);
+      propList.insert("office:binary-data", iter->second.m_binaryData);
+      if (m_iface)
+        m_iface->insertBinaryObject(propList);
+
+      if (m_iface)
+        m_iface->closeFrame();
+    }
+  }
+}
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

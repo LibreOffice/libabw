@@ -183,6 +183,10 @@ void libabw::ABWStylesCollector::insertText(const librevenge::RVNGString &)
 {
 }
 
+void libabw::ABWStylesCollector::insertImage(const char *, const char *)
+{
+}
+
 void libabw::ABWStylesCollector::openFoot(const char *)
 {
 }

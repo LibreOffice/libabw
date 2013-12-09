@@ -69,6 +69,8 @@ public:
   void insertColumnBreak();
   void insertPageBreak();
   void insertText(const librevenge::RVNGString &text);
+  void insertImage(const char *dataid, const char *props);
+
   void collectData(const char *name, const char *mimeType, const librevenge::RVNGBinaryData &data);
 
   void openTable(const char *props);

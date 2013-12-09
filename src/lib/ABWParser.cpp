@@ -11,6 +11,7 @@
 #include <libxml/xmlIO.h>
 #include <libxml/xmlstring.h>
 #include <librevenge-stream/librevenge-stream.h>
+#include <boost/spirit/include/classic.hpp>
 #include <boost/algorithm/string.hpp>
 #include "ABWParser.h"
 #include "ABWContentCollector.h"
@@ -19,6 +20,44 @@
 #include "ABWXMLHelper.h"
 #include "ABWXMLTokenMap.h"
 
+
+namespace libabw
+{
+
+namespace
+{
+
+bool findBool(const std::string &str, bool &res)
+{
+  using namespace ::boost::spirit::classic;
+
+  if (str.empty())
+    return false;
+
+  return parse(str.c_str(),
+               //  Begin grammar
+               (
+                 str_p("true")[assign_a(res,true)]
+                 |
+                 str_p("false")[assign_a(res,false)]
+                 |
+                 str_p("yes")[assign_a(res,true)]
+                 |
+                 str_p("no")[assign_a(res,false)]
+                 |
+                 str_p("TRUE")[assign_a(res,true)]
+                 |
+                 str_p("FALSE")[assign_a(res,false)]
+               ) >> end_p,
+               //  End grammar
+               space_p).full;
+}
+
+
+
+} // anonymous namespace
+
+} // namespace libabw
 
 libabw::ABWParser::ABWParser(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *iface)
   : m_input(input), m_iface(iface), m_collector(0), m_inParagraph(false)
@@ -133,9 +172,9 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
       if (m_collector)
         m_collector->endSection();
     break;
-  case XML_DATA:
+  case XML_D:
     if (XML_READER_TYPE_ELEMENT == tokenType)
-      readData(reader);
+      readD(reader);
     break;
   case XML_P:
     if (XML_READER_TYPE_ELEMENT == tokenType)
@@ -198,6 +237,10 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
       readCell(reader);
     if (XML_READER_TYPE_END_ELEMENT == tokenType || emptyToken > 0)
       m_collector->closeCell();
+    break;
+  case XML_IMAGE:
+    if (XML_READER_TYPE_ELEMENT == tokenType)
+      readImage(reader);
     break;
   default:
     break;
@@ -377,8 +420,20 @@ void libabw::ABWParser::readSection(xmlTextReaderPtr reader)
     xmlFree(props);
 }
 
-void libabw::ABWParser::readData(xmlTextReaderPtr reader)
+void libabw::ABWParser::readD(xmlTextReaderPtr reader)
 {
+  xmlChar *name = xmlTextReaderGetAttribute(reader, BAD_CAST("name"));
+  xmlChar *mimeType = xmlTextReaderGetAttribute(reader, BAD_CAST("mime-type"));
+
+  xmlChar *tmpBase64 = xmlTextReaderGetAttribute(reader, BAD_CAST("base64"));
+  bool base64(false);
+  if (tmpBase64)
+  {
+    findBool((const char *)tmpBase64, base64);
+    xmlFree(tmpBase64);
+  }
+
+  librevenge::RVNGBinaryData binaryData;
   int ret = 1;
   int tokenId = XML_TOKEN_INVALID;
   int tokenType = -1;
@@ -388,16 +443,35 @@ void libabw::ABWParser::readData(xmlTextReaderPtr reader)
     tokenId = getElementToken(reader);
     if (XML_TOKEN_INVALID == tokenId)
     {
-      ABW_DEBUG_MSG(("ABWParser::readData: unknown token %s\n", xmlTextReaderConstName(reader)));
+      ABW_DEBUG_MSG(("ABWParser::readD: unknown token %s\n", xmlTextReaderConstName(reader)));
     }
     tokenType = xmlTextReaderNodeType(reader);
-    switch (tokenId)
+    switch (tokenType)
     {
+    case XML_READER_TYPE_TEXT:
+    case XML_READER_TYPE_CDATA:
+    {
+      const xmlChar *data = xmlTextReaderConstValue(reader);
+      if (data)
+      {
+        if (base64)
+          binaryData.appendBase64Data((const char *)data);
+        else
+          binaryData.append(data, xmlStrlen(data));
+        if (m_collector)
+          m_collector->collectData((const char *)name, (const char *)mimeType, binaryData);
+      }
+      break;
+    }
     default:
       break;
     }
   }
-  while ((XML_DATA != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
+  while ((XML_D != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
+  if (name)
+    xmlFree(name);
+  if (mimeType)
+    xmlFree(mimeType);
 }
 
 void libabw::ABWParser::readS(xmlTextReaderPtr reader)
@@ -501,6 +575,18 @@ void libabw::ABWParser::readCell(xmlTextReaderPtr reader)
     m_collector->openCell((const char *)props);
   if (props)
     xmlFree(props);
+}
+
+void libabw::ABWParser::readImage(xmlTextReaderPtr reader)
+{
+  xmlChar *props = xmlTextReaderGetAttribute(reader, BAD_CAST("props"));
+  xmlChar *dataid = xmlTextReaderGetAttribute(reader, BAD_CAST("dataid"));
+  if (m_collector)
+    m_collector->insertImage((const char *)dataid, (const char *)props);
+  if (props)
+    xmlFree(props);
+  if (dataid)
+    xmlFree(dataid);
 }
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

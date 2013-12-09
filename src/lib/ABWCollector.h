@@ -57,6 +57,7 @@ public:
   virtual void insertColumnBreak() = 0;
   virtual void insertPageBreak() = 0;
   virtual void insertText(const librevenge::RVNGString &text) = 0;
+  virtual void insertImage(const char *dataid, const char *props) = 0;
 
   virtual void collectData(const char *name, const char *mimeType, const librevenge::RVNGBinaryData &data) = 0;
 
