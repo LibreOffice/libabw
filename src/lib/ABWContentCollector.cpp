@@ -1133,11 +1133,9 @@ void libabw::ABWContentCollector::_closeTable()
 
     if (m_iface)
       m_iface->closeTable();
-  }
 
-  m_ps->m_tableStates.top().m_currentTableRow = (-1);
-  m_ps->m_tableStates.top().m_currentTableCol = (-1);
-  m_ps->m_tableStates.top().m_currentTableCellNumberInRow = (-1);
+    m_ps->m_tableStates.pop();
+  }
 }
 
 void libabw::ABWContentCollector::_openTableRow()
@@ -1301,9 +1299,6 @@ void libabw::ABWContentCollector::openTable(const char *props)
 void libabw::ABWContentCollector::closeTable()
 {
   _closeTable();
-
-  if (!m_ps->m_tableStates.empty())
-    m_ps->m_tableStates.pop();
 }
 
 void libabw::ABWContentCollector::openCell(const char *props)
