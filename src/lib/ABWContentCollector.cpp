@@ -98,7 +98,7 @@ static bool findDouble(const std::string &str, double &res, ABWUnit &unit)
   return true;
 }
 
-bool findInt(const std::string &str, int &res)
+static bool findInt(const std::string &str, int &res)
 {
   using namespace ::boost::spirit::classic;
 
@@ -109,28 +109,6 @@ bool findInt(const std::string &str, int &res)
                //  Begin grammar
                (
                  int_p[assign_a(res)]
-               ) >> end_p,
-               //  End grammar
-               space_p).full;
-}
-
-bool findBool(const std::string &str, bool &res)
-{
-  using namespace ::boost::spirit::classic;
-
-  if (str.empty())
-    return false;
-
-  return parse(str.c_str(),
-               //  Begin grammar
-               (
-                 str_p("true")[assign_a(res,true)]
-                 |
-                 str_p("false")[assign_a(res,false)]
-                 |
-                 str_p("TRUE")[assign_a(res,true)]
-                 |
-                 str_p("FALSE")[assign_a(res,false)]
                ) >> end_p,
                //  End grammar
                space_p).full;
@@ -351,7 +329,7 @@ void parseTabStops(const std::string &str, librevenge::RVNGPropertyListVector &t
   }
 }
 
-std::string decodeUrl(const std::string &str)
+static std::string decodeUrl(const std::string &str)
 {
   using namespace ::boost::spirit::classic;
 
@@ -387,13 +365,14 @@ std::string decodeUrl(const std::string &str)
 
 } // namespace libabw
 
-libabw::ABWTableState::ABWTableState() :
+libabw::ABWContentTableState::ABWContentTableState() :
   m_currentTableProperties(),
   m_currentCellProperties(),
 
   m_currentTableCol(-1),
   m_currentTableRow(-1),
   m_currentTableCellNumberInRow(-1),
+  m_currentTableId(-1),
   m_isTableRowOpened(false),
   m_isTableColumnOpened(false),
   m_isTableCellOpened(false),
@@ -402,26 +381,27 @@ libabw::ABWTableState::ABWTableState() :
 {
 }
 
-libabw::ABWTableState::ABWTableState(const ABWTableState &ps) :
-  m_currentTableProperties(ps.m_currentTableProperties),
-  m_currentCellProperties(ps.m_currentCellProperties),
+libabw::ABWContentTableState::ABWContentTableState(const ABWContentTableState &ts) :
+  m_currentTableProperties(ts.m_currentTableProperties),
+  m_currentCellProperties(ts.m_currentCellProperties),
 
-  m_currentTableCol(ps.m_currentTableCol),
-  m_currentTableRow(ps.m_currentTableRow),
-  m_currentTableCellNumberInRow(ps.m_currentTableCellNumberInRow),
-  m_isTableRowOpened(ps.m_isTableRowOpened),
-  m_isTableColumnOpened(ps.m_isTableColumnOpened),
-  m_isTableCellOpened(ps.m_isTableCellOpened),
-  m_isCellWithoutParagraph(ps.m_isCellWithoutParagraph),
-  m_isRowWithoutCell(ps.m_isRowWithoutCell)
+  m_currentTableCol(ts.m_currentTableCol),
+  m_currentTableRow(ts.m_currentTableRow),
+  m_currentTableCellNumberInRow(ts.m_currentTableCellNumberInRow),
+  m_currentTableId(ts.m_currentTableId),
+  m_isTableRowOpened(ts.m_isTableRowOpened),
+  m_isTableColumnOpened(ts.m_isTableColumnOpened),
+  m_isTableCellOpened(ts.m_isTableCellOpened),
+  m_isCellWithoutParagraph(ts.m_isCellWithoutParagraph),
+  m_isRowWithoutCell(ts.m_isRowWithoutCell)
 {
 }
 
-libabw::ABWTableState::~ABWTableState()
+libabw::ABWContentTableState::~ABWContentTableState()
 {
 }
 
-libabw::ABWParsingState::ABWParsingState() :
+libabw::ABWContentParsingState::ABWContentParsingState() :
   m_isDocumentStarted(false),
   m_isPageSpanOpened(false),
   m_isSectionOpened(false),
@@ -449,7 +429,7 @@ libabw::ABWParsingState::ABWParsingState() :
 {
 }
 
-libabw::ABWParsingState::ABWParsingState(const ABWParsingState &ps) :
+libabw::ABWContentParsingState::ABWContentParsingState(const ABWContentParsingState &ps) :
   m_isDocumentStarted(ps.m_isDocumentStarted),
   m_isPageSpanOpened(ps.m_isPageSpanOpened),
   m_isSectionOpened(ps.m_isSectionOpened),
@@ -477,16 +457,18 @@ libabw::ABWParsingState::ABWParsingState(const ABWParsingState &ps) :
 {
 }
 
-libabw::ABWParsingState::~ABWParsingState()
+libabw::ABWContentParsingState::~ABWContentParsingState()
 {
 }
 
-libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *iface) :
-  m_ps(new ABWParsingState),
+libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes) :
+  m_ps(new ABWContentParsingState),
   m_iface(iface),
   m_parsingStates(),
   m_dontLoop(),
-  m_textStyles()
+  m_textStyles(),
+  m_tableSizes(tableSizes),
+  m_tableCounter(0)
 {
 }
 
@@ -1112,6 +1094,15 @@ void libabw::ABWContentCollector::_openTable()
 
   librevenge::RVNGPropertyListVector columns;
   parseTableColumns(_findTableProperty("table-column-props"), columns);
+  if (!columns.count())
+  {
+    std::map<int, int>::const_iterator iter = m_tableSizes.find(m_ps->m_tableStates.top().m_currentTableId);
+    if (iter != m_tableSizes.end())
+    {
+      for (int j = 0; j < iter->second; ++j)
+        columns.append(librevenge::RVNGPropertyList());
+    }
+  }
   if (columns.count())
     propList.insert("librevenge:table-columns", columns);
 
@@ -1242,7 +1233,7 @@ void libabw::ABWContentCollector::openFoot(const char *id)
     m_iface->openFootnote(propList);
 
   m_parsingStates.push(m_ps);
-  m_ps = new ABWParsingState();
+  m_ps = new ABWContentParsingState();
 
   m_ps->m_isNote = true;
 }
@@ -1273,7 +1264,7 @@ void libabw::ABWContentCollector::openEndnote(const char *id)
     m_iface->openEndnote(propList);
 
   m_parsingStates.push(m_ps);
-  m_ps = new ABWParsingState();
+  m_ps = new ABWContentParsingState();
 
   m_ps->m_isNote = true;
 }
@@ -1299,7 +1290,8 @@ void libabw::ABWContentCollector::openTable(const char *props)
   if (m_ps->m_isParagraphOpened)
     _closeParagraph();
 
-  m_ps->m_tableStates.push(ABWTableState());
+  m_ps->m_tableStates.push(ABWContentTableState());
+  m_ps->m_tableStates.top().m_currentTableId = m_tableCounter++;
   if (props)
     parsePropString(props, m_ps->m_tableStates.top().m_currentTableProperties);
 

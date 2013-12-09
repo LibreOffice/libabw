@@ -32,6 +32,7 @@ libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_LDFLAGS = $(version_info) -exp
 libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_SOURCES = \
 	ABWContentCollector.cpp \
 	ABWParser.cpp \
+	ABWStylesCollector.cpp \
 	ABWXMLHelper.cpp \
 	ABWXMLTokenMap.cpp \
 	AbiDocument.cpp \
@@ -39,6 +40,7 @@ libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_SOURCES = \
 	ABWCollector.h \
 	ABWContentCollector.h \
 	ABWParser.h \
+	ABWStylesCollector.h \
 	ABWXMLHelper.h \
 	ABWXMLTokenMap.h \
 	libabw_internal.h \

@@ -14,6 +14,7 @@
 #include <boost/algorithm/string.hpp>
 #include "ABWParser.h"
 #include "ABWContentCollector.h"
+#include "ABWStylesCollector.h"
 #include "libabw_internal.h"
 #include "ABWXMLHelper.h"
 #include "ABWXMLTokenMap.h"
@@ -35,7 +36,14 @@ bool libabw::ABWParser::parse()
 
   try
   {
-    ABWContentCollector collector(m_iface);
+    std::map<int, int> tableSizes;
+    ABWStylesCollector stylesCollector(tableSizes);
+    m_collector = &stylesCollector;
+    m_input->seek(0, librevenge::RVNG_SEEK_SET);
+    if (!processXmlDocument(m_input))
+      return false;
+
+    ABWContentCollector collector(m_iface, tableSizes);
     m_collector = &collector;
     m_input->seek(0, librevenge::RVNG_SEEK_SET);
     if (!processXmlDocument(m_input))

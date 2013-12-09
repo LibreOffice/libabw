@@ -30,11 +30,11 @@ struct ABWStyle
   std::map<std::string, std::string> properties;
 };
 
-struct ABWTableState
+struct ABWContentTableState
 {
-  ABWTableState();
-  ABWTableState(const ABWTableState &ps);
-  ~ABWTableState();
+  ABWContentTableState();
+  ABWContentTableState(const ABWContentTableState &ts);
+  ~ABWContentTableState();
 
   std::map<std::string, std::string> m_currentTableProperties;
   std::map<std::string, std::string> m_currentCellProperties;
@@ -42,6 +42,7 @@ struct ABWTableState
   int m_currentTableCol;
   int m_currentTableRow;
   int m_currentTableCellNumberInRow;
+  int m_currentTableId;
   bool m_isTableRowOpened;
   bool m_isTableColumnOpened;
   bool m_isTableCellOpened;
@@ -49,11 +50,11 @@ struct ABWTableState
   bool m_isRowWithoutCell;
 };
 
-struct ABWParsingState
+struct ABWContentParsingState
 {
-  ABWParsingState();
-  ABWParsingState(const ABWParsingState &ps);
-  ~ABWParsingState();
+  ABWContentParsingState();
+  ABWContentParsingState(const ABWContentParsingState &ps);
+  ~ABWContentParsingState();
 
   bool m_isDocumentStarted;
   bool m_isPageSpanOpened;
@@ -78,13 +79,13 @@ struct ABWParsingState
 
   bool m_isNote;
 
-  std::stack<ABWTableState> m_tableStates;
+  std::stack<ABWContentTableState> m_tableStates;
 };
 
 class ABWContentCollector : public ABWCollector
 {
 public:
-  ABWContentCollector(::librevenge::RVNGTextInterface *iface);
+  ABWContentCollector(::librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes);
   virtual ~ABWContentCollector();
 
   // collector functions
@@ -148,11 +149,14 @@ private:
   std::string _findTableProperty(const char *name);
   std::string _findCellProperty(const char *name);
 
-  ABWParsingState *m_ps;
+  ABWContentParsingState *m_ps;
   librevenge::RVNGTextInterface *m_iface;
-  std::stack<ABWParsingState *> m_parsingStates;
+  std::stack<ABWContentParsingState *> m_parsingStates;
   std::set<std::string> m_dontLoop;
   std::map<std::string, ABWStyle> m_textStyles;
+
+  const std::map<int, int> &m_tableSizes;
+  int m_tableCounter;
 };
 
 } // namespace libabw
