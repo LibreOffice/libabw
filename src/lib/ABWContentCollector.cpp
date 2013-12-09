@@ -10,7 +10,7 @@
 #include <boost/spirit/include/classic.hpp>
 #include <boost/algorithm/string.hpp>
 #include <librevenge/librevenge.h>
-#include "ABWCollector.h"
+#include "ABWContentCollector.h"
 #include "libabw_internal.h"
 
 #define ABW_EPSILON 1.0E-06
@@ -481,7 +481,7 @@ libabw::ABWParsingState::~ABWParsingState()
 {
 }
 
-libabw::ABWCollector::ABWCollector(librevenge::RVNGTextInterface *iface) :
+libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *iface) :
   m_ps(new ABWParsingState),
   m_iface(iface),
   m_parsingStates(),
@@ -490,12 +490,12 @@ libabw::ABWCollector::ABWCollector(librevenge::RVNGTextInterface *iface) :
 {
 }
 
-libabw::ABWCollector::~ABWCollector()
+libabw::ABWContentCollector::~ABWContentCollector()
 {
   DELETEP(m_ps);
 }
 
-void libabw::ABWCollector::collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props)
+void libabw::ABWContentCollector::collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props)
 {
   ABWStyle style;
   style.basedon = basedon ? basedon : std::string();
@@ -506,7 +506,7 @@ void libabw::ABWCollector::collectTextStyle(const char *name, const char *basedo
     m_textStyles[name] = style;
 }
 
-void libabw::ABWCollector::_recurseTextProperties(const char *name, std::map<std::string, std::string> &styleProps)
+void libabw::ABWContentCollector::_recurseTextProperties(const char *name, std::map<std::string, std::string> &styleProps)
 {
   if (name)
   {
@@ -524,7 +524,7 @@ void libabw::ABWCollector::_recurseTextProperties(const char *name, std::map<std
     m_dontLoop.clear();
 }
 
-std::string libabw::ABWCollector::_findParagraphProperty(const char *name)
+std::string libabw::ABWContentCollector::_findParagraphProperty(const char *name)
 {
   std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentParagraphStyle.find(name);
   if (iter != m_ps->m_currentParagraphStyle.end())
@@ -532,7 +532,7 @@ std::string libabw::ABWCollector::_findParagraphProperty(const char *name)
   return std::string();
 }
 
-std::string libabw::ABWCollector::_findTableProperty(const char *name)
+std::string libabw::ABWContentCollector::_findTableProperty(const char *name)
 {
   std::map<std::string, std::string>::const_iterator iter = m_ps->m_tableStates.top().m_currentTableProperties.find(name);
   if (iter != m_ps->m_tableStates.top().m_currentTableProperties.end())
@@ -540,7 +540,7 @@ std::string libabw::ABWCollector::_findTableProperty(const char *name)
   return std::string();
 }
 
-std::string libabw::ABWCollector::_findCellProperty(const char *name)
+std::string libabw::ABWContentCollector::_findCellProperty(const char *name)
 {
   std::map<std::string, std::string>::const_iterator iter = m_ps->m_tableStates.top().m_currentCellProperties.find(name);
   if (iter != m_ps->m_tableStates.top().m_currentCellProperties.end())
@@ -548,7 +548,7 @@ std::string libabw::ABWCollector::_findCellProperty(const char *name)
   return std::string();
 }
 
-std::string libabw::ABWCollector::_findCharacterProperty(const char *name)
+std::string libabw::ABWContentCollector::_findCharacterProperty(const char *name)
 {
   std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentCharacterStyle.find(name);
   if (iter != m_ps->m_currentCharacterStyle.end())
@@ -559,7 +559,7 @@ std::string libabw::ABWCollector::_findCharacterProperty(const char *name)
   return std::string();
 }
 
-void libabw::ABWCollector::collectParagraphProperties(const char *style, const char *props)
+void libabw::ABWContentCollector::collectParagraphProperties(const char *style, const char *props)
 {
   m_ps->m_currentParagraphStyle.clear();
   if (style)
@@ -572,7 +572,7 @@ void libabw::ABWCollector::collectParagraphProperties(const char *style, const c
     m_ps->m_currentParagraphStyle[iter->first] = iter->second;
 }
 
-void libabw::ABWCollector::collectCharacterProperties(const char *style, const char *props)
+void libabw::ABWContentCollector::collectCharacterProperties(const char *style, const char *props)
 {
   m_ps->m_currentCharacterStyle.clear();
   if (style)
@@ -585,7 +585,7 @@ void libabw::ABWCollector::collectCharacterProperties(const char *style, const c
     m_ps->m_currentCharacterStyle[iter->first] = iter->second;
 }
 
-void libabw::ABWCollector::collectSectionProperties(const char *props)
+void libabw::ABWContentCollector::collectSectionProperties(const char *props)
 {
   double pageMarginLeft = m_ps->m_pageMarginLeft;
   double pageMarginRight = m_ps->m_pageMarginRight;
@@ -657,7 +657,7 @@ void libabw::ABWCollector::collectSectionProperties(const char *props)
   }
 }
 
-void libabw::ABWCollector::collectPageSize(const char *width, const char *height, const char *units, const char * /* pageScale */)
+void libabw::ABWContentCollector::collectPageSize(const char *width, const char *height, const char *units, const char * /* pageScale */)
 {
   std::string widthStr(width);
   std::string heightStr(height);
@@ -680,7 +680,7 @@ void libabw::ABWCollector::collectPageSize(const char *width, const char *height
   }
 }
 
-void libabw::ABWCollector::startDocument()
+void libabw::ABWContentCollector::startDocument()
 {
   if (!m_ps->m_isNote && m_ps->m_tableStates.empty())
   {
@@ -692,7 +692,7 @@ void libabw::ABWCollector::startDocument()
   }
 }
 
-void libabw::ABWCollector::endDocument()
+void libabw::ABWContentCollector::endDocument()
 {
   if (!m_ps->m_isNote)
   {
@@ -701,8 +701,6 @@ void libabw::ABWCollector::endDocument()
 
     if (m_ps->m_isParagraphOpened)
       _closeParagraph();
-    if (!m_ps->m_tableStates.empty())
-      _closeTable();
 
     // close the document nice and tight
     _closeSection();
@@ -712,12 +710,12 @@ void libabw::ABWCollector::endDocument()
   }
 }
 
-void libabw::ABWCollector::endSection()
+void libabw::ABWContentCollector::endSection()
 {
   _closeSection();
 }
 
-void libabw::ABWCollector::closeParagraph()
+void libabw::ABWContentCollector::closeParagraph()
 {
   // we have an empty paragraph, insert it
   if (!m_ps->m_isParagraphOpened)
@@ -726,7 +724,7 @@ void libabw::ABWCollector::closeParagraph()
   m_ps->m_currentParagraphStyle.clear();
 }
 
-void libabw::ABWCollector::openLink(const char *href)
+void libabw::ABWContentCollector::openLink(const char *href)
 {
   if (m_ps->m_isSpanOpened)
     _closeSpan();
@@ -741,7 +739,7 @@ void libabw::ABWCollector::openLink(const char *href)
     _openSpan();
 }
 
-void libabw::ABWCollector::closeLink()
+void libabw::ABWContentCollector::closeLink()
 {
   if (m_ps->m_isSpanOpened)
     _closeSpan();
@@ -749,13 +747,13 @@ void libabw::ABWCollector::closeLink()
     m_iface->closeLink();
 }
 
-void libabw::ABWCollector::closeSpan()
+void libabw::ABWContentCollector::closeSpan()
 {
   _closeSpan();
   m_ps->m_currentCharacterStyle.clear();
 }
 
-void libabw::ABWCollector::insertLineBreak()
+void libabw::ABWContentCollector::insertLineBreak()
 {
   if (!m_ps->m_isSpanOpened)
     _openSpan();
@@ -764,19 +762,19 @@ void libabw::ABWCollector::insertLineBreak()
     m_iface->insertLineBreak();
 }
 
-void libabw::ABWCollector::insertColumnBreak()
+void libabw::ABWContentCollector::insertColumnBreak()
 {
   _closeParagraph();
   m_ps->m_deferredColumnBreak = true;
 }
 
-void libabw::ABWCollector::insertPageBreak()
+void libabw::ABWContentCollector::insertPageBreak()
 {
   _closeParagraph();
   m_ps->m_deferredPageBreak = true;
 }
 
-void libabw::ABWCollector::insertText(const librevenge::RVNGString &text)
+void libabw::ABWContentCollector::insertText(const librevenge::RVNGString &text)
 {
   if (!m_ps->m_isSpanOpened)
     _openSpan();
@@ -785,7 +783,7 @@ void libabw::ABWCollector::insertText(const librevenge::RVNGString &text)
     separateSpacesAndInsertText(m_iface, text);
 }
 
-void libabw::ABWCollector::_openPageSpan()
+void libabw::ABWContentCollector::_openPageSpan()
 {
   if (!m_ps->m_isPageSpanOpened && !m_ps->m_isNote && m_ps->m_tableStates.empty())
   {
@@ -807,7 +805,7 @@ void libabw::ABWCollector::_openPageSpan()
   m_ps->m_isPageSpanOpened = true;
 }
 
-void libabw::ABWCollector::_closePageSpan()
+void libabw::ABWContentCollector::_closePageSpan()
 {
   if (m_ps->m_isPageSpanOpened)
   {
@@ -820,7 +818,7 @@ void libabw::ABWCollector::_closePageSpan()
   m_ps->m_isPageSpanOpened = false;
 }
 
-void libabw::ABWCollector::_openSection()
+void libabw::ABWContentCollector::_openSection()
 {
   if (!m_ps->m_isSectionOpened && !m_ps->m_isNote && m_ps->m_tableStates.empty())
   {
@@ -897,7 +895,7 @@ void libabw::ABWCollector::_openSection()
   m_ps->m_isSectionOpened = true;
 }
 
-void libabw::ABWCollector::_openParagraph()
+void libabw::ABWContentCollector::_openParagraph()
 {
   if (!m_ps->m_isParagraphOpened)
   {
@@ -1006,7 +1004,7 @@ void libabw::ABWCollector::_openParagraph()
   }
 }
 
-void libabw::ABWCollector::_openSpan()
+void libabw::ABWContentCollector::_openSpan()
 {
   if (!m_ps->m_isSpanOpened)
   {
@@ -1058,11 +1056,11 @@ void libabw::ABWCollector::_openSpan()
   m_ps->m_isSpanOpened = true;
 }
 
-void libabw::ABWCollector::_closeSection()
+void libabw::ABWContentCollector::_closeSection()
 {
   if (m_ps->m_isSectionOpened)
   {
-    if (!m_ps->m_tableStates.empty())
+    while (!m_ps->m_tableStates.empty())
       _closeTable();
 
     if (m_ps->m_isParagraphOpened)
@@ -1074,7 +1072,7 @@ void libabw::ABWCollector::_closeSection()
   }
 }
 
-void libabw::ABWCollector::_closeParagraph()
+void libabw::ABWContentCollector::_closeParagraph()
 {
   if (m_ps->m_isParagraphOpened)
   {
@@ -1088,7 +1086,7 @@ void libabw::ABWCollector::_closeParagraph()
   m_ps->m_isParagraphOpened = false;
 }
 
-void libabw::ABWCollector::_closeSpan()
+void libabw::ABWContentCollector::_closeSpan()
 {
   if (m_ps->m_isSpanOpened && m_iface)
     m_iface->closeSpan();
@@ -1096,13 +1094,13 @@ void libabw::ABWCollector::_closeSpan()
   m_ps->m_isSpanOpened = false;
 }
 
-void libabw::ABWCollector::_openTable()
+void libabw::ABWContentCollector::_openTable()
 {
-  if (m_ps->m_isParagraphOpened)
-    _closeParagraph();
-
   if (!m_ps->m_isSectionOpened)
     _openSection();
+
+  if (m_ps->m_isParagraphOpened)
+    _closeParagraph();
 
   librevenge::RVNGPropertyList propList;
   if (m_ps->m_deferredPageBreak)
@@ -1135,7 +1133,7 @@ void libabw::ABWCollector::_openTable()
   m_ps->m_tableStates.top().m_currentTableCellNumberInRow = (-1);
 }
 
-void libabw::ABWCollector::_closeTable()
+void libabw::ABWContentCollector::_closeTable()
 {
   if (!m_ps->m_tableStates.empty())
   {
@@ -1151,7 +1149,7 @@ void libabw::ABWCollector::_closeTable()
   m_ps->m_tableStates.top().m_currentTableCellNumberInRow = (-1);
 }
 
-void libabw::ABWCollector::_openTableRow()
+void libabw::ABWContentCollector::_openTableRow()
 {
   if (m_ps->m_tableStates.top().m_isTableRowOpened)
     _closeTableRow();
@@ -1167,7 +1165,7 @@ void libabw::ABWCollector::_openTableRow()
   m_ps->m_tableStates.top().m_currentTableRow++;
 }
 
-void libabw::ABWCollector::_closeTableRow()
+void libabw::ABWContentCollector::_closeTableRow()
 {
   if (m_ps->m_tableStates.top().m_isTableRowOpened)
   {
@@ -1186,7 +1184,7 @@ void libabw::ABWCollector::_closeTableRow()
   m_ps->m_tableStates.top().m_isTableRowOpened = false;
 }
 
-void libabw::ABWCollector::_openTableCell()
+void libabw::ABWContentCollector::_openTableCell()
 {
   if (m_ps->m_tableStates.top().m_isTableCellOpened)
     _closeTableCell();
@@ -1216,7 +1214,7 @@ void libabw::ABWCollector::_openTableCell()
   m_ps->m_tableStates.top().m_isRowWithoutCell = false;
 }
 
-void libabw::ABWCollector::_closeTableCell()
+void libabw::ABWContentCollector::_closeTableCell()
 {
   if (m_ps->m_tableStates.top().m_isTableCellOpened)
   {
@@ -1231,7 +1229,7 @@ void libabw::ABWCollector::_closeTableCell()
   m_ps->m_tableStates.top().m_isTableCellOpened = false;
 }
 
-void libabw::ABWCollector::openFoot(const char *id)
+void libabw::ABWContentCollector::openFoot(const char *id)
 {
   if (!m_ps->m_isParagraphOpened)
     _openSpan();
@@ -1249,7 +1247,7 @@ void libabw::ABWCollector::openFoot(const char *id)
   m_ps->m_isNote = true;
 }
 
-void libabw::ABWCollector::closeFoot()
+void libabw::ABWContentCollector::closeFoot()
 {
   if (m_iface)
     m_iface->closeFootnote();
@@ -1262,7 +1260,7 @@ void libabw::ABWCollector::closeFoot()
   }
 }
 
-void libabw::ABWCollector::openEndnote(const char *id)
+void libabw::ABWContentCollector::openEndnote(const char *id)
 {
   if (!m_ps->m_isParagraphOpened)
     _openSpan();
@@ -1280,7 +1278,7 @@ void libabw::ABWCollector::openEndnote(const char *id)
   m_ps->m_isNote = true;
 }
 
-void libabw::ABWCollector::closeEndnote()
+void libabw::ABWContentCollector::closeEndnote()
 {
   if (m_iface)
     m_iface->closeEndnote();
@@ -1293,10 +1291,13 @@ void libabw::ABWCollector::closeEndnote()
   }
 }
 
-void libabw::ABWCollector::openTable(const char *props)
+void libabw::ABWContentCollector::openTable(const char *props)
 {
   if (!m_ps->m_isSectionOpened && m_ps->m_tableStates.empty())
     _openSection();
+
+  if (m_ps->m_isParagraphOpened)
+    _closeParagraph();
 
   m_ps->m_tableStates.push(ABWTableState());
   if (props)
@@ -1305,7 +1306,7 @@ void libabw::ABWCollector::openTable(const char *props)
   _openTable();
 }
 
-void libabw::ABWCollector::closeTable()
+void libabw::ABWContentCollector::closeTable()
 {
   _closeTable();
 
@@ -1313,7 +1314,7 @@ void libabw::ABWCollector::closeTable()
     m_ps->m_tableStates.pop();
 }
 
-void libabw::ABWCollector::openCell(const char *props)
+void libabw::ABWContentCollector::openCell(const char *props)
 {
   if (props)
     parsePropString(props, m_ps->m_tableStates.top().m_currentCellProperties);
@@ -1331,7 +1332,7 @@ void libabw::ABWCollector::openCell(const char *props)
     m_ps->m_tableStates.top().m_currentTableCol++;
 }
 
-void libabw::ABWCollector::closeCell()
+void libabw::ABWContentCollector::closeCell()
 {
   _closeTableCell();
   m_ps->m_tableStates.top().m_currentCellProperties.clear();

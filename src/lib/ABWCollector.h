@@ -10,148 +10,44 @@
 #ifndef __ABWCOLLECTOR_H__
 #define __ABWCOLLECTOR_H__
 
-#include <map>
-#include <vector>
-#include <stack>
-#include <set>
-#include <string>
 #include <librevenge/librevenge.h>
 
 namespace libabw
 {
 
-struct ABWStyle
-{
-  ABWStyle() : basedon(), followedby(), properties() {}
-  ~ABWStyle() {}
-  std::string basedon;
-  std::string followedby;
-  std::map<std::string, std::string> properties;
-};
-
-struct ABWTableState
-{
-  ABWTableState();
-  ABWTableState(const ABWTableState &ps);
-  ~ABWTableState();
-
-  std::map<std::string, std::string> m_currentTableProperties;
-  std::map<std::string, std::string> m_currentCellProperties;
-
-  int m_currentTableCol;
-  int m_currentTableRow;
-  int m_currentTableCellNumberInRow;
-  bool m_isTableRowOpened;
-  bool m_isTableColumnOpened;
-  bool m_isTableCellOpened;
-  bool m_isCellWithoutParagraph;
-  bool m_isRowWithoutCell;
-};
-
-struct ABWParsingState
-{
-  ABWParsingState();
-  ABWParsingState(const ABWParsingState &ps);
-  ~ABWParsingState();
-
-  bool m_isDocumentStarted;
-  bool m_isPageSpanOpened;
-  bool m_isSectionOpened;
-
-  bool m_isSpanOpened;
-  bool m_isParagraphOpened;
-
-  std::map<std::string, std::string> m_currentSectionStyle;
-  std::map<std::string, std::string> m_currentParagraphStyle;
-  std::map<std::string, std::string> m_currentCharacterStyle;
-
-  double m_pageWidth;
-  double m_pageHeight;
-  double m_pageMarginTop;
-  double m_pageMarginBottom;
-  double m_pageMarginLeft;
-  double m_pageMarginRight;
-
-  bool m_deferredPageBreak;
-  bool m_deferredColumnBreak;
-
-  bool m_isNote;
-
-  std::stack<ABWTableState> m_tableStates;
-};
-
 class ABWCollector
 {
 public:
-  ABWCollector(::librevenge::RVNGTextInterface *iface);
-  virtual ~ABWCollector();
+  ABWCollector() {}
+  virtual ~ABWCollector() {}
 
   // collector functions
 
-  void collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props);
-  void collectParagraphProperties(const char *style, const char *props);
-  void collectSectionProperties(const char *props);
-  void collectCharacterProperties(const char *style, const char *props);
-  void collectPageSize(const char *width, const char *height, const char *units, const char *pageScale);
-  void closeParagraph();
-  void closeSpan();
-  void openLink(const char *href);
-  void closeLink();
-  void openFoot(const char *id);
-  void closeFoot();
-  void openEndnote(const char *id);
-  void closeEndnote();
-  void endSection();
-  void startDocument();
-  void endDocument();
-  void insertLineBreak();
-  void insertColumnBreak();
-  void insertPageBreak();
-  void insertText(const librevenge::RVNGString &text);
+  virtual void collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props) = 0;
+  virtual void collectParagraphProperties(const char *style, const char *props) = 0;
+  virtual void collectSectionProperties(const char *props) = 0;
+  virtual void collectCharacterProperties(const char *style, const char *props) = 0;
+  virtual void collectPageSize(const char *width, const char *height, const char *units, const char *pageScale) = 0;
+  virtual void closeParagraph() = 0;
+  virtual void closeSpan() = 0;
+  virtual void openLink(const char *href) = 0;
+  virtual void closeLink() = 0;
+  virtual void openFoot(const char *id) = 0;
+  virtual void closeFoot() = 0;
+  virtual void openEndnote(const char *id) = 0;
+  virtual void closeEndnote() = 0;
+  virtual void endSection() = 0;
+  virtual void startDocument() = 0;
+  virtual void endDocument() = 0;
+  virtual void insertLineBreak() = 0;
+  virtual void insertColumnBreak() = 0;
+  virtual void insertPageBreak() = 0;
+  virtual void insertText(const librevenge::RVNGString &text) = 0;
 
-  void openTable(const char *props);
-  void closeTable();
-  void openCell(const char *props);
-  void closeCell();
-
-
-private:
-  ABWCollector(const ABWCollector &);
-  ABWCollector &operator=(const ABWCollector &);
-
-  void _openPageSpan();
-  void _closePageSpan();
-
-  void _openSection();
-  void _closeSection();
-
-  void _openParagraph();
-  void _closeParagraph();
-
-  void _openListElement();
-  void _closeListElement();
-
-  void _openSpan();
-  void _closeSpan();
-
-  void _openTable();
-  void _closeTable();
-  void _openTableRow();
-  void _closeTableRow();
-  void _openTableCell();
-  void _closeTableCell();
-
-  void _recurseTextProperties(const char *name, std::map<std::string, std::string> &styleProps);
-  std::string _findParagraphProperty(const char *name);
-  std::string _findCharacterProperty(const char *name);
-  std::string _findTableProperty(const char *name);
-  std::string _findCellProperty(const char *name);
-
-  ABWParsingState *m_ps;
-  librevenge::RVNGTextInterface *m_iface;
-  std::stack<ABWParsingState *> m_parsingStates;
-  std::set<std::string> m_dontLoop;
-  std::map<std::string, ABWStyle> m_textStyles;
+  virtual void openTable(const char *props) = 0;
+  virtual void closeTable() = 0;
+  virtual void openCell(const char *props) = 0;
+  virtual void closeCell() = 0;
 };
 
 } // namespace libabw

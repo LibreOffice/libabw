@@ -13,7 +13,7 @@
 #include <librevenge-stream/librevenge-stream.h>
 #include <boost/algorithm/string.hpp>
 #include "ABWParser.h"
-#include "ABWCollector.h"
+#include "ABWContentCollector.h"
 #include "libabw_internal.h"
 #include "ABWXMLHelper.h"
 #include "ABWXMLTokenMap.h"
@@ -35,7 +35,7 @@ bool libabw::ABWParser::parse()
 
   try
   {
-    ABWCollector collector(m_iface);
+    ABWContentCollector collector(m_iface);
     m_collector = &collector;
     m_input->seek(0, librevenge::RVNG_SEEK_SET);
     if (!processXmlDocument(m_input))

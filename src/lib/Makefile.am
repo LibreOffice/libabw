@@ -30,13 +30,14 @@ libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_LIBADD  = $(REVENGE_LIBS) $(LI
 libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_DEPENDENCIES = @LIBABW_WIN32_RESOURCE@
 libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_LDFLAGS = $(version_info) -export-dynamic $(no_undefined)
 libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_SOURCES = \
-	ABWCollector.cpp \
+	ABWContentCollector.cpp \
 	ABWParser.cpp \
 	ABWXMLHelper.cpp \
 	ABWXMLTokenMap.cpp \
 	AbiDocument.cpp \
 	\
 	ABWCollector.h \
+	ABWContentCollector.h \
 	ABWParser.h \
 	ABWXMLHelper.h \
 	ABWXMLTokenMap.h \
