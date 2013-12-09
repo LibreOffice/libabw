@@ -433,7 +433,6 @@ void libabw::ABWParser::readD(xmlTextReaderPtr reader)
     xmlFree(tmpBase64);
   }
 
-  librevenge::RVNGBinaryData binaryData;
   int ret = 1;
   int tokenId = XML_TOKEN_INVALID;
   int tokenType = -1;
@@ -454,6 +453,7 @@ void libabw::ABWParser::readD(xmlTextReaderPtr reader)
       const xmlChar *data = xmlTextReaderConstValue(reader);
       if (data)
       {
+        librevenge::RVNGBinaryData binaryData;
         if (base64)
           binaryData.appendBase64Data((const char *)data);
         else
