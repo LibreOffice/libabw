@@ -31,6 +31,7 @@ libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_DEPENDENCIES = @LIBABW_WIN32_R
 libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_LDFLAGS = $(version_info) -export-dynamic $(no_undefined)
 libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_SOURCES = \
 	ABWContentCollector.cpp \
+	ABWOutputElements.cpp \
 	ABWParser.cpp \
 	ABWStylesCollector.cpp \
 	ABWXMLHelper.cpp \
@@ -39,6 +40,7 @@ libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_SOURCES = \
 	\
 	ABWCollector.h \
 	ABWContentCollector.h \
+	ABWOutputElements.h \
 	ABWParser.h \
 	ABWStylesCollector.h \
 	ABWXMLHelper.h \
