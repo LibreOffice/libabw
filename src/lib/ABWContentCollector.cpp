@@ -593,6 +593,7 @@ void libabw::ABWContentCollector::collectSectionProperties(const char * /* id */
   std::map<std::string, std::string> tmpProps;
   if (props)
     parsePropString(props, tmpProps);
+
   ABWUnit unit(ABW_NONE);
   double value(0.0);
   for (std::map<std::string, std::string>::const_iterator iter = tmpProps.begin(); iter != tmpProps.end(); ++iter)
@@ -639,6 +640,7 @@ void libabw::ABWContentCollector::collectSectionProperties(const char * /* id */
     m_ps->m_pageMarginTop = 1.0;
   if (fabs(m_ps->m_pageMarginBottom) < ABW_EPSILON)
     m_ps->m_pageMarginBottom = 1.0;
+
 
   if (fabs(pageMarginLeft-m_ps->m_pageMarginLeft) > ABW_EPSILON ||
       fabs(pageMarginRight-m_ps->m_pageMarginRight) > ABW_EPSILON ||
