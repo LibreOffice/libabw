@@ -11,6 +11,7 @@
 #define ABWOUTPUTELEMENTS_H
 
 #include <vector>
+#include <map>
 #include <librevenge/librevenge.h>
 
 namespace libabw
@@ -22,14 +23,14 @@ class ABWOutputElements
 {
 public:
   ABWOutputElements();
-  ABWOutputElements(const ABWOutputElements &elements);
-  ABWOutputElements &operator=(const ABWOutputElements &elements);
   virtual ~ABWOutputElements();
   void append(const ABWOutputElements &elements);
   void write(librevenge::RVNGTextInterface *iface) const;
   void addCloseEndnote();
+  void addCloseFooter();
   void addCloseFootnote();
   void addCloseFrame();
+  void addCloseHeader();
   void addCloseLink();
   void addClosePageSpan();
   void addCloseParagraph();
@@ -45,10 +46,12 @@ public:
   void addInsertTab();
   void addInsertText(const librevenge::RVNGString &text);
   void addOpenEndnote(const librevenge::RVNGPropertyList &propList);
+  void addOpenFooter(const librevenge::RVNGPropertyList &propList, int id);
   void addOpenFootnote(const librevenge::RVNGPropertyList &propList);
   void addOpenFrame(const librevenge::RVNGPropertyList &propList);
+  void addOpenHeader(const librevenge::RVNGPropertyList &propList, int id);
   void addOpenLink(const librevenge::RVNGPropertyList &propList);
-  void addOpenPageSpan(const librevenge::RVNGPropertyList &propList);
+  void addOpenPageSpan(const librevenge::RVNGPropertyList &propList, int header = -1, int footer = -1);
   void addOpenParagraph(const librevenge::RVNGPropertyList &propList);
   void addOpenSection(const librevenge::RVNGPropertyList &propList);
   void addOpenSpan(const librevenge::RVNGPropertyList &propList);
@@ -58,10 +61,15 @@ public:
   void addStartDocument(const librevenge::RVNGPropertyList &propList);
   bool empty() const
   {
-    return m_elements.empty();
+    return m_bodyElements.empty();
   }
 private:
-  std::vector<ABWOutputElement *> m_elements;
+  ABWOutputElements(const ABWOutputElements &);
+  ABWOutputElements &operator=(const ABWOutputElements &);
+  std::vector<ABWOutputElement *> m_bodyElements;
+  std::map<int, std::vector<ABWOutputElement *> > m_headerElements;
+  std::map<int, std::vector<ABWOutputElement *> > m_footerElements;
+  std::vector<ABWOutputElement *> *m_elements;
 };
 
 

@@ -153,9 +153,9 @@ static void parsePropString(const std::string &str, std::map<std::string, std::s
   }
 }
 
-static void separateTabsAndInsertText(librevenge::RVNGTextInterface *iface, const librevenge::RVNGString &text)
+static void separateTabsAndInsertText(ABWOutputElements &outputElements, const librevenge::RVNGString &text)
 {
-  if (!iface || text.empty())
+  if (text.empty())
     return;
   librevenge::RVNGString tmpText;
   librevenge::RVNGString::Iter i(text);
@@ -165,42 +165,34 @@ static void separateTabsAndInsertText(librevenge::RVNGTextInterface *iface, cons
     {
       if (!tmpText.empty())
       {
-        if (iface)
-          iface->insertText(tmpText);
+        outputElements.addInsertText(tmpText);
         tmpText.clear();
       }
-
-      if (iface)
-        iface->insertTab();
+      outputElements.addInsertTab();
     }
     else if (*(i()) == '\n')
     {
       if (!tmpText.empty())
       {
-        if (iface)
-          iface->insertText(tmpText);
+        outputElements.addInsertText(tmpText);
         tmpText.clear();
       }
-
-      if (iface)
-        iface->insertLineBreak();
+      outputElements.addInsertLineBreak();
     }
     else
     {
       tmpText.append(i());
     }
   }
-  if (iface && !tmpText.empty())
-    iface->insertText(tmpText);
+  if (!tmpText.empty())
+    outputElements.addInsertText(tmpText);
 }
 
-static void separateSpacesAndInsertText(librevenge::RVNGTextInterface *iface, const librevenge::RVNGString &text)
+static void separateSpacesAndInsertText(ABWOutputElements &outputElements, const librevenge::RVNGString &text)
 {
-  if (!iface)
-    return;
   if (text.empty())
   {
-    iface->insertText(text);
+    outputElements.addInsertText(text);
     return;
   }
   librevenge::RVNGString tmpText;
@@ -217,19 +209,15 @@ static void separateSpacesAndInsertText(librevenge::RVNGTextInterface *iface, co
     {
       if (!tmpText.empty())
       {
-        separateTabsAndInsertText(iface, tmpText);
+        separateTabsAndInsertText(outputElements, tmpText);
         tmpText.clear();
       }
-
-      if (iface)
-        iface->insertSpace();
+      outputElements.addInsertSpace();
     }
     else
-    {
       tmpText.append(i());
-    }
   }
-  separateTabsAndInsertText(iface, tmpText);
+  separateTabsAndInsertText(outputElements, tmpText);
 }
 
 void parseTableColumns(const std::string &str, librevenge::RVNGPropertyListVector &columns)
@@ -419,6 +407,8 @@ libabw::ABWContentParsingState::ABWContentParsingState() :
   m_pageMarginBottom(0.0),
   m_pageMarginLeft(0.0),
   m_pageMarginRight(0.0),
+  m_currentFooterId(-1),
+  m_currentHeaderId(-1),
 
   m_deferredPageBreak(false),
   m_deferredColumnBreak(false),
@@ -447,6 +437,8 @@ libabw::ABWContentParsingState::ABWContentParsingState(const ABWContentParsingSt
   m_pageMarginBottom(ps.m_pageMarginBottom),
   m_pageMarginLeft(ps.m_pageMarginLeft),
   m_pageMarginRight(ps.m_pageMarginRight),
+  m_currentFooterId(ps.m_currentFooterId),
+  m_currentHeaderId(ps.m_currentHeaderId),
 
   m_deferredPageBreak(ps.m_deferredPageBreak),
   m_deferredColumnBreak(ps.m_deferredColumnBreak),
@@ -469,7 +461,8 @@ libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *
   m_textStyles(),
   m_data(data),
   m_tableSizes(tableSizes),
-  m_tableCounter(0)
+  m_tableCounter(0),
+  m_outputElements()
 {
 }
 
@@ -509,6 +502,8 @@ void libabw::ABWContentCollector::_recurseTextProperties(const char *name, std::
 
 std::string libabw::ABWContentCollector::_findParagraphProperty(const char *name)
 {
+  if (!name)
+    return std::string();
   std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentParagraphStyle.find(name);
   if (iter != m_ps->m_currentParagraphStyle.end())
     return iter->second;
@@ -517,6 +512,8 @@ std::string libabw::ABWContentCollector::_findParagraphProperty(const char *name
 
 std::string libabw::ABWContentCollector::_findTableProperty(const char *name)
 {
+  if (!name)
+    return std::string();
   std::map<std::string, std::string>::const_iterator iter = m_ps->m_tableStates.top().m_currentTableProperties.find(name);
   if (iter != m_ps->m_tableStates.top().m_currentTableProperties.end())
     return iter->second;
@@ -525,14 +522,29 @@ std::string libabw::ABWContentCollector::_findTableProperty(const char *name)
 
 std::string libabw::ABWContentCollector::_findCellProperty(const char *name)
 {
+  if (!name)
+    return std::string();
   std::map<std::string, std::string>::const_iterator iter = m_ps->m_tableStates.top().m_currentCellProperties.find(name);
   if (iter != m_ps->m_tableStates.top().m_currentCellProperties.end())
     return iter->second;
   return std::string();
 }
 
+std::string libabw::ABWContentCollector::_findSectionProperty(const char *name)
+{
+  if (!name)
+    return std::string();
+  std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentSectionStyle.find(name);
+  if (iter != m_ps->m_currentSectionStyle.end())
+    return iter->second;
+  return std::string();
+}
+
+
 std::string libabw::ABWContentCollector::_findCharacterProperty(const char *name)
 {
+  if (!name)
+    return std::string();
   std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentCharacterStyle.find(name);
   if (iter != m_ps->m_currentCharacterStyle.end())
     return iter->second;
@@ -568,12 +580,14 @@ void libabw::ABWContentCollector::collectCharacterProperties(const char *style, 
     m_ps->m_currentCharacterStyle[iter->first] = iter->second;
 }
 
-void libabw::ABWContentCollector::collectSectionProperties(const char *props)
+void libabw::ABWContentCollector::collectSectionProperties(const char * /* id */, const char * /* type */, const char *header, const char *footer, const char *props)
 {
   double pageMarginLeft = m_ps->m_pageMarginLeft;
   double pageMarginRight = m_ps->m_pageMarginRight;
   double pageMarginTop = m_ps->m_pageMarginTop;
   double pageMarginBottom = m_ps->m_pageMarginBottom;
+  int oldHeaderId = m_ps->m_currentHeaderId;
+  int oldFooterId = m_ps->m_currentFooterId;
 
   m_ps->m_currentSectionStyle.clear();
   std::map<std::string, std::string> tmpProps;
@@ -585,39 +599,38 @@ void libabw::ABWContentCollector::collectSectionProperties(const char *props)
   {
     if (iter->first == "page-margin-right" && !iter->second.empty() && fabs(m_ps->m_pageMarginRight) < ABW_EPSILON)
     {
-      if (findDouble(iter->second, value, unit))
-      {
-        if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
-          m_ps->m_pageMarginRight = value;
-      }
+      if (findDouble(iter->second, value, unit) && unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
+        m_ps->m_pageMarginRight = value;
     }
     else if (iter->first == "page-margin-left" && !iter->second.empty() && fabs(m_ps->m_pageMarginLeft) < ABW_EPSILON)
     {
-      if (findDouble(iter->second, value, unit))
-      {
-        if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
-          m_ps->m_pageMarginLeft = value;
-      }
+      if (findDouble(iter->second, value, unit) && unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
+        m_ps->m_pageMarginLeft = value;
     }
     else if (iter->first == "page-margin-top" && !iter->second.empty() && fabs(m_ps->m_pageMarginTop) < ABW_EPSILON)
     {
-      if (findDouble(iter->second, value, unit))
-      {
-        if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
-          m_ps->m_pageMarginTop = value;
-      }
+      if (findDouble(iter->second, value, unit) && unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
+        m_ps->m_pageMarginTop = value;
     }
     else if (iter->first == "page-margin-bottom" && !iter->second.empty() && fabs(m_ps->m_pageMarginBottom) < ABW_EPSILON)
     {
-      if (findDouble(iter->second, value, unit))
-      {
-        if (unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
-          m_ps->m_pageMarginBottom = value;
-      }
+      if (findDouble(iter->second, value, unit) && unit == ABW_IN && value > 0.0 && fabs(value) > ABW_EPSILON)
+        m_ps->m_pageMarginBottom = value;
     }
-
     m_ps->m_currentSectionStyle[iter->first] = iter->second;
   }
+
+  int intValue(0);
+  if (header && findInt(header, intValue) && intValue >= 0)
+    m_ps->m_currentHeaderId = intValue;
+  else
+    m_ps->m_currentHeaderId = -1;
+
+  if (footer && findInt(footer, intValue) && intValue >= 0)
+    m_ps->m_currentFooterId = intValue;
+  else
+    m_ps->m_currentFooterId = -1;
+
   if (fabs(m_ps->m_pageMarginRight) < ABW_EPSILON)
     m_ps->m_pageMarginRight = 1.0;
   if (fabs(m_ps->m_pageMarginLeft) < ABW_EPSILON)
@@ -630,7 +643,8 @@ void libabw::ABWContentCollector::collectSectionProperties(const char *props)
   if (fabs(pageMarginLeft-m_ps->m_pageMarginLeft) > ABW_EPSILON ||
       fabs(pageMarginRight-m_ps->m_pageMarginRight) > ABW_EPSILON ||
       fabs(pageMarginTop-m_ps->m_pageMarginTop) > ABW_EPSILON ||
-      fabs(pageMarginBottom-m_ps->m_pageMarginBottom) > ABW_EPSILON)
+      fabs(pageMarginBottom-m_ps->m_pageMarginBottom) > ABW_EPSILON ||
+      oldHeaderId != m_ps->m_currentHeaderId || oldFooterId != m_ps->m_currentHeaderId)
   {
     _closePageSpan();
   }
@@ -688,8 +702,12 @@ void libabw::ABWContentCollector::endDocument()
     // close the document nice and tight
     _closeSection();
     _closePageSpan();
+
     if (m_iface)
+    {
+      m_outputElements.write(m_iface);
       m_iface->endDocument();
+    }
   }
 }
 
@@ -716,8 +734,7 @@ void libabw::ABWContentCollector::openLink(const char *href)
   librevenge::RVNGPropertyList propList;
   if (href)
     propList.insert("xlink:href", decodeUrl(href).c_str());
-  if (m_iface)
-    m_iface->openLink(propList);
+  m_outputElements.addOpenLink(propList);
   if (!m_ps->m_isSpanOpened)
     _openSpan();
 }
@@ -726,8 +743,7 @@ void libabw::ABWContentCollector::closeLink()
 {
   if (m_ps->m_isSpanOpened)
     _closeSpan();
-  if (m_iface)
-    m_iface->closeLink();
+  m_outputElements.addCloseLink();
 }
 
 void libabw::ABWContentCollector::closeSpan()
@@ -741,8 +757,7 @@ void libabw::ABWContentCollector::insertLineBreak()
   if (!m_ps->m_isSpanOpened)
     _openSpan();
 
-  if (m_iface)
-    m_iface->insertLineBreak();
+  m_outputElements.addInsertLineBreak();
 }
 
 void libabw::ABWContentCollector::insertColumnBreak()
@@ -762,8 +777,7 @@ void libabw::ABWContentCollector::insertText(const librevenge::RVNGString &text)
   if (!m_ps->m_isSpanOpened)
     _openSpan();
 
-  if (m_iface)
-    separateSpacesAndInsertText(m_iface, text);
+  separateSpacesAndInsertText(m_outputElements, text);
 }
 
 void libabw::ABWContentCollector::_openPageSpan()
@@ -782,8 +796,8 @@ void libabw::ABWContentCollector::_openPageSpan()
     propList.insert("fo:margin-top", m_ps->m_pageMarginTop);
     propList.insert("fo:margin-bottom", m_ps->m_pageMarginBottom);
 
-    if (m_iface && !m_ps->m_isPageSpanOpened)
-      m_iface->openPageSpan(propList);
+    if (!m_ps->m_isPageSpanOpened)
+      m_outputElements.addOpenPageSpan(propList);
   }
   m_ps->m_isPageSpanOpened = true;
 }
@@ -795,8 +809,7 @@ void libabw::ABWContentCollector::_closePageSpan()
     if (m_ps->m_isSectionOpened)
       _closeSection();
 
-    if (m_iface)
-      m_iface->closePageSpan();
+    m_outputElements.addClosePageSpan();
   }
   m_ps->m_isPageSpanOpened = false;
 }
@@ -812,68 +825,38 @@ void libabw::ABWContentCollector::_openSection()
 
     ABWUnit unit(ABW_NONE);
     double value(0.0);
-    std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentSectionStyle.find("page-margin-right");
-    if (iter != m_ps->m_currentSectionStyle.end())
-    {
-      if (findDouble(iter->second, value, unit))
-      {
-        if (unit == ABW_IN)
-          propList.insert("fo:margin-right", value - m_ps->m_pageMarginRight);
-      }
-    }
-    iter = m_ps->m_currentSectionStyle.find("page-margin-left");
-    if (iter != m_ps->m_currentSectionStyle.end())
-    {
-      if (findDouble(iter->second, value, unit))
-      {
-        if (unit == ABW_IN)
-          propList.insert("fo:margin-left", value - m_ps->m_pageMarginLeft);
-      }
-    }
-    iter = m_ps->m_currentSectionStyle.find("section-space-after");
-    if (iter != m_ps->m_currentSectionStyle.end())
-    {
-      if (findDouble(iter->second, value, unit))
-      {
-        if (unit == ABW_IN)
-          propList.insert("librevenge:margin-bottom", value);
-      }
-    }
-    iter = m_ps->m_currentSectionStyle.find("dom-dir");
-    if (iter != m_ps->m_currentSectionStyle.end())
-    {
-      if (iter->second == "ltr")
-        propList.insert("style:writing-mode", "lr-tb");
-      else if (iter->second == "rtl")
-        propList.insert("style:writing-mode", "rl-tb");
-    }
+    if (findDouble(_findSectionProperty("page-margin-right"), value, unit) && unit == ABW_IN)
+      propList.insert("fo:margin-right", value - m_ps->m_pageMarginRight);
 
-    iter = m_ps->m_currentSectionStyle.find("columns");
-    if (iter != m_ps->m_currentSectionStyle.end())
+    if (findDouble(_findSectionProperty("page-margin-left"), value, unit) && unit == ABW_IN)
+      propList.insert("fo:margin-left", value - m_ps->m_pageMarginLeft);
+
+    if (findDouble(_findSectionProperty("section-space-after"), value, unit) && unit == ABW_IN)
+      propList.insert("librevenge:margin-bottom", value);
+
+    std::string sValue = _findSectionProperty("dom-dir");
+    if (sValue == "ltr")
+      propList.insert("style:writing-mode", "lr-tb");
+    else if (sValue == "rtl")
+      propList.insert("style:writing-mode", "rl-tb");
+
+    int intValue(0);
+    if (findInt(_findSectionProperty("columns"), intValue) && intValue > 1)
     {
-      int intValue(0);
-      if (findInt(iter->second, intValue))
+      librevenge::RVNGPropertyListVector columns;
+      for (int i = 0; i < intValue; ++i)
       {
-        if (intValue > 1)
-        {
-          librevenge::RVNGPropertyListVector columns;
-          for (int i = 0; i < intValue; ++i)
-          {
-            librevenge::RVNGPropertyList column;
-            column.insert("style:rel-width", 1.0 / (double)intValue, librevenge::RVNG_PERCENT);
-            columns.append(column);
-          }
-          if (columns.count())
-          {
-            propList.insert("style:columns", columns);
-            propList.insert("text:dont-balance-text-columns", true);
-          }
-        }
+        librevenge::RVNGPropertyList column;
+        column.insert("style:rel-width", 1.0 / (double)intValue, librevenge::RVNG_PERCENT);
+        columns.append(column);
+      }
+      if (columns.count())
+      {
+        propList.insert("style:columns", columns);
+        propList.insert("text:dont-balance-text-columns", true);
       }
     }
-
-    if (!m_ps->m_isSectionOpened)
-      m_iface->openSection(propList);
+    m_outputElements.addOpenSection(propList);
   }
   m_ps->m_isSectionOpened = true;
 }
@@ -978,8 +961,7 @@ void libabw::ABWContentCollector::_openParagraph()
     m_ps->m_deferredPageBreak = false;
     m_ps->m_deferredColumnBreak = false;
 
-    if (m_iface)
-      m_iface->openParagraph(propList);
+    m_outputElements.addOpenParagraph(propList);
 
     m_ps->m_isParagraphOpened = true;
     if (!m_ps->m_tableStates.empty())
@@ -1033,8 +1015,7 @@ void libabw::ABWContentCollector::_openSpan()
     else if (sValue == "superscript")
       propList.insert("style:text-position", "super");
 
-    if (m_iface)
-      m_iface->openSpan(propList);
+    m_outputElements.addOpenSpan(propList);
   }
   m_ps->m_isSpanOpened = true;
 }
@@ -1049,7 +1030,7 @@ void libabw::ABWContentCollector::_closeSection()
     if (m_ps->m_isParagraphOpened)
       _closeParagraph();
 
-    m_iface->closeSection();
+    m_outputElements.addCloseSection();
 
     m_ps->m_isSectionOpened = false;
   }
@@ -1062,17 +1043,15 @@ void libabw::ABWContentCollector::_closeParagraph()
     if (m_ps->m_isSpanOpened)
       _closeSpan();
 
-    if (m_iface)
-      m_iface->closeParagraph();
+    m_outputElements.addCloseParagraph();
   }
-
   m_ps->m_isParagraphOpened = false;
 }
 
 void libabw::ABWContentCollector::_closeSpan()
 {
-  if (m_ps->m_isSpanOpened && m_iface)
-    m_iface->closeSpan();
+  if (m_ps->m_isSpanOpened)
+    m_outputElements.addCloseSpan();
 
   m_ps->m_isSpanOpened = false;
 }
@@ -1117,8 +1096,7 @@ void libabw::ABWContentCollector::_openTable()
   else
     propList.insert("table:align", "left");
 
-  if (m_iface)
-    m_iface->openTable(propList);
+  m_outputElements.addOpenTable(propList);
 
   m_ps->m_tableStates.top().m_currentTableRow = (-1);
   m_ps->m_tableStates.top().m_currentTableCol = (-1);
@@ -1132,8 +1110,7 @@ void libabw::ABWContentCollector::_closeTable()
     if (m_ps->m_tableStates.top().m_isTableRowOpened)
       _closeTableRow();
 
-    if (m_iface)
-      m_iface->closeTable();
+    m_outputElements.addCloseTable();
 
     m_ps->m_tableStates.pop();
   }
@@ -1147,8 +1124,7 @@ void libabw::ABWContentCollector::_openTableRow()
   m_ps->m_tableStates.top().m_currentTableCol = 0;
   m_ps->m_tableStates.top().m_currentTableCellNumberInRow = 0;
 
-  if (m_iface)
-    m_iface->openTableRow(librevenge::RVNGPropertyList());
+  m_outputElements.addOpenTableRow(librevenge::RVNGPropertyList());
 
   m_ps->m_tableStates.top().m_isTableRowOpened = true;
   m_ps->m_tableStates.top().m_isRowWithoutCell = true;
@@ -1165,11 +1141,9 @@ void libabw::ABWContentCollector::_closeTableRow()
     if (m_ps->m_tableStates.top().m_isRowWithoutCell)
     {
       m_ps->m_tableStates.top().m_isRowWithoutCell = false;
-      if (m_iface)
-        m_iface->insertCoveredTableCell(librevenge::RVNGPropertyList());
+      m_outputElements.addInsertCoveredTableCell(librevenge::RVNGPropertyList());
     }
-    if (m_iface)
-      m_iface->closeTableRow();
+    m_outputElements.addCloseTableRow();
   }
   m_ps->m_tableStates.top().m_isTableRowOpened = false;
 }
@@ -1195,8 +1169,7 @@ void libabw::ABWContentCollector::_openTableCell()
   if (!bgColor.empty())
     propList.insert("fo:background-color", bgColor.c_str());
 
-  if (m_iface)
-    m_iface->openTableCell(propList);
+  m_outputElements.addOpenTableCell(propList);
 
   m_ps->m_tableStates.top().m_currentTableCellNumberInRow++;
   m_ps->m_tableStates.top().m_isTableCellOpened = true;
@@ -1213,8 +1186,7 @@ void libabw::ABWContentCollector::_closeTableCell()
     if (m_ps->m_isParagraphOpened)
       _closeParagraph();
 
-    if (m_iface)
-      m_iface->closeTableCell();
+    m_outputElements.addCloseTableCell();
   }
   m_ps->m_tableStates.top().m_isTableCellOpened = false;
 }
@@ -1228,8 +1200,7 @@ void libabw::ABWContentCollector::openFoot(const char *id)
   librevenge::RVNGPropertyList propList;
   if (id)
     propList.insert("librevenge:number", id);
-  if (m_iface)
-    m_iface->openFootnote(propList);
+  m_outputElements.addOpenFootnote(propList);
 
   m_parsingStates.push(m_ps);
   m_ps = new ABWContentParsingState();
@@ -1239,8 +1210,7 @@ void libabw::ABWContentCollector::openFoot(const char *id)
 
 void libabw::ABWContentCollector::closeFoot()
 {
-  if (m_iface)
-    m_iface->closeFootnote();
+  m_outputElements.addCloseFootnote();
 
   if (!m_parsingStates.empty())
   {
@@ -1259,8 +1229,7 @@ void libabw::ABWContentCollector::openEndnote(const char *id)
   librevenge::RVNGPropertyList propList;
   if (id)
     propList.insert("librevenge:number", id);
-  if (m_iface)
-    m_iface->openEndnote(propList);
+  m_outputElements.addOpenEndnote(propList);
 
   m_parsingStates.push(m_ps);
   m_ps = new ABWContentParsingState();
@@ -1270,8 +1239,7 @@ void libabw::ABWContentCollector::openEndnote(const char *id)
 
 void libabw::ABWContentCollector::closeEndnote()
 {
-  if (m_iface)
-    m_iface->closeEndnote();
+  m_outputElements.addCloseEndnote();
 
   if (!m_parsingStates.empty())
   {
@@ -1354,17 +1322,14 @@ void libabw::ABWContentCollector::insertImage(const char *dataid, const char *pr
         propList.insert("svg:width", value);
       propList.insert("text:anchor-type", "as-char");
 
-      if (m_iface)
-        m_iface->openFrame(propList);
+      m_outputElements.addOpenFrame(propList);
 
       propList.clear();
       propList.insert("librevenge:mime-type", iter->second.m_mimeType);
       propList.insert("office:binary-data", iter->second.m_binaryData);
-      if (m_iface)
-        m_iface->insertBinaryObject(propList);
+      m_outputElements.addInsertBinaryObject(propList);
 
-      if (m_iface)
-        m_iface->closeFrame();
+      m_outputElements.addCloseFrame();
     }
   }
 }

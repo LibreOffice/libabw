@@ -413,9 +413,21 @@ void libabw::ABWParser::readPageSize(xmlTextReaderPtr reader)
 
 void libabw::ABWParser::readSection(xmlTextReaderPtr reader)
 {
+  xmlChar *id = xmlTextReaderGetAttribute(reader, BAD_CAST("id"));
+  xmlChar *type = xmlTextReaderGetAttribute(reader, BAD_CAST("type"));
+  xmlChar *header = xmlTextReaderGetAttribute(reader, BAD_CAST("header"));
+  xmlChar *footer = xmlTextReaderGetAttribute(reader, BAD_CAST("footer"));
   xmlChar *props = xmlTextReaderGetAttribute(reader, BAD_CAST("props"));
   if (m_collector)
-    m_collector->collectSectionProperties((const char *)props);
+    m_collector->collectSectionProperties((const char *)id, (const char *)type, (const char *)header, (const char *)footer, (const char *)props);
+  if (id)
+    xmlFree(id);
+  if (type)
+    xmlFree(type);
+  if (header)
+    xmlFree(header);
+  if (footer)
+    xmlFree(footer);
   if (props)
     xmlFree(props);
 }

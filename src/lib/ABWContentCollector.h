@@ -16,6 +16,7 @@
 #include <set>
 #include <string>
 #include <librevenge/librevenge.h>
+#include "ABWOutputElements.h"
 #include "ABWCollector.h"
 
 namespace libabw
@@ -73,6 +74,8 @@ struct ABWContentParsingState
   double m_pageMarginBottom;
   double m_pageMarginLeft;
   double m_pageMarginRight;
+  int m_currentFooterId;
+  int m_currentHeaderId;
 
   bool m_deferredPageBreak;
   bool m_deferredColumnBreak;
@@ -92,7 +95,7 @@ public:
 
   void collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props);
   void collectParagraphProperties(const char *style, const char *props);
-  void collectSectionProperties(const char *props);
+  void collectSectionProperties(const char *id, const char *type, const char *header, const char *footer, const char *props);
   void collectCharacterProperties(const char *style, const char *props);
   void collectPageSize(const char *width, const char *height, const char *units, const char *pageScale);
   void closeParagraph();
@@ -151,6 +154,7 @@ private:
   std::string _findCharacterProperty(const char *name);
   std::string _findTableProperty(const char *name);
   std::string _findCellProperty(const char *name);
+  std::string _findSectionProperty(const char *name);
 
   ABWContentParsingState *m_ps;
   librevenge::RVNGTextInterface *m_iface;
@@ -161,6 +165,7 @@ private:
   const std::map<std::string, ABWData> &m_data;
   const std::map<int, int> &m_tableSizes;
   int m_tableCounter;
+  ABWOutputElements m_outputElements;
 };
 
 } // namespace libabw

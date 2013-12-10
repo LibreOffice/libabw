@@ -51,7 +51,7 @@ public:
 
   void collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props);
   void collectParagraphProperties(const char *style, const char *props);
-  void collectSectionProperties(const char *props);
+  void collectSectionProperties(const char *id, const char *type, const char *header, const char *footer, const char *props);
   void collectCharacterProperties(const char *style, const char *props);
   void collectPageSize(const char *width, const char *height, const char *units, const char *pageScale);
   void closeParagraph();

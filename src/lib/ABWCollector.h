@@ -39,7 +39,7 @@ public:
 
   virtual void collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props) = 0;
   virtual void collectParagraphProperties(const char *style, const char *props) = 0;
-  virtual void collectSectionProperties(const char *props) = 0;
+  virtual void collectSectionProperties(const char *id, const char *type, const char *header, const char *footer, const char *props) = 0;
   virtual void collectCharacterProperties(const char *style, const char *props) = 0;
   virtual void collectPageSize(const char *width, const char *height, const char *units, const char *pageScale) = 0;
   virtual void closeParagraph() = 0;

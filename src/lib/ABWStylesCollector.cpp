@@ -131,7 +131,7 @@ void libabw::ABWStylesCollector::collectCharacterProperties(const char *, const 
 {
 }
 
-void libabw::ABWStylesCollector::collectSectionProperties(const char *)
+void libabw::ABWStylesCollector::collectSectionProperties(const char *, const char *, const char *, const char *, const char *)
 {
 }
 
