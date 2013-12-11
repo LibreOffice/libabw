@@ -19,8 +19,8 @@ public:
   ABWOutputElement() {}
   virtual ~ABWOutputElement() {}
   virtual void write(librevenge::RVNGTextInterface *iface,
-                     const std::map<int, std::vector<ABWOutputElement *> > *footers,
-                     const std::map<int, std::vector<ABWOutputElement *> > *headers) const = 0;
+                     const std::map<int, std::list<ABWOutputElement *> > *footers,
+                     const std::map<int, std::list<ABWOutputElement *> > *headers) const = 0;
 };
 
 class ABWCloseEndnoteElement : public ABWOutputElement
@@ -29,8 +29,8 @@ public:
   ABWCloseEndnoteElement() {}
   ~ABWCloseEndnoteElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 };
 
 class ABWCloseFooterElement : public ABWOutputElement
@@ -39,8 +39,8 @@ public:
   ABWCloseFooterElement() {}
   ~ABWCloseFooterElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 };
 
 class ABWCloseFootnoteElement : public ABWOutputElement
@@ -49,8 +49,8 @@ public:
   ABWCloseFootnoteElement() {}
   ~ABWCloseFootnoteElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 };
 
 class ABWCloseFrameElement : public ABWOutputElement
@@ -59,8 +59,8 @@ public:
   ABWCloseFrameElement() {}
   ~ABWCloseFrameElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 };
 
 class ABWCloseHeaderElement : public ABWOutputElement
@@ -69,8 +69,8 @@ public:
   ABWCloseHeaderElement() {}
   ~ABWCloseHeaderElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 };
 
 class ABWCloseLinkElement : public ABWOutputElement
@@ -79,8 +79,8 @@ public:
   ABWCloseLinkElement() {}
   ~ABWCloseLinkElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
   {
     return new ABWCloseLinkElement();
@@ -93,8 +93,8 @@ public:
   ABWClosePageSpanElement() {}
   ~ABWClosePageSpanElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
   {
     return new ABWClosePageSpanElement();
@@ -107,8 +107,8 @@ public:
   ABWCloseParagraphElement() {}
   ~ABWCloseParagraphElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
   {
     return new ABWCloseParagraphElement();
@@ -121,8 +121,8 @@ public:
   ABWCloseSectionElement() {}
   ~ABWCloseSectionElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
   {
     return new ABWCloseSectionElement();
@@ -135,8 +135,8 @@ public:
   ABWCloseSpanElement() {}
   ~ABWCloseSpanElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
   {
     return new ABWCloseSpanElement();
@@ -149,8 +149,8 @@ public:
   ABWCloseTableElement() {}
   ~ABWCloseTableElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
   {
     return new ABWCloseTableElement();
@@ -163,8 +163,8 @@ public:
   ABWCloseTableCellElement() {}
   ~ABWCloseTableCellElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
   {
     return new ABWCloseTableCellElement();
@@ -177,8 +177,8 @@ public:
   ABWCloseTableRowElement() {}
   ~ABWCloseTableRowElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
   {
     return new ABWCloseTableRowElement();
@@ -192,8 +192,8 @@ public:
     m_propList(propList) {}
   ~ABWInsertBinaryObjectElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
   {
     return new ABWInsertBinaryObjectElement(m_propList);
@@ -209,8 +209,8 @@ public:
     m_propList(propList) {}
   ~ABWInsertCoveredTableCellElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
   {
     return new ABWInsertCoveredTableCellElement(m_propList);
@@ -225,8 +225,8 @@ public:
   ABWInsertLineBreakElement() {}
   ~ABWInsertLineBreakElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
   {
     return new ABWInsertLineBreakElement();
@@ -239,8 +239,8 @@ public:
   ABWInsertSpaceElement() {}
   ~ABWInsertSpaceElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
   {
     return new ABWInsertSpaceElement();
@@ -253,8 +253,8 @@ public:
   ABWInsertTabElement() {}
   ~ABWInsertTabElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
   {
     return new ABWInsertTabElement();
@@ -268,8 +268,8 @@ public:
     m_text(text) {}
   ~ABWInsertTextElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
   {
     return new ABWInsertTextElement(m_text);
@@ -285,8 +285,8 @@ public:
     m_propList(propList) {}
   ~ABWOpenEndnoteElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
   {
     return new ABWOpenEndnoteElement(m_propList);
@@ -302,8 +302,8 @@ public:
     m_propList(propList) {}
   ~ABWOpenFooterElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
   {
     return new ABWOpenFooterElement(m_propList);
@@ -319,8 +319,8 @@ public:
     m_propList(propList) {}
   ~ABWOpenFootnoteElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
   {
     return new ABWOpenFootnoteElement(m_propList);
@@ -336,8 +336,8 @@ public:
     m_propList(propList) {}
   ~ABWOpenFrameElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
   {
     return new ABWOpenFrameElement(m_propList);
@@ -353,8 +353,8 @@ public:
     m_propList(propList) {}
   ~ABWOpenHeaderElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
   {
     return new ABWOpenHeaderElement(m_propList);
@@ -370,8 +370,8 @@ public:
     m_propList(propList) {}
   ~ABWOpenLinkElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -393,11 +393,11 @@ public:
     m_headerLast(headerLast) {}
   ~ABWOpenPageSpanElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 private:
   void _writeElements(librevenge::RVNGTextInterface *iface, int id,
-                      const std::map<int, std::vector<ABWOutputElement *> > *elements) const;
+                      const std::map<int, std::list<ABWOutputElement *> > *elements) const;
   librevenge::RVNGPropertyList m_propList;
   int m_footer;
   int m_footerLeft;
@@ -416,8 +416,8 @@ public:
     m_propList(propList) {}
   ~ABWOpenParagraphElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -429,8 +429,8 @@ public:
     m_propList(propList) {}
   ~ABWOpenSectionElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -442,8 +442,8 @@ public:
     m_propList(propList) {}
   ~ABWOpenSpanElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -455,8 +455,8 @@ public:
     m_propList(propList) {}
   ~ABWOpenTableElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -468,8 +468,8 @@ public:
     m_propList(propList) {}
   ~ABWOpenTableCellElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -481,8 +481,8 @@ public:
     m_propList(propList) {}
   ~ABWOpenTableRowElement() {}
   void write(librevenge::RVNGTextInterface *iface,
-             const std::map<int, std::vector<ABWOutputElement *> > *footers,
-             const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -490,208 +490,208 @@ private:
 } // namespace libabw
 
 void libabw::ABWCloseEndnoteElement::write(librevenge::RVNGTextInterface *iface,
-                                           const std::map<int, std::vector<ABWOutputElement *> > *,
-                                           const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                           const std::map<int, std::list<ABWOutputElement *> > *,
+                                           const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->closeEndnote();
 }
 
 void libabw::ABWCloseFooterElement::write(librevenge::RVNGTextInterface *iface,
-                                          const std::map<int, std::vector<ABWOutputElement *> > *,
-                                          const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                          const std::map<int, std::list<ABWOutputElement *> > *,
+                                          const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->closeFooter();
 }
 
 void libabw::ABWCloseFootnoteElement::write(librevenge::RVNGTextInterface *iface,
-                                            const std::map<int, std::vector<ABWOutputElement *> > *,
-                                            const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                            const std::map<int, std::list<ABWOutputElement *> > *,
+                                            const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->closeFootnote();
 }
 
 void libabw::ABWCloseFrameElement::write(librevenge::RVNGTextInterface *iface,
-                                         const std::map<int, std::vector<ABWOutputElement *> > *,
-                                         const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                         const std::map<int, std::list<ABWOutputElement *> > *,
+                                         const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->closeFrame();
 }
 
 void libabw::ABWCloseHeaderElement::write(librevenge::RVNGTextInterface *iface,
-                                          const std::map<int, std::vector<ABWOutputElement *> > *,
-                                          const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                          const std::map<int, std::list<ABWOutputElement *> > *,
+                                          const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->closeHeader();
 }
 
 void libabw::ABWCloseLinkElement::write(librevenge::RVNGTextInterface *iface,
-                                        const std::map<int, std::vector<ABWOutputElement *> > *,
-                                        const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                        const std::map<int, std::list<ABWOutputElement *> > *,
+                                        const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->closeLink();
 }
 
 void libabw::ABWClosePageSpanElement::write(librevenge::RVNGTextInterface *iface,
-                                            const std::map<int, std::vector<ABWOutputElement *> > *,
-                                            const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                            const std::map<int, std::list<ABWOutputElement *> > *,
+                                            const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->closePageSpan();
 }
 
 void libabw::ABWCloseParagraphElement::write(librevenge::RVNGTextInterface *iface,
-                                             const std::map<int, std::vector<ABWOutputElement *> > *,
-                                             const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                             const std::map<int, std::list<ABWOutputElement *> > *,
+                                             const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->closeParagraph();
 }
 
 void libabw::ABWCloseSectionElement::write(librevenge::RVNGTextInterface *iface,
-                                           const std::map<int, std::vector<ABWOutputElement *> > *,
-                                           const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                           const std::map<int, std::list<ABWOutputElement *> > *,
+                                           const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->closeSection();
 }
 
 void libabw::ABWCloseSpanElement::write(librevenge::RVNGTextInterface *iface,
-                                        const std::map<int, std::vector<ABWOutputElement *> > *,
-                                        const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                        const std::map<int, std::list<ABWOutputElement *> > *,
+                                        const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->closeSpan();
 }
 
 void libabw::ABWCloseTableElement::write(librevenge::RVNGTextInterface *iface,
-                                         const std::map<int, std::vector<ABWOutputElement *> > *,
-                                         const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                         const std::map<int, std::list<ABWOutputElement *> > *,
+                                         const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->closeTable();
 }
 
 void libabw::ABWCloseTableCellElement::write(librevenge::RVNGTextInterface *iface,
-                                             const std::map<int, std::vector<ABWOutputElement *> > *,
-                                             const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                             const std::map<int, std::list<ABWOutputElement *> > *,
+                                             const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->closeTableCell();
 }
 
 void libabw::ABWCloseTableRowElement::write(librevenge::RVNGTextInterface *iface,
-                                            const std::map<int, std::vector<ABWOutputElement *> > *,
-                                            const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                            const std::map<int, std::list<ABWOutputElement *> > *,
+                                            const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->closeTableRow();
 }
 
 void libabw::ABWInsertBinaryObjectElement::write(librevenge::RVNGTextInterface *iface,
-                                                 const std::map<int, std::vector<ABWOutputElement *> > *,
-                                                 const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                                 const std::map<int, std::list<ABWOutputElement *> > *,
+                                                 const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->insertBinaryObject(m_propList);
 }
 
 void libabw::ABWInsertCoveredTableCellElement::write(librevenge::RVNGTextInterface *iface,
-                                                     const std::map<int, std::vector<ABWOutputElement *> > *,
-                                                     const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                                     const std::map<int, std::list<ABWOutputElement *> > *,
+                                                     const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->insertCoveredTableCell(m_propList);
 }
 
 void libabw::ABWInsertLineBreakElement::write(librevenge::RVNGTextInterface *iface,
-                                              const std::map<int, std::vector<ABWOutputElement *> > *,
-                                              const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                              const std::map<int, std::list<ABWOutputElement *> > *,
+                                              const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->insertLineBreak();
 }
 
 void libabw::ABWInsertSpaceElement::write(librevenge::RVNGTextInterface *iface,
-                                          const std::map<int, std::vector<ABWOutputElement *> > *,
-                                          const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                          const std::map<int, std::list<ABWOutputElement *> > *,
+                                          const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->insertSpace();
 }
 
 void libabw::ABWInsertTabElement::write(librevenge::RVNGTextInterface *iface,
-                                        const std::map<int, std::vector<ABWOutputElement *> > *,
-                                        const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                        const std::map<int, std::list<ABWOutputElement *> > *,
+                                        const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->insertTab();
 }
 
 void libabw::ABWInsertTextElement::write(librevenge::RVNGTextInterface *iface,
-                                         const std::map<int, std::vector<ABWOutputElement *> > *,
-                                         const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                         const std::map<int, std::list<ABWOutputElement *> > *,
+                                         const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->insertText(m_text);
 }
 
 void libabw::ABWOpenEndnoteElement::write(librevenge::RVNGTextInterface *iface,
-                                          const std::map<int, std::vector<ABWOutputElement *> > *,
-                                          const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                          const std::map<int, std::list<ABWOutputElement *> > *,
+                                          const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->openEndnote(m_propList);
 }
 
 void libabw::ABWOpenFooterElement::write(librevenge::RVNGTextInterface *iface,
-                                         const std::map<int, std::vector<ABWOutputElement *> > *,
-                                         const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                         const std::map<int, std::list<ABWOutputElement *> > *,
+                                         const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->openFooter(m_propList);
 }
 
 void libabw::ABWOpenFootnoteElement::write(librevenge::RVNGTextInterface *iface,
-                                           const std::map<int, std::vector<ABWOutputElement *> > *,
-                                           const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                           const std::map<int, std::list<ABWOutputElement *> > *,
+                                           const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->openFootnote(m_propList);
 }
 
 void libabw::ABWOpenFrameElement::write(librevenge::RVNGTextInterface *iface,
-                                        const std::map<int, std::vector<ABWOutputElement *> > *,
-                                        const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                        const std::map<int, std::list<ABWOutputElement *> > *,
+                                        const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->openFrame(m_propList);
 }
 
 void libabw::ABWOpenHeaderElement::write(librevenge::RVNGTextInterface *iface,
-                                         const std::map<int, std::vector<ABWOutputElement *> > *,
-                                         const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                         const std::map<int, std::list<ABWOutputElement *> > *,
+                                         const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->openHeader(m_propList);
 }
 
 void libabw::ABWOpenLinkElement::write(librevenge::RVNGTextInterface *iface,
-                                       const std::map<int, std::vector<ABWOutputElement *> > *,
-                                       const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                       const std::map<int, std::list<ABWOutputElement *> > *,
+                                       const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->openLink(m_propList);
 }
 
 void libabw::ABWOpenPageSpanElement::write(librevenge::RVNGTextInterface *iface,
-                                           const std::map<int, std::vector<ABWOutputElement *> > *footers,
-                                           const std::map<int, std::vector<ABWOutputElement *> > *headers) const
+                                           const std::map<int, std::list<ABWOutputElement *> > *footers,
+                                           const std::map<int, std::list<ABWOutputElement *> > *headers) const
 {
   if (iface)
   {
@@ -713,63 +713,63 @@ void libabw::ABWOpenPageSpanElement::write(librevenge::RVNGTextInterface *iface,
 }
 
 void libabw::ABWOpenPageSpanElement::_writeElements(librevenge::RVNGTextInterface *iface, int id,
-                                                    const std::map<int, std::vector<ABWOutputElement *> > *elements) const
+                                                    const std::map<int, std::list<ABWOutputElement *> > *elements) const
 {
   if (!elements || id < 0 || !iface)
     return;
 
-  std::map<int, std::vector<ABWOutputElement *> >::const_iterator iterMap = elements->find(id);
+  std::map<int, std::list<ABWOutputElement *> >::const_iterator iterMap = elements->find(id);
   if (iterMap == elements->end() || iterMap->second.empty())
     return;
 
-  for (std::vector<ABWOutputElement *>::const_iterator iterVec = iterMap->second.begin();
+  for (std::list<ABWOutputElement *>::const_iterator iterVec = iterMap->second.begin();
        iterVec != iterMap->second.end(); ++iterVec)
     (*iterVec)->write(iface, 0, 0);
 }
 
 void libabw::ABWOpenParagraphElement::write(librevenge::RVNGTextInterface *iface,
-                                            const std::map<int, std::vector<ABWOutputElement *> > *,
-                                            const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                            const std::map<int, std::list<ABWOutputElement *> > *,
+                                            const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->openParagraph(m_propList);
 }
 
 void libabw::ABWOpenSectionElement::write(librevenge::RVNGTextInterface *iface,
-                                          const std::map<int, std::vector<ABWOutputElement *> > *,
-                                          const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                          const std::map<int, std::list<ABWOutputElement *> > *,
+                                          const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->openSection(m_propList);
 }
 
 void libabw::ABWOpenSpanElement::write(librevenge::RVNGTextInterface *iface,
-                                       const std::map<int, std::vector<ABWOutputElement *> > *,
-                                       const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                       const std::map<int, std::list<ABWOutputElement *> > *,
+                                       const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->openSpan(m_propList);
 }
 
 void libabw::ABWOpenTableElement::write(librevenge::RVNGTextInterface *iface,
-                                        const std::map<int, std::vector<ABWOutputElement *> > *,
-                                        const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                        const std::map<int, std::list<ABWOutputElement *> > *,
+                                        const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->openTable(m_propList);
 }
 
 void libabw::ABWOpenTableCellElement::write(librevenge::RVNGTextInterface *iface,
-                                            const std::map<int, std::vector<ABWOutputElement *> > *,
-                                            const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                            const std::map<int, std::list<ABWOutputElement *> > *,
+                                            const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->openTableCell(m_propList);
 }
 
 void libabw::ABWOpenTableRowElement::write(librevenge::RVNGTextInterface *iface,
-                                           const std::map<int, std::vector<ABWOutputElement *> > *,
-                                           const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                           const std::map<int, std::list<ABWOutputElement *> > *,
+                                           const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->openTableRow(m_propList);
@@ -787,10 +787,10 @@ libabw::ABWOutputElements::ABWOutputElements()
 libabw::ABWOutputElements::~ABWOutputElements()
 {
   m_elements = 0;
-  std::vector<ABWOutputElement *>::iterator iterVec;
+  std::list<ABWOutputElement *>::iterator iterVec;
   for (iterVec = m_bodyElements.begin(); iterVec != m_bodyElements.end(); ++iterVec)
     delete(*iterVec);
-  std::map<int, std::vector<ABWOutputElement *> >::iterator iterMap;
+  std::map<int, std::list<ABWOutputElement *> >::iterator iterMap;
   for (iterMap = m_headerElements.begin(); iterMap != m_headerElements.end(); ++iterMap)
   {
     for (iterVec = iterMap->second.begin(); iterVec != iterMap->second.end(); ++iterVec)
@@ -805,7 +805,7 @@ libabw::ABWOutputElements::~ABWOutputElements()
 
 void libabw::ABWOutputElements::write(librevenge::RVNGTextInterface *iface) const
 {
-  std::vector<ABWOutputElement *>::const_iterator iter;
+  std::list<ABWOutputElement *>::const_iterator iter;
   for (iter = m_bodyElements.begin(); iter != m_bodyElements.end(); ++iter)
     (*iter)->write(iface, &m_footerElements, &m_headerElements);
 }
@@ -935,7 +935,7 @@ void libabw::ABWOutputElements::addOpenEndnote(const librevenge::RVNGPropertyLis
 void libabw::ABWOutputElements::addOpenFooter(const librevenge::RVNGPropertyList &propList, int id)
 {
   // if the corresponding element of the map does not exist, this will default-construct it.
-  // In that case we will get an empty vector to fill with the footer content. If the element
+  // In that case we will get an empty list to fill with the footer content. If the element
   // already exists, this might be a footer with different occurrence and we will add it to
   // the existing one.
   m_elements = &m_footerElements[id];

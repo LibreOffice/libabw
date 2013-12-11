@@ -10,7 +10,7 @@
 #ifndef ABWOUTPUTELEMENTS_H
 #define ABWOUTPUTELEMENTS_H
 
-#include <vector>
+#include <list>
 #include <map>
 #include <librevenge/librevenge.h>
 
@@ -68,10 +68,10 @@ public:
 private:
   ABWOutputElements(const ABWOutputElements &);
   ABWOutputElements &operator=(const ABWOutputElements &);
-  std::vector<ABWOutputElement *> m_bodyElements;
-  std::map<int, std::vector<ABWOutputElement *> > m_headerElements;
-  std::map<int, std::vector<ABWOutputElement *> > m_footerElements;
-  std::vector<ABWOutputElement *> *m_elements;
+  std::list<ABWOutputElement *> m_bodyElements;
+  std::map<int, std::list<ABWOutputElement *> > m_headerElements;
+  std::map<int, std::list<ABWOutputElement *> > m_footerElements;
+  std::list<ABWOutputElement *> *m_elements;
 };
 
 
