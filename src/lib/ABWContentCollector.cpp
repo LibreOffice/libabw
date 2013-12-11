@@ -228,8 +228,9 @@ void parseTableColumns(const std::string &str, librevenge::RVNGPropertyListVecto
     return;
 
   std::string propString(str);
-  boost::trim(propString);
+  boost::trim_if(propString,boost::is_any_of("/ "));
   std::vector<std::string> strVec;
+
   boost::algorithm::split(strVec, propString, boost::is_any_of("/"), boost::token_compress_on);
   for (std::vector<std::string>::size_type i = 0; i < strVec.size(); ++i)
   {
@@ -249,8 +250,10 @@ bool parseTabStop(const std::string &str, librevenge::RVNGPropertyList &tabStop)
 {
   if (str.empty())
     return false;
+  std::string sTabStop(str);
+  boost::trim_if(sTabStop, boost::is_any_of("/ "));
   std::vector<std::string> strVec;
-  boost::algorithm::split(strVec, str, boost::is_any_of("/"), boost::token_compress_on);
+  boost::algorithm::split(strVec, sTabStop, boost::is_any_of("/"), boost::token_compress_on);
   if (strVec.size() < 2)
     return false;
   boost::algorithm::trim(strVec[0]);
@@ -308,8 +311,10 @@ void parseTabStops(const std::string &str, librevenge::RVNGPropertyListVector &t
 {
   if (str.empty())
     return;
+  std::string sTabStops(str);
+  boost::trim_if(sTabStops, boost::is_any_of(", "));
   std::vector<std::string> strVec;
-  boost::algorithm::split(strVec, str, boost::is_any_of(","), boost::token_compress_on);
+  boost::algorithm::split(strVec, sTabStops, boost::is_any_of(","), boost::token_compress_on);
   for (std::vector<std::string>::size_type i = 0; i < strVec.size(); ++i)
   {
     boost::algorithm::trim(strVec[i]);
