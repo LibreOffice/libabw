@@ -49,6 +49,8 @@ static bool findDouble(const std::string &str, double &res, ABWUnit &unit)
                (
                  str_p("cm")[assign_a(unit,ABW_CM)]
                  |
+                 str_p("inch")[assign_a(unit,ABW_IN)]
+                 |
                  str_p("in")[assign_a(unit,ABW_IN)]
                  |
                  str_p("mm")[assign_a(unit,ABW_MM)]
