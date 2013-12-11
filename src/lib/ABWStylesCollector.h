@@ -49,35 +49,37 @@ public:
 
   // collector functions
 
-  void collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props);
-  void collectParagraphProperties(const char *style, const char *props);
-  void collectSectionProperties(const char *id, const char *type, const char *header, const char *footer, const char *props);
-  void collectCharacterProperties(const char *style, const char *props);
-  void collectPageSize(const char *width, const char *height, const char *units, const char *pageScale);
-  void closeParagraph();
-  void closeSpan();
-  void openLink(const char *href);
-  void closeLink();
-  void openFoot(const char *id);
-  void closeFoot();
-  void openEndnote(const char *id);
-  void closeEndnote();
-  void endSection();
-  void startDocument();
-  void endDocument();
-  void insertLineBreak();
-  void insertColumnBreak();
-  void insertPageBreak();
-  void insertText(const librevenge::RVNGString &text);
-  void insertImage(const char *dataid, const char *props);
+  void collectTextStyle(const char *, const char *, const char *, const char *) {}
+  void collectParagraphProperties(const char *, const char *) {}
+  void collectSectionProperties(const char *, const char *, const char *, const char *,
+                                const char *, const char *, const char *, const char *,
+                                const char *) {}
+  void collectCharacterProperties(const char *, const char *) {}
+  void collectPageSize(const char *, const char *, const char *, const char *) {}
+  void closeParagraph() {}
+  void closeSpan() {}
+  void openLink(const char *) {}
+  void closeLink() {}
+  void openFoot(const char *) {}
+  void closeFoot() {}
+  void openEndnote(const char *) {}
+  void closeEndnote() {}
+  void endSection() {}
+  void startDocument() {}
+  void endDocument() {}
+  void insertLineBreak() {}
+  void insertColumnBreak() {}
+  void insertPageBreak() {}
+  void insertText(const librevenge::RVNGString &) {}
+  void insertImage(const char *, const char *) {}
 
   void collectData(const char *name, const char *mimeType, const librevenge::RVNGBinaryData &data);
+  void collectHeaderFooter(const char *, const char *) {}
 
   void openTable(const char *props);
   void closeTable();
   void openCell(const char *props);
   void closeCell();
-
 
 private:
   ABWStylesCollector(const ABWStylesCollector &);

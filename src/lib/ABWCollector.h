@@ -39,7 +39,9 @@ public:
 
   virtual void collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props) = 0;
   virtual void collectParagraphProperties(const char *style, const char *props) = 0;
-  virtual void collectSectionProperties(const char *id, const char *type, const char *header, const char *footer, const char *props) = 0;
+  virtual void collectSectionProperties(const char *footer, const char *footerLeft, const char *footerFirst, const char *footerLast,
+                                        const char *header, const char *headerLeft, const char *headerFirst, const char *headerLast,
+                                        const char *props) = 0;
   virtual void collectCharacterProperties(const char *style, const char *props) = 0;
   virtual void collectPageSize(const char *width, const char *height, const char *units, const char *pageScale) = 0;
   virtual void closeParagraph() = 0;
@@ -60,6 +62,7 @@ public:
   virtual void insertImage(const char *dataid, const char *props) = 0;
 
   virtual void collectData(const char *name, const char *mimeType, const librevenge::RVNGBinaryData &data) = 0;
+  virtual void collectHeaderFooter(const char *id, const char *type) = 0;
 
   virtual void openTable(const char *props) = 0;
   virtual void closeTable() = 0;

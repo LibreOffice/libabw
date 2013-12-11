@@ -51,7 +51,9 @@ public:
   void addOpenFrame(const librevenge::RVNGPropertyList &propList);
   void addOpenHeader(const librevenge::RVNGPropertyList &propList, int id);
   void addOpenLink(const librevenge::RVNGPropertyList &propList);
-  void addOpenPageSpan(const librevenge::RVNGPropertyList &propList, int header = -1, int footer = -1);
+  void addOpenPageSpan(const librevenge::RVNGPropertyList &propList,
+                       int footer, int footerLeft, int footerFirst, int footerLast,
+                       int header, int headerLeft, int headerFirst, int headerLast);
   void addOpenParagraph(const librevenge::RVNGPropertyList &propList);
   void addOpenSection(const librevenge::RVNGPropertyList &propList);
   void addOpenSpan(const librevenge::RVNGPropertyList &propList);

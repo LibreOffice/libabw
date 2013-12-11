@@ -8,6 +8,7 @@
  */
 
 #include "ABWOutputElements.h"
+#include "libabw_internal.h"
 
 namespace libabw
 {
@@ -25,7 +26,7 @@ public:
 class ABWCloseEndnoteElement : public ABWOutputElement
 {
 public:
-  ABWCloseEndnoteElement();
+  ABWCloseEndnoteElement() {}
   ~ABWCloseEndnoteElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -35,7 +36,7 @@ public:
 class ABWCloseFooterElement : public ABWOutputElement
 {
 public:
-  ABWCloseFooterElement();
+  ABWCloseFooterElement() {}
   ~ABWCloseFooterElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -45,7 +46,7 @@ public:
 class ABWCloseFootnoteElement : public ABWOutputElement
 {
 public:
-  ABWCloseFootnoteElement();
+  ABWCloseFootnoteElement() {}
   ~ABWCloseFootnoteElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -55,7 +56,7 @@ public:
 class ABWCloseFrameElement : public ABWOutputElement
 {
 public:
-  ABWCloseFrameElement();
+  ABWCloseFrameElement() {}
   ~ABWCloseFrameElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -65,7 +66,7 @@ public:
 class ABWCloseHeaderElement : public ABWOutputElement
 {
 public:
-  ABWCloseHeaderElement();
+  ABWCloseHeaderElement() {}
   ~ABWCloseHeaderElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -75,7 +76,7 @@ public:
 class ABWCloseLinkElement : public ABWOutputElement
 {
 public:
-  ABWCloseLinkElement();
+  ABWCloseLinkElement() {}
   ~ABWCloseLinkElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -89,7 +90,7 @@ public:
 class ABWClosePageSpanElement : public ABWOutputElement
 {
 public:
-  ABWClosePageSpanElement();
+  ABWClosePageSpanElement() {}
   ~ABWClosePageSpanElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -103,7 +104,7 @@ public:
 class ABWCloseParagraphElement : public ABWOutputElement
 {
 public:
-  ABWCloseParagraphElement();
+  ABWCloseParagraphElement() {}
   ~ABWCloseParagraphElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -117,7 +118,7 @@ public:
 class ABWCloseSectionElement : public ABWOutputElement
 {
 public:
-  ABWCloseSectionElement();
+  ABWCloseSectionElement() {}
   ~ABWCloseSectionElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -131,7 +132,7 @@ public:
 class ABWCloseSpanElement : public ABWOutputElement
 {
 public:
-  ABWCloseSpanElement();
+  ABWCloseSpanElement() {}
   ~ABWCloseSpanElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -145,7 +146,7 @@ public:
 class ABWCloseTableElement : public ABWOutputElement
 {
 public:
-  ABWCloseTableElement();
+  ABWCloseTableElement() {}
   ~ABWCloseTableElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -159,7 +160,7 @@ public:
 class ABWCloseTableCellElement : public ABWOutputElement
 {
 public:
-  ABWCloseTableCellElement();
+  ABWCloseTableCellElement() {}
   ~ABWCloseTableCellElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -173,7 +174,7 @@ public:
 class ABWCloseTableRowElement : public ABWOutputElement
 {
 public:
-  ABWCloseTableRowElement();
+  ABWCloseTableRowElement() {}
   ~ABWCloseTableRowElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -187,7 +188,8 @@ public:
 class ABWInsertBinaryObjectElement : public ABWOutputElement
 {
 public:
-  ABWInsertBinaryObjectElement(const librevenge::RVNGPropertyList &propList);
+  ABWInsertBinaryObjectElement(const librevenge::RVNGPropertyList &propList) :
+    m_propList(propList) {}
   ~ABWInsertBinaryObjectElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -203,7 +205,8 @@ private:
 class ABWInsertCoveredTableCellElement : public ABWOutputElement
 {
 public:
-  ABWInsertCoveredTableCellElement(const librevenge::RVNGPropertyList &propList);
+  ABWInsertCoveredTableCellElement(const librevenge::RVNGPropertyList &propList) :
+    m_propList(propList) {}
   ~ABWInsertCoveredTableCellElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -219,7 +222,7 @@ private:
 class ABWInsertLineBreakElement : public ABWOutputElement
 {
 public:
-  ABWInsertLineBreakElement();
+  ABWInsertLineBreakElement() {}
   ~ABWInsertLineBreakElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -233,7 +236,7 @@ public:
 class ABWInsertSpaceElement : public ABWOutputElement
 {
 public:
-  ABWInsertSpaceElement();
+  ABWInsertSpaceElement() {}
   ~ABWInsertSpaceElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -247,7 +250,7 @@ public:
 class ABWInsertTabElement : public ABWOutputElement
 {
 public:
-  ABWInsertTabElement();
+  ABWInsertTabElement() {}
   ~ABWInsertTabElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -261,7 +264,8 @@ public:
 class ABWInsertTextElement : public ABWOutputElement
 {
 public:
-  ABWInsertTextElement(const librevenge::RVNGString &text);
+  ABWInsertTextElement(const librevenge::RVNGString &text) :
+    m_text(text) {}
   ~ABWInsertTextElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -277,7 +281,8 @@ private:
 class ABWOpenEndnoteElement : public ABWOutputElement
 {
 public:
-  ABWOpenEndnoteElement(const librevenge::RVNGPropertyList &propList);
+  ABWOpenEndnoteElement(const librevenge::RVNGPropertyList &propList) :
+    m_propList(propList) {}
   ~ABWOpenEndnoteElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -293,7 +298,8 @@ private:
 class ABWOpenFooterElement : public ABWOutputElement
 {
 public:
-  ABWOpenFooterElement(const librevenge::RVNGPropertyList &propList);
+  ABWOpenFooterElement(const librevenge::RVNGPropertyList &propList) :
+    m_propList(propList) {}
   ~ABWOpenFooterElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -309,7 +315,8 @@ private:
 class ABWOpenFootnoteElement : public ABWOutputElement
 {
 public:
-  ABWOpenFootnoteElement(const librevenge::RVNGPropertyList &propList);
+  ABWOpenFootnoteElement(const librevenge::RVNGPropertyList &propList) :
+    m_propList(propList) {}
   ~ABWOpenFootnoteElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -325,7 +332,8 @@ private:
 class ABWOpenFrameElement : public ABWOutputElement
 {
 public:
-  ABWOpenFrameElement(const librevenge::RVNGPropertyList &propList);
+  ABWOpenFrameElement(const librevenge::RVNGPropertyList &propList) :
+    m_propList(propList) {}
   ~ABWOpenFrameElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -341,7 +349,8 @@ private:
 class ABWOpenHeaderElement : public ABWOutputElement
 {
 public:
-  ABWOpenHeaderElement(const librevenge::RVNGPropertyList &propList);
+  ABWOpenHeaderElement(const librevenge::RVNGPropertyList &propList) :
+    m_propList(propList) {}
   ~ABWOpenHeaderElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -357,7 +366,8 @@ private:
 class ABWOpenLinkElement : public ABWOutputElement
 {
 public:
-  ABWOpenLinkElement(const librevenge::RVNGPropertyList &propList);
+  ABWOpenLinkElement(const librevenge::RVNGPropertyList &propList) :
+    m_propList(propList) {}
   ~ABWOpenLinkElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -369,21 +379,41 @@ private:
 class ABWOpenPageSpanElement : public ABWOutputElement
 {
 public:
-  ABWOpenPageSpanElement(const librevenge::RVNGPropertyList &propList, int header = -1, int footer = -1);
+  ABWOpenPageSpanElement(const librevenge::RVNGPropertyList &propList,
+                         int footer, int footerLeft, int footerFirst, int footerLast,
+                         int header, int headerLeft, int headerFirst, int headerLast) :
+    m_propList(propList),
+    m_footer(footer),
+    m_footerLeft(footerLeft),
+    m_footerFirst(footerFirst),
+    m_footerLast(footerLast),
+    m_header(header),
+    m_headerLeft(headerLeft),
+    m_headerFirst(headerFirst),
+    m_headerLast(headerLast) {}
   ~ABWOpenPageSpanElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
              const std::map<int, std::vector<ABWOutputElement *> > *headers) const;
 private:
+  void _writeElements(librevenge::RVNGTextInterface *iface, int id,
+                      const std::map<int, std::vector<ABWOutputElement *> > *elements) const;
   librevenge::RVNGPropertyList m_propList;
-  int m_header;
   int m_footer;
+  int m_footerLeft;
+  int m_footerFirst;
+  int m_footerLast;
+  int m_header;
+  int m_headerLeft;
+  int m_headerFirst;
+  int m_headerLast;
 };
 
 class ABWOpenParagraphElement : public ABWOutputElement
 {
 public:
-  ABWOpenParagraphElement(const librevenge::RVNGPropertyList &propList);
+  ABWOpenParagraphElement(const librevenge::RVNGPropertyList &propList) :
+    m_propList(propList) {}
   ~ABWOpenParagraphElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -395,7 +425,8 @@ private:
 class ABWOpenSectionElement : public ABWOutputElement
 {
 public:
-  ABWOpenSectionElement(const librevenge::RVNGPropertyList &propList);
+  ABWOpenSectionElement(const librevenge::RVNGPropertyList &propList) :
+    m_propList(propList) {}
   ~ABWOpenSectionElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -407,7 +438,8 @@ private:
 class ABWOpenSpanElement : public ABWOutputElement
 {
 public:
-  ABWOpenSpanElement(const librevenge::RVNGPropertyList &propList);
+  ABWOpenSpanElement(const librevenge::RVNGPropertyList &propList) :
+    m_propList(propList) {}
   ~ABWOpenSpanElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -419,7 +451,8 @@ private:
 class ABWOpenTableElement : public ABWOutputElement
 {
 public:
-  ABWOpenTableElement(const librevenge::RVNGPropertyList &propList);
+  ABWOpenTableElement(const librevenge::RVNGPropertyList &propList) :
+    m_propList(propList) {}
   ~ABWOpenTableElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -431,7 +464,8 @@ private:
 class ABWOpenTableCellElement : public ABWOutputElement
 {
 public:
-  ABWOpenTableCellElement(const librevenge::RVNGPropertyList &propList);
+  ABWOpenTableCellElement(const librevenge::RVNGPropertyList &propList) :
+    m_propList(propList) {}
   ~ABWOpenTableCellElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -443,7 +477,8 @@ private:
 class ABWOpenTableRowElement : public ABWOutputElement
 {
 public:
-  ABWOpenTableRowElement(const librevenge::RVNGPropertyList &propList);
+  ABWOpenTableRowElement(const librevenge::RVNGPropertyList &propList) :
+    m_propList(propList) {}
   ~ABWOpenTableRowElement() {}
   void write(librevenge::RVNGTextInterface *iface,
              const std::map<int, std::vector<ABWOutputElement *> > *footers,
@@ -454,8 +489,6 @@ private:
 
 } // namespace libabw
 
-libabw::ABWCloseEndnoteElement::ABWCloseEndnoteElement() {}
-
 void libabw::ABWCloseEndnoteElement::write(librevenge::RVNGTextInterface *iface,
                                            const std::map<int, std::vector<ABWOutputElement *> > *,
                                            const std::map<int, std::vector<ABWOutputElement *> > *) const
@@ -463,8 +496,6 @@ void libabw::ABWCloseEndnoteElement::write(librevenge::RVNGTextInterface *iface,
   if (iface)
     iface->closeEndnote();
 }
-
-libabw::ABWCloseFooterElement::ABWCloseFooterElement() {}
 
 void libabw::ABWCloseFooterElement::write(librevenge::RVNGTextInterface *iface,
                                           const std::map<int, std::vector<ABWOutputElement *> > *,
@@ -474,8 +505,6 @@ void libabw::ABWCloseFooterElement::write(librevenge::RVNGTextInterface *iface,
     iface->closeFooter();
 }
 
-libabw::ABWCloseFootnoteElement::ABWCloseFootnoteElement() {}
-
 void libabw::ABWCloseFootnoteElement::write(librevenge::RVNGTextInterface *iface,
                                             const std::map<int, std::vector<ABWOutputElement *> > *,
                                             const std::map<int, std::vector<ABWOutputElement *> > *) const
@@ -483,8 +512,6 @@ void libabw::ABWCloseFootnoteElement::write(librevenge::RVNGTextInterface *iface
   if (iface)
     iface->closeFootnote();
 }
-
-libabw::ABWCloseFrameElement::ABWCloseFrameElement() {}
 
 void libabw::ABWCloseFrameElement::write(librevenge::RVNGTextInterface *iface,
                                          const std::map<int, std::vector<ABWOutputElement *> > *,
@@ -494,8 +521,6 @@ void libabw::ABWCloseFrameElement::write(librevenge::RVNGTextInterface *iface,
     iface->closeFrame();
 }
 
-libabw::ABWCloseHeaderElement::ABWCloseHeaderElement() {}
-
 void libabw::ABWCloseHeaderElement::write(librevenge::RVNGTextInterface *iface,
                                           const std::map<int, std::vector<ABWOutputElement *> > *,
                                           const std::map<int, std::vector<ABWOutputElement *> > *) const
@@ -503,8 +528,6 @@ void libabw::ABWCloseHeaderElement::write(librevenge::RVNGTextInterface *iface,
   if (iface)
     iface->closeHeader();
 }
-
-libabw::ABWCloseLinkElement::ABWCloseLinkElement() {}
 
 void libabw::ABWCloseLinkElement::write(librevenge::RVNGTextInterface *iface,
                                         const std::map<int, std::vector<ABWOutputElement *> > *,
@@ -514,8 +537,6 @@ void libabw::ABWCloseLinkElement::write(librevenge::RVNGTextInterface *iface,
     iface->closeLink();
 }
 
-libabw::ABWClosePageSpanElement::ABWClosePageSpanElement() {}
-
 void libabw::ABWClosePageSpanElement::write(librevenge::RVNGTextInterface *iface,
                                             const std::map<int, std::vector<ABWOutputElement *> > *,
                                             const std::map<int, std::vector<ABWOutputElement *> > *) const
@@ -523,8 +544,6 @@ void libabw::ABWClosePageSpanElement::write(librevenge::RVNGTextInterface *iface
   if (iface)
     iface->closePageSpan();
 }
-
-libabw::ABWCloseParagraphElement::ABWCloseParagraphElement() {}
 
 void libabw::ABWCloseParagraphElement::write(librevenge::RVNGTextInterface *iface,
                                              const std::map<int, std::vector<ABWOutputElement *> > *,
@@ -534,8 +553,6 @@ void libabw::ABWCloseParagraphElement::write(librevenge::RVNGTextInterface *ifac
     iface->closeParagraph();
 }
 
-libabw::ABWCloseSectionElement::ABWCloseSectionElement() {}
-
 void libabw::ABWCloseSectionElement::write(librevenge::RVNGTextInterface *iface,
                                            const std::map<int, std::vector<ABWOutputElement *> > *,
                                            const std::map<int, std::vector<ABWOutputElement *> > *) const
@@ -543,8 +560,6 @@ void libabw::ABWCloseSectionElement::write(librevenge::RVNGTextInterface *iface,
   if (iface)
     iface->closeSection();
 }
-
-libabw::ABWCloseSpanElement::ABWCloseSpanElement() {}
 
 void libabw::ABWCloseSpanElement::write(librevenge::RVNGTextInterface *iface,
                                         const std::map<int, std::vector<ABWOutputElement *> > *,
@@ -554,8 +569,6 @@ void libabw::ABWCloseSpanElement::write(librevenge::RVNGTextInterface *iface,
     iface->closeSpan();
 }
 
-libabw::ABWCloseTableElement::ABWCloseTableElement() {}
-
 void libabw::ABWCloseTableElement::write(librevenge::RVNGTextInterface *iface,
                                          const std::map<int, std::vector<ABWOutputElement *> > *,
                                          const std::map<int, std::vector<ABWOutputElement *> > *) const
@@ -563,8 +576,6 @@ void libabw::ABWCloseTableElement::write(librevenge::RVNGTextInterface *iface,
   if (iface)
     iface->closeTable();
 }
-
-libabw::ABWCloseTableCellElement::ABWCloseTableCellElement() {}
 
 void libabw::ABWCloseTableCellElement::write(librevenge::RVNGTextInterface *iface,
                                              const std::map<int, std::vector<ABWOutputElement *> > *,
@@ -574,8 +585,6 @@ void libabw::ABWCloseTableCellElement::write(librevenge::RVNGTextInterface *ifac
     iface->closeTableCell();
 }
 
-libabw::ABWCloseTableRowElement::ABWCloseTableRowElement() {}
-
 void libabw::ABWCloseTableRowElement::write(librevenge::RVNGTextInterface *iface,
                                             const std::map<int, std::vector<ABWOutputElement *> > *,
                                             const std::map<int, std::vector<ABWOutputElement *> > *) const
@@ -583,9 +592,6 @@ void libabw::ABWCloseTableRowElement::write(librevenge::RVNGTextInterface *iface
   if (iface)
     iface->closeTableRow();
 }
-
-libabw::ABWInsertBinaryObjectElement::ABWInsertBinaryObjectElement(const librevenge::RVNGPropertyList &propList) :
-  m_propList(propList) {}
 
 void libabw::ABWInsertBinaryObjectElement::write(librevenge::RVNGTextInterface *iface,
                                                  const std::map<int, std::vector<ABWOutputElement *> > *,
@@ -595,9 +601,6 @@ void libabw::ABWInsertBinaryObjectElement::write(librevenge::RVNGTextInterface *
     iface->insertBinaryObject(m_propList);
 }
 
-libabw::ABWInsertCoveredTableCellElement::ABWInsertCoveredTableCellElement(const librevenge::RVNGPropertyList &propList) :
-  m_propList(propList) {}
-
 void libabw::ABWInsertCoveredTableCellElement::write(librevenge::RVNGTextInterface *iface,
                                                      const std::map<int, std::vector<ABWOutputElement *> > *,
                                                      const std::map<int, std::vector<ABWOutputElement *> > *) const
@@ -605,8 +608,6 @@ void libabw::ABWInsertCoveredTableCellElement::write(librevenge::RVNGTextInterfa
   if (iface)
     iface->insertCoveredTableCell(m_propList);
 }
-
-libabw::ABWInsertLineBreakElement::ABWInsertLineBreakElement() {}
 
 void libabw::ABWInsertLineBreakElement::write(librevenge::RVNGTextInterface *iface,
                                               const std::map<int, std::vector<ABWOutputElement *> > *,
@@ -616,8 +617,6 @@ void libabw::ABWInsertLineBreakElement::write(librevenge::RVNGTextInterface *ifa
     iface->insertLineBreak();
 }
 
-libabw::ABWInsertSpaceElement::ABWInsertSpaceElement() {}
-
 void libabw::ABWInsertSpaceElement::write(librevenge::RVNGTextInterface *iface,
                                           const std::map<int, std::vector<ABWOutputElement *> > *,
                                           const std::map<int, std::vector<ABWOutputElement *> > *) const
@@ -625,8 +624,6 @@ void libabw::ABWInsertSpaceElement::write(librevenge::RVNGTextInterface *iface,
   if (iface)
     iface->insertSpace();
 }
-
-libabw::ABWInsertTabElement::ABWInsertTabElement() {}
 
 void libabw::ABWInsertTabElement::write(librevenge::RVNGTextInterface *iface,
                                         const std::map<int, std::vector<ABWOutputElement *> > *,
@@ -636,9 +633,6 @@ void libabw::ABWInsertTabElement::write(librevenge::RVNGTextInterface *iface,
     iface->insertTab();
 }
 
-libabw::ABWInsertTextElement::ABWInsertTextElement(const librevenge::RVNGString &text) :
-  m_text(text) {}
-
 void libabw::ABWInsertTextElement::write(librevenge::RVNGTextInterface *iface,
                                          const std::map<int, std::vector<ABWOutputElement *> > *,
                                          const std::map<int, std::vector<ABWOutputElement *> > *) const
@@ -646,9 +640,6 @@ void libabw::ABWInsertTextElement::write(librevenge::RVNGTextInterface *iface,
   if (iface)
     iface->insertText(m_text);
 }
-
-libabw::ABWOpenEndnoteElement::ABWOpenEndnoteElement(const librevenge::RVNGPropertyList &propList) :
-  m_propList(propList) {}
 
 void libabw::ABWOpenEndnoteElement::write(librevenge::RVNGTextInterface *iface,
                                           const std::map<int, std::vector<ABWOutputElement *> > *,
@@ -658,9 +649,6 @@ void libabw::ABWOpenEndnoteElement::write(librevenge::RVNGTextInterface *iface,
     iface->openEndnote(m_propList);
 }
 
-libabw::ABWOpenFooterElement::ABWOpenFooterElement(const librevenge::RVNGPropertyList &propList) :
-  m_propList(propList) {}
-
 void libabw::ABWOpenFooterElement::write(librevenge::RVNGTextInterface *iface,
                                          const std::map<int, std::vector<ABWOutputElement *> > *,
                                          const std::map<int, std::vector<ABWOutputElement *> > *) const
@@ -668,9 +656,6 @@ void libabw::ABWOpenFooterElement::write(librevenge::RVNGTextInterface *iface,
   if (iface)
     iface->openFooter(m_propList);
 }
-
-libabw::ABWOpenFootnoteElement::ABWOpenFootnoteElement(const librevenge::RVNGPropertyList &propList) :
-  m_propList(propList) {}
 
 void libabw::ABWOpenFootnoteElement::write(librevenge::RVNGTextInterface *iface,
                                            const std::map<int, std::vector<ABWOutputElement *> > *,
@@ -680,9 +665,6 @@ void libabw::ABWOpenFootnoteElement::write(librevenge::RVNGTextInterface *iface,
     iface->openFootnote(m_propList);
 }
 
-libabw::ABWOpenFrameElement::ABWOpenFrameElement(const librevenge::RVNGPropertyList &propList) :
-  m_propList(propList) {}
-
 void libabw::ABWOpenFrameElement::write(librevenge::RVNGTextInterface *iface,
                                         const std::map<int, std::vector<ABWOutputElement *> > *,
                                         const std::map<int, std::vector<ABWOutputElement *> > *) const
@@ -690,9 +672,6 @@ void libabw::ABWOpenFrameElement::write(librevenge::RVNGTextInterface *iface,
   if (iface)
     iface->openFrame(m_propList);
 }
-
-libabw::ABWOpenHeaderElement::ABWOpenHeaderElement(const librevenge::RVNGPropertyList &propList) :
-  m_propList(propList) {}
 
 void libabw::ABWOpenHeaderElement::write(librevenge::RVNGTextInterface *iface,
                                          const std::map<int, std::vector<ABWOutputElement *> > *,
@@ -702,9 +681,6 @@ void libabw::ABWOpenHeaderElement::write(librevenge::RVNGTextInterface *iface,
     iface->openHeader(m_propList);
 }
 
-libabw::ABWOpenLinkElement::ABWOpenLinkElement(const librevenge::RVNGPropertyList &propList) :
-  m_propList(propList) {}
-
 void libabw::ABWOpenLinkElement::write(librevenge::RVNGTextInterface *iface,
                                        const std::map<int, std::vector<ABWOutputElement *> > *,
                                        const std::map<int, std::vector<ABWOutputElement *> > *) const
@@ -713,19 +689,43 @@ void libabw::ABWOpenLinkElement::write(librevenge::RVNGTextInterface *iface,
     iface->openLink(m_propList);
 }
 
-libabw::ABWOpenPageSpanElement::ABWOpenPageSpanElement(const librevenge::RVNGPropertyList &propList, int header, int footer) :
-  m_propList(propList), m_header(header), m_footer(footer) {}
-
 void libabw::ABWOpenPageSpanElement::write(librevenge::RVNGTextInterface *iface,
-                                           const std::map<int, std::vector<ABWOutputElement *> > *,
-                                           const std::map<int, std::vector<ABWOutputElement *> > *) const
+                                           const std::map<int, std::vector<ABWOutputElement *> > *footers,
+                                           const std::map<int, std::vector<ABWOutputElement *> > *headers) const
 {
   if (iface)
+  {
+    // open the page span
     iface->openPageSpan(m_propList);
+    // write out the footers
+    _writeElements(iface, m_footer, footers);
+    _writeElements(iface, m_footerLeft, footers);
+    _writeElements(iface, m_footerFirst, footers);
+    _writeElements(iface, m_footerLast, footers);
+    // write out the headers
+    _writeElements(iface, m_header, headers);
+    _writeElements(iface, m_headerLeft, headers);
+    _writeElements(iface, m_headerFirst, headers);
+    _writeElements(iface, m_headerLast, headers);
+    // and continue with writing out the other stuff
+  }
+
 }
 
-libabw::ABWOpenParagraphElement::ABWOpenParagraphElement(const librevenge::RVNGPropertyList &propList) :
-  m_propList(propList) {}
+void libabw::ABWOpenPageSpanElement::_writeElements(librevenge::RVNGTextInterface *iface, int id,
+                                                    const std::map<int, std::vector<ABWOutputElement *> > *elements) const
+{
+  if (!elements || id < 0 || !iface)
+    return;
+
+  std::map<int, std::vector<ABWOutputElement *> >::const_iterator iterMap = elements->find(id);
+  if (iterMap == elements->end() || iterMap->second.empty())
+    return;
+
+  for (std::vector<ABWOutputElement *>::const_iterator iterVec = iterMap->second.begin();
+       iterVec != iterMap->second.end(); ++iterVec)
+    (*iterVec)->write(iface, 0, 0);
+}
 
 void libabw::ABWOpenParagraphElement::write(librevenge::RVNGTextInterface *iface,
                                             const std::map<int, std::vector<ABWOutputElement *> > *,
@@ -735,9 +735,6 @@ void libabw::ABWOpenParagraphElement::write(librevenge::RVNGTextInterface *iface
     iface->openParagraph(m_propList);
 }
 
-libabw::ABWOpenSectionElement::ABWOpenSectionElement(const librevenge::RVNGPropertyList &propList) :
-  m_propList(propList) {}
-
 void libabw::ABWOpenSectionElement::write(librevenge::RVNGTextInterface *iface,
                                           const std::map<int, std::vector<ABWOutputElement *> > *,
                                           const std::map<int, std::vector<ABWOutputElement *> > *) const
@@ -745,9 +742,6 @@ void libabw::ABWOpenSectionElement::write(librevenge::RVNGTextInterface *iface,
   if (iface)
     iface->openSection(m_propList);
 }
-
-libabw::ABWOpenSpanElement::ABWOpenSpanElement(const librevenge::RVNGPropertyList &propList) :
-  m_propList(propList) {}
 
 void libabw::ABWOpenSpanElement::write(librevenge::RVNGTextInterface *iface,
                                        const std::map<int, std::vector<ABWOutputElement *> > *,
@@ -757,10 +751,6 @@ void libabw::ABWOpenSpanElement::write(librevenge::RVNGTextInterface *iface,
     iface->openSpan(m_propList);
 }
 
-libabw::ABWOpenTableElement::ABWOpenTableElement(const librevenge::RVNGPropertyList &propList) :
-  m_propList(propList) {}
-
-
 void libabw::ABWOpenTableElement::write(librevenge::RVNGTextInterface *iface,
                                         const std::map<int, std::vector<ABWOutputElement *> > *,
                                         const std::map<int, std::vector<ABWOutputElement *> > *) const
@@ -768,10 +758,6 @@ void libabw::ABWOpenTableElement::write(librevenge::RVNGTextInterface *iface,
   if (iface)
     iface->openTable(m_propList);
 }
-
-libabw::ABWOpenTableCellElement::ABWOpenTableCellElement(const librevenge::RVNGPropertyList &propList) :
-  m_propList(propList) {}
-
 
 void libabw::ABWOpenTableCellElement::write(librevenge::RVNGTextInterface *iface,
                                             const std::map<int, std::vector<ABWOutputElement *> > *,
@@ -781,9 +767,6 @@ void libabw::ABWOpenTableCellElement::write(librevenge::RVNGTextInterface *iface
     iface->openTableCell(m_propList);
 }
 
-libabw::ABWOpenTableRowElement::ABWOpenTableRowElement(const librevenge::RVNGPropertyList &propList) :
-  m_propList(propList) {}
-
 void libabw::ABWOpenTableRowElement::write(librevenge::RVNGTextInterface *iface,
                                            const std::map<int, std::vector<ABWOutputElement *> > *,
                                            const std::map<int, std::vector<ABWOutputElement *> > *) const
@@ -792,6 +775,8 @@ void libabw::ABWOpenTableRowElement::write(librevenge::RVNGTextInterface *iface,
     iface->openTableRow(m_propList);
 }
 
+
+// ABWOutputElements
 
 libabw::ABWOutputElements::ABWOutputElements()
   : m_bodyElements(), m_headerElements(), m_footerElements(), m_elements(0)
@@ -984,10 +969,13 @@ void libabw::ABWOutputElements::addOpenLink(const librevenge::RVNGPropertyList &
     m_elements->push_back(new ABWOpenLinkElement(propList));
 }
 
-void libabw::ABWOutputElements::addOpenPageSpan(const librevenge::RVNGPropertyList &propList, int header, int footer)
+void libabw::ABWOutputElements::addOpenPageSpan(const librevenge::RVNGPropertyList &propList,
+                                                int footer, int footerLeft, int footerFirst, int footerLast,
+                                                int header, int headerLeft, int headerFirst, int headerLast)
 {
   if (m_elements)
-    m_elements->push_back(new ABWOpenPageSpanElement(propList, header, footer));
+    m_elements->push_back(new ABWOpenPageSpanElement(propList, footer, footerLeft, footerFirst, footerLast,
+                                                     header, headerLeft, headerFirst, headerLast));
 }
 
 void libabw::ABWOutputElements::addOpenParagraph(const librevenge::RVNGPropertyList &propList)

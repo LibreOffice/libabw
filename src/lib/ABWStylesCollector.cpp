@@ -76,131 +76,33 @@ libabw::ABWStylesTableState::ABWStylesTableState() :
   m_currentCellProperties(),
   m_currentTableWidth(0),
   m_currentTableRow(-1),
-  m_currentTableId(-1)
-{
-}
+  m_currentTableId(-1) {}
 
 libabw::ABWStylesTableState::ABWStylesTableState(const ABWStylesTableState &ts) :
   m_currentCellProperties(ts.m_currentCellProperties),
   m_currentTableWidth(ts.m_currentTableWidth),
   m_currentTableRow(ts.m_currentTableRow),
-  m_currentTableId(ts.m_currentTableId)
-{
-}
+  m_currentTableId(ts.m_currentTableId) {}
 
-libabw::ABWStylesTableState::~ABWStylesTableState()
-{
-}
+libabw::ABWStylesTableState::~ABWStylesTableState() {}
 
 libabw::ABWStylesParsingState::ABWStylesParsingState() :
-  m_tableStates()
-{
-}
+  m_tableStates() {}
 
 libabw::ABWStylesParsingState::ABWStylesParsingState(const ABWStylesParsingState &ps) :
-  m_tableStates(ps.m_tableStates)
-{
-}
+  m_tableStates(ps.m_tableStates) {}
 
-libabw::ABWStylesParsingState::~ABWStylesParsingState()
-{
-}
+libabw::ABWStylesParsingState::~ABWStylesParsingState() {}
 
 libabw::ABWStylesCollector::ABWStylesCollector(std::map<int, int> &tableSizes, std::map<std::string, ABWData> &data) :
   m_ps(new ABWStylesParsingState),
   m_tableSizes(tableSizes),
   m_data(data),
-  m_tableCounter(0)
-{
-}
+  m_tableCounter(0) {}
 
 libabw::ABWStylesCollector::~ABWStylesCollector()
 {
   DELETEP(m_ps);
-}
-
-void libabw::ABWStylesCollector::collectTextStyle(const char *, const char *, const char *, const char *)
-{
-}
-
-void libabw::ABWStylesCollector::collectParagraphProperties(const char *, const char *)
-{
-}
-
-void libabw::ABWStylesCollector::collectCharacterProperties(const char *, const char *)
-{
-}
-
-void libabw::ABWStylesCollector::collectSectionProperties(const char *, const char *, const char *, const char *, const char *)
-{
-}
-
-void libabw::ABWStylesCollector::collectPageSize(const char *, const char *, const char *, const char *)
-{
-}
-
-void libabw::ABWStylesCollector::startDocument()
-{
-}
-
-void libabw::ABWStylesCollector::endDocument()
-{
-}
-
-void libabw::ABWStylesCollector::endSection()
-{
-}
-
-void libabw::ABWStylesCollector::closeParagraph()
-{
-}
-
-void libabw::ABWStylesCollector::openLink(const char *)
-{
-}
-
-void libabw::ABWStylesCollector::closeLink()
-{
-}
-
-void libabw::ABWStylesCollector::closeSpan()
-{
-}
-
-void libabw::ABWStylesCollector::insertLineBreak()
-{
-}
-
-void libabw::ABWStylesCollector::insertColumnBreak()
-{
-}
-
-void libabw::ABWStylesCollector::insertPageBreak()
-{
-}
-
-void libabw::ABWStylesCollector::insertText(const librevenge::RVNGString &)
-{
-}
-
-void libabw::ABWStylesCollector::insertImage(const char *, const char *)
-{
-}
-
-void libabw::ABWStylesCollector::openFoot(const char *)
-{
-}
-
-void libabw::ABWStylesCollector::closeFoot()
-{
-}
-
-void libabw::ABWStylesCollector::openEndnote(const char *)
-{
-}
-
-void libabw::ABWStylesCollector::closeEndnote()
-{
 }
 
 void libabw::ABWStylesCollector::openTable(const char *)

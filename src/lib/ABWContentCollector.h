@@ -22,6 +22,13 @@
 namespace libabw
 {
 
+enum ABWContext
+{
+  ABW_SECTION,
+  ABW_HEADER,
+  ABW_FOOTER
+};
+
 struct ABWStyle
 {
   ABWStyle() : basedon(), followedby(), properties() {}
@@ -60,6 +67,8 @@ struct ABWContentParsingState
   bool m_isDocumentStarted;
   bool m_isPageSpanOpened;
   bool m_isSectionOpened;
+  bool m_isHeaderOpened;
+  bool m_isFooterOpened;
 
   bool m_isSpanOpened;
   bool m_isParagraphOpened;
@@ -74,8 +83,17 @@ struct ABWContentParsingState
   double m_pageMarginBottom;
   double m_pageMarginLeft;
   double m_pageMarginRight;
-  int m_currentFooterId;
-  int m_currentHeaderId;
+  int m_footerId;
+  int m_footerLeftId;
+  int m_footerFirstId;
+  int m_footerLastId;
+  int m_headerId;
+  int m_headerLeftId;
+  int m_headerFirstId;
+  int m_headerLastId;
+  int m_currentHeaderFooterId;
+  librevenge::RVNGString m_currentHeaderFooterOccurrence;
+  ABWContext m_parsingContext;
 
   bool m_deferredPageBreak;
   bool m_deferredColumnBreak;
@@ -95,7 +113,9 @@ public:
 
   void collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props);
   void collectParagraphProperties(const char *style, const char *props);
-  void collectSectionProperties(const char *id, const char *type, const char *header, const char *footer, const char *props);
+  void collectSectionProperties(const char *footer, const char *footerLeft, const char *footerFirst, const char *footerLast,
+                                const char *header, const char *headerLeft, const char *headerFirst, const char *headerLast,
+                                const char *props);
   void collectCharacterProperties(const char *style, const char *props);
   void collectPageSize(const char *width, const char *height, const char *units, const char *pageScale);
   void closeParagraph();
@@ -116,6 +136,7 @@ public:
   void insertImage(const char *dataid, const char *props);
 
   void collectData(const char *name, const char *mimeType, const librevenge::RVNGBinaryData &data);
+  void collectHeaderFooter(const char *id, const char *type);
 
   void openTable(const char *props);
   void closeTable();
@@ -148,6 +169,11 @@ private:
   void _closeTableRow();
   void _openTableCell();
   void _closeTableCell();
+
+  void _openHeader();
+  void _closeHeader();
+  void _openFooter();
+  void _closeFooter();
 
   void _recurseTextProperties(const char *name, std::map<std::string, std::string> &styleProps);
   std::string _findParagraphProperty(const char *name);

@@ -393,6 +393,8 @@ libabw::ABWContentParsingState::ABWContentParsingState() :
   m_isDocumentStarted(false),
   m_isPageSpanOpened(false),
   m_isSectionOpened(false),
+  m_isHeaderOpened(false),
+  m_isFooterOpened(false),
 
   m_isSpanOpened(false),
   m_isParagraphOpened(false),
@@ -407,8 +409,17 @@ libabw::ABWContentParsingState::ABWContentParsingState() :
   m_pageMarginBottom(0.0),
   m_pageMarginLeft(0.0),
   m_pageMarginRight(0.0),
-  m_currentFooterId(-1),
-  m_currentHeaderId(-1),
+  m_footerId(-1),
+  m_footerLeftId(-1),
+  m_footerFirstId(-1),
+  m_footerLastId(-1),
+  m_headerId(-1),
+  m_headerLeftId(-1),
+  m_headerFirstId(-1),
+  m_headerLastId(-1),
+  m_currentHeaderFooterId(-1),
+  m_currentHeaderFooterOccurrence(),
+  m_parsingContext(ABW_SECTION),
 
   m_deferredPageBreak(false),
   m_deferredColumnBreak(false),
@@ -423,6 +434,8 @@ libabw::ABWContentParsingState::ABWContentParsingState(const ABWContentParsingSt
   m_isDocumentStarted(ps.m_isDocumentStarted),
   m_isPageSpanOpened(ps.m_isPageSpanOpened),
   m_isSectionOpened(ps.m_isSectionOpened),
+  m_isHeaderOpened(ps.m_isHeaderOpened),
+  m_isFooterOpened(ps.m_isFooterOpened),
 
   m_isSpanOpened(ps.m_isSpanOpened),
   m_isParagraphOpened(ps.m_isParagraphOpened),
@@ -437,8 +450,17 @@ libabw::ABWContentParsingState::ABWContentParsingState(const ABWContentParsingSt
   m_pageMarginBottom(ps.m_pageMarginBottom),
   m_pageMarginLeft(ps.m_pageMarginLeft),
   m_pageMarginRight(ps.m_pageMarginRight),
-  m_currentFooterId(ps.m_currentFooterId),
-  m_currentHeaderId(ps.m_currentHeaderId),
+  m_footerId(ps.m_footerId),
+  m_footerLeftId(ps.m_footerLeftId),
+  m_footerFirstId(ps.m_footerFirstId),
+  m_footerLastId(ps.m_footerLastId),
+  m_headerId(ps.m_headerId),
+  m_headerLeftId(ps.m_headerLeftId),
+  m_headerFirstId(ps.m_headerFirstId),
+  m_headerLastId(ps.m_headerLastId),
+  m_currentHeaderFooterId(ps.m_currentHeaderFooterId),
+  m_currentHeaderFooterOccurrence(ps.m_currentHeaderFooterOccurrence),
+  m_parsingContext(ps.m_parsingContext),
 
   m_deferredPageBreak(ps.m_deferredPageBreak),
   m_deferredColumnBreak(ps.m_deferredColumnBreak),
@@ -540,7 +562,6 @@ std::string libabw::ABWContentCollector::_findSectionProperty(const char *name)
   return std::string();
 }
 
-
 std::string libabw::ABWContentCollector::_findCharacterProperty(const char *name)
 {
   if (!name)
@@ -559,6 +580,8 @@ void libabw::ABWContentCollector::collectParagraphProperties(const char *style, 
   m_ps->m_currentParagraphStyle.clear();
   if (style)
     _recurseTextProperties(style, m_ps->m_currentParagraphStyle);
+  else
+    _recurseTextProperties("Normal", m_ps->m_currentParagraphStyle);
 
   std::map<std::string, std::string> tmpProps;
   if (props)
@@ -580,14 +603,25 @@ void libabw::ABWContentCollector::collectCharacterProperties(const char *style, 
     m_ps->m_currentCharacterStyle[iter->first] = iter->second;
 }
 
-void libabw::ABWContentCollector::collectSectionProperties(const char * /* id */, const char * /* type */, const char *header, const char *footer, const char *props)
+void libabw::ABWContentCollector::collectSectionProperties(const char *footer, const char *footerLeft, const char *footerFirst, const char *footerLast,
+                                                           const char *header, const char *headerLeft, const char *headerFirst, const char *headerLast,
+                                                           const char *props)
 {
+  _closeHeader();
+  _closeFooter();
+  _closeSection();
   double pageMarginLeft = m_ps->m_pageMarginLeft;
   double pageMarginRight = m_ps->m_pageMarginRight;
   double pageMarginTop = m_ps->m_pageMarginTop;
   double pageMarginBottom = m_ps->m_pageMarginBottom;
-  int oldHeaderId = m_ps->m_currentHeaderId;
-  int oldFooterId = m_ps->m_currentFooterId;
+  int headerId = m_ps->m_headerId;
+  int headerLeftId = m_ps->m_headerLeftId;
+  int headerFirstId = m_ps->m_headerFirstId;
+  int headerLastId = m_ps->m_headerLastId;
+  int footerId = m_ps->m_footerId;
+  int footerLeftId = m_ps->m_footerLeftId;
+  int footerFirstId = m_ps->m_footerFirstId;
+  int footerLastId = m_ps->m_footerLastId;
 
   m_ps->m_currentSectionStyle.clear();
   std::map<std::string, std::string> tmpProps;
@@ -622,15 +656,45 @@ void libabw::ABWContentCollector::collectSectionProperties(const char * /* id */
   }
 
   int intValue(0);
-  if (header && findInt(header, intValue) && intValue >= 0)
-    m_ps->m_currentHeaderId = intValue;
-  else
-    m_ps->m_currentHeaderId = -1;
-
   if (footer && findInt(footer, intValue) && intValue >= 0)
-    m_ps->m_currentFooterId = intValue;
+    m_ps->m_footerId = intValue;
   else
-    m_ps->m_currentFooterId = -1;
+    m_ps->m_footerId = -1;
+
+  if (footerLeft && findInt(footerLeft, intValue) && intValue >= 0)
+    m_ps->m_footerLeftId = intValue;
+  else
+    m_ps->m_footerLeftId = -1;
+
+  if (footerFirst && findInt(footerFirst, intValue) && intValue >= 0)
+    m_ps->m_footerFirstId = intValue;
+  else
+    m_ps->m_footerFirstId = -1;
+
+  if (footerLast && findInt(footerLast, intValue) && intValue >= 0)
+    m_ps->m_footerLastId = intValue;
+  else
+    m_ps->m_footerLastId = -1;
+
+  if (header && findInt(header, intValue) && intValue >= 0)
+    m_ps->m_headerId = intValue;
+  else
+    m_ps->m_headerId = -1;
+
+  if (headerLeft && findInt(headerLeft, intValue) && intValue >= 0)
+    m_ps->m_headerLeftId = intValue;
+  else
+    m_ps->m_headerLeftId = -1;
+
+  if (headerFirst && findInt(headerFirst, intValue) && intValue >= 0)
+    m_ps->m_headerFirstId = intValue;
+  else
+    m_ps->m_headerFirstId = -1;
+
+  if (headerLast && findInt(headerLast, intValue) && intValue >= 0)
+    m_ps->m_headerLastId = intValue;
+  else
+    m_ps->m_headerLastId = -1;
 
   if (fabs(m_ps->m_pageMarginRight) < ABW_EPSILON)
     m_ps->m_pageMarginRight = 1.0;
@@ -641,19 +705,46 @@ void libabw::ABWContentCollector::collectSectionProperties(const char * /* id */
   if (fabs(m_ps->m_pageMarginBottom) < ABW_EPSILON)
     m_ps->m_pageMarginBottom = 1.0;
 
-
   if (fabs(pageMarginLeft-m_ps->m_pageMarginLeft) > ABW_EPSILON ||
       fabs(pageMarginRight-m_ps->m_pageMarginRight) > ABW_EPSILON ||
       fabs(pageMarginTop-m_ps->m_pageMarginTop) > ABW_EPSILON ||
       fabs(pageMarginBottom-m_ps->m_pageMarginBottom) > ABW_EPSILON ||
-      oldHeaderId != m_ps->m_currentHeaderId || oldFooterId != m_ps->m_currentHeaderId)
+      footerId != m_ps->m_footerId || footerLeftId != m_ps->m_footerLeftId ||
+      footerFirstId != m_ps->m_footerFirstId || footerLastId != m_ps->m_footerLastId ||
+      headerId != m_ps->m_headerId || headerLeftId != m_ps->m_headerLeftId ||
+      headerFirstId != m_ps->m_headerFirstId || headerLastId != m_ps->m_headerLastId)
   {
     _closePageSpan();
   }
+}
+
+void libabw::ABWContentCollector::collectHeaderFooter(const char *id, const char *type)
+{
+  if (!id || !findInt(id, m_ps->m_currentHeaderFooterId))
+    m_ps->m_currentHeaderFooterId = -1;
+
+  if (!type)
+    m_ps->m_currentHeaderFooterId = -1;
+
+  std::string sType(type);
+  boost::trim(sType);
+  std::vector<std::string> strVec;
+  boost::algorithm::split(strVec, sType, boost::is_any_of("-"), boost::token_compress_on);
+  if (strVec.size() >= 2)
+    m_ps->m_currentHeaderFooterOccurrence = strVec[1].c_str();
   else
+    m_ps->m_currentHeaderFooterOccurrence = "all";
+  if (!strVec.empty())
   {
-    _closeSection();
+    if (strVec[0] == "header")
+      m_ps->m_parsingContext = ABW_HEADER;
+    else if (strVec[0] == "footer")
+      m_ps->m_parsingContext = ABW_FOOTER;
+    else
+      m_ps->m_parsingContext = ABW_SECTION;
   }
+  else
+    m_ps->m_parsingContext = ABW_SECTION;
 }
 
 void libabw::ABWContentCollector::collectPageSize(const char *width, const char *height, const char *units, const char * /* pageScale */)
@@ -667,16 +758,10 @@ void libabw::ABWContentCollector::collectPageSize(const char *width, const char 
   }
   ABWUnit unit;
   double value;
-  if (findDouble(widthStr, value, unit))
-  {
-    if (unit == ABW_IN)
-      m_ps->m_pageWidth = value;
-  }
-  if (findDouble(heightStr, value, unit))
-  {
-    if (unit == ABW_IN)
-      m_ps->m_pageHeight = value;
-  }
+  if (findDouble(widthStr, value, unit) && unit == ABW_IN)
+    m_ps->m_pageWidth = value;
+  if (findDouble(heightStr, value, unit) && unit == ABW_IN)
+    m_ps->m_pageHeight = value;
 }
 
 void libabw::ABWContentCollector::startDocument()
@@ -703,6 +788,9 @@ void libabw::ABWContentCollector::endDocument()
 
     // close the document nice and tight
     _closeSection();
+    _closeHeader();
+    _closeFooter();
+
     _closePageSpan();
 
     if (m_iface)
@@ -715,6 +803,8 @@ void libabw::ABWContentCollector::endDocument()
 
 void libabw::ABWContentCollector::endSection()
 {
+  _closeHeader();
+  _closeFooter();
   _closeSection();
 }
 
@@ -799,7 +889,11 @@ void libabw::ABWContentCollector::_openPageSpan()
     propList.insert("fo:margin-bottom", m_ps->m_pageMarginBottom);
 
     if (!m_ps->m_isPageSpanOpened)
-      m_outputElements.addOpenPageSpan(propList);
+      m_outputElements.addOpenPageSpan(propList,
+                                       m_ps->m_footerId, m_ps->m_footerLeftId,
+                                       m_ps->m_footerFirstId, m_ps->m_footerLastId,
+                                       m_ps->m_headerId, m_ps->m_headerLeftId,
+                                       m_ps->m_headerFirstId, m_ps->m_headerLastId);
   }
   m_ps->m_isPageSpanOpened = true;
 }
@@ -808,8 +902,9 @@ void libabw::ABWContentCollector::_closePageSpan()
 {
   if (m_ps->m_isPageSpanOpened)
   {
-    if (m_ps->m_isSectionOpened)
-      _closeSection();
+    _closeHeader();
+    _closeFooter();
+    _closeSection();
 
     m_outputElements.addClosePageSpan();
   }
@@ -863,6 +958,30 @@ void libabw::ABWContentCollector::_openSection()
   m_ps->m_isSectionOpened = true;
 }
 
+void libabw::ABWContentCollector::_openFooter()
+{
+  if (!m_ps->m_isFooterOpened && !m_ps->m_isNote && m_ps->m_tableStates.empty())
+  {
+    librevenge::RVNGPropertyList propList;
+    propList.insert("librevenge:occurrence", m_ps->m_currentHeaderFooterOccurrence);
+
+    m_outputElements.addOpenFooter(propList, m_ps->m_currentHeaderFooterId);
+  }
+  m_ps->m_isFooterOpened = true;
+}
+
+void libabw::ABWContentCollector::_openHeader()
+{
+  if (!m_ps->m_isHeaderOpened && !m_ps->m_isNote && m_ps->m_tableStates.empty())
+  {
+    librevenge::RVNGPropertyList propList;
+    propList.insert("librevenge:occurrence", m_ps->m_currentHeaderFooterOccurrence);
+
+    m_outputElements.addOpenHeader(propList, m_ps->m_currentHeaderFooterId);
+  }
+  m_ps->m_isHeaderOpened = true;
+}
+
 void libabw::ABWContentCollector::_openParagraph()
 {
   if (!m_ps->m_isParagraphOpened)
@@ -870,43 +989,42 @@ void libabw::ABWContentCollector::_openParagraph()
     if (!m_ps->m_tableStates.empty() && !m_ps->m_tableStates.top().m_isTableCellOpened)
       _openTableCell();
 
-    if (!m_ps->m_isSectionOpened)
-      _openSection();
+    switch (m_ps->m_parsingContext)
+    {
+    case ABW_HEADER:
+      if (!m_ps->m_isHeaderOpened)
+        _openHeader();
+      break;
+    case ABW_FOOTER:
+      if (!m_ps->m_isFooterOpened)
+        _openFooter();
+      break;
+    case ABW_SECTION:
+    default:
+      if (!m_ps->m_isSectionOpened)
+        _openSection();
+      break;
+    }
 
     librevenge::RVNGPropertyList propList;
     ABWUnit unit(ABW_NONE);
     double value(0.0);
     int intValue(0);
 
-    if (findDouble(_findParagraphProperty("margin-right"), value, unit))
-    {
-      if (unit == ABW_IN)
-        propList.insert("fo:margin-right", value);
-    }
+    if (findDouble(_findParagraphProperty("margin-right"), value, unit) && unit == ABW_IN)
+      propList.insert("fo:margin-right", value);
 
-    if (findDouble(_findParagraphProperty("margin-left"), value, unit))
-    {
-      if (unit == ABW_IN)
-        propList.insert("fo:margin-left", value);
-    }
+    if (findDouble(_findParagraphProperty("margin-left"), value, unit) && unit == ABW_IN)
+      propList.insert("fo:margin-left", value);
 
-    if (findDouble(_findParagraphProperty("margin-top"), value, unit))
-    {
-      if (unit == ABW_IN)
-        propList.insert("fo:margin-top", value);
-    }
+    if (findDouble(_findParagraphProperty("margin-top"), value, unit) && unit == ABW_IN)
+      propList.insert("fo:margin-top", value);
 
-    if (findDouble(_findParagraphProperty("margin-left"), value, unit))
-    {
-      if (unit == ABW_IN)
-        propList.insert("fo:margin-left", value);
-    }
+    if (findDouble(_findParagraphProperty("margin-left"), value, unit) && unit == ABW_IN)
+      propList.insert("fo:margin-left", value);
 
-    if (findDouble(_findParagraphProperty("text-indent"), value, unit))
-    {
-      if (unit == ABW_IN)
-        propList.insert("fo:text-indent", value);
-    }
+    if (findDouble(_findParagraphProperty("text-indent"), value, unit) && unit == ABW_IN)
+      propList.insert("fo:text-indent", value);
 
     std::string sValue = _findParagraphProperty("text-align");
     if (!sValue.empty())
@@ -1038,6 +1156,42 @@ void libabw::ABWContentCollector::_closeSection()
   }
 }
 
+void libabw::ABWContentCollector::_closeHeader()
+{
+  if (m_ps->m_isHeaderOpened)
+  {
+    while (!m_ps->m_tableStates.empty())
+      _closeTable();
+
+    if (m_ps->m_isParagraphOpened)
+      _closeParagraph();
+
+    m_outputElements.addCloseHeader();
+
+    m_ps->m_isHeaderOpened = false;
+  }
+  m_ps->m_currentHeaderFooterId = -1;
+  m_ps->m_currentHeaderFooterOccurrence.clear();
+}
+
+void libabw::ABWContentCollector::_closeFooter()
+{
+  if (m_ps->m_isFooterOpened)
+  {
+    while (!m_ps->m_tableStates.empty())
+      _closeTable();
+
+    if (m_ps->m_isParagraphOpened)
+      _closeParagraph();
+
+    m_outputElements.addCloseFooter();
+
+    m_ps->m_isFooterOpened = false;
+  }
+  m_ps->m_currentHeaderFooterId = -1;
+  m_ps->m_currentHeaderFooterOccurrence.clear();
+}
+
 void libabw::ABWContentCollector::_closeParagraph()
 {
   if (m_ps->m_isParagraphOpened)
@@ -1060,8 +1214,22 @@ void libabw::ABWContentCollector::_closeSpan()
 
 void libabw::ABWContentCollector::_openTable()
 {
-  if (!m_ps->m_isSectionOpened)
-    _openSection();
+  switch (m_ps->m_parsingContext)
+  {
+  case ABW_HEADER:
+    if (!m_ps->m_isHeaderOpened)
+      _openHeader();
+    break;
+  case ABW_FOOTER:
+    if (!m_ps->m_isFooterOpened)
+      _openFooter();
+    break;
+  case ABW_SECTION:
+  default:
+    if (!m_ps->m_isSectionOpened)
+      _openSection();
+    break;
+  }
 
   if (m_ps->m_isParagraphOpened)
     _closeParagraph();
@@ -1253,11 +1421,27 @@ void libabw::ABWContentCollector::closeEndnote()
 
 void libabw::ABWContentCollector::openTable(const char *props)
 {
-  if (!m_ps->m_isSectionOpened && m_ps->m_tableStates.empty())
-    _openSection();
-
-  if (m_ps->m_isParagraphOpened)
-    _closeParagraph();
+  if (m_ps->m_tableStates.empty())
+  {
+    switch (m_ps->m_parsingContext)
+    {
+    case ABW_HEADER:
+      if (!m_ps->m_isHeaderOpened)
+        _openHeader();
+      break;
+    case ABW_FOOTER:
+      if (!m_ps->m_isFooterOpened)
+        _openFooter();
+      break;
+    case ABW_SECTION:
+    default:
+      if (!m_ps->m_isSectionOpened)
+        _openSection();
+      break;
+    }
+    if (m_ps->m_isParagraphOpened)
+      _closeParagraph();
+  }
 
   m_ps->m_tableStates.push(ABWContentTableState());
   m_ps->m_tableStates.top().m_currentTableId = m_tableCounter++;

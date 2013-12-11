@@ -415,19 +415,51 @@ void libabw::ABWParser::readSection(xmlTextReaderPtr reader)
 {
   xmlChar *id = xmlTextReaderGetAttribute(reader, BAD_CAST("id"));
   xmlChar *type = xmlTextReaderGetAttribute(reader, BAD_CAST("type"));
-  xmlChar *header = xmlTextReaderGetAttribute(reader, BAD_CAST("header"));
   xmlChar *footer = xmlTextReaderGetAttribute(reader, BAD_CAST("footer"));
+  xmlChar *footerLeft = xmlTextReaderGetAttribute(reader, BAD_CAST("footer-even"));
+  xmlChar *footerFirst = xmlTextReaderGetAttribute(reader, BAD_CAST("footer-first"));
+  xmlChar *footerLast = xmlTextReaderGetAttribute(reader, BAD_CAST("footer-last"));
+  xmlChar *header = xmlTextReaderGetAttribute(reader, BAD_CAST("header"));
+  xmlChar *headerLeft = xmlTextReaderGetAttribute(reader, BAD_CAST("header-even"));
+  xmlChar *headerFirst = xmlTextReaderGetAttribute(reader, BAD_CAST("header-first"));
+  xmlChar *headerLast = xmlTextReaderGetAttribute(reader, BAD_CAST("header-last"));
   xmlChar *props = xmlTextReaderGetAttribute(reader, BAD_CAST("props"));
-  if (m_collector)
-    m_collector->collectSectionProperties((const char *)id, (const char *)type, (const char *)header, (const char *)footer, (const char *)props);
+
+  if (!type || (xmlStrncmp(type, BAD_CAST("header"), 6) && xmlStrncmp(type, BAD_CAST("footer"), 6)))
+  {
+    if (m_collector)
+      m_collector->collectSectionProperties((const char *)footer, (const char *)footerLeft,
+                                            (const char *)footerFirst, (const char *)footerLast,
+                                            (const char *)header, (const char *)headerLeft,
+                                            (const char *)headerFirst, (const char *)headerLast,
+                                            (const char *)props);
+  }
+  else
+  {
+    if (m_collector)
+      m_collector->collectHeaderFooter((const char *)id, (const char *)type);
+  }
+
   if (id)
     xmlFree(id);
   if (type)
     xmlFree(type);
-  if (header)
-    xmlFree(header);
   if (footer)
     xmlFree(footer);
+  if (footerLeft)
+    xmlFree(footerLeft);
+  if (footerFirst)
+    xmlFree(footerFirst);
+  if (footerLast)
+    xmlFree(footerLast);
+  if (header)
+    xmlFree(header);
+  if (headerLeft)
+    xmlFree(headerLeft);
+  if (headerFirst)
+    xmlFree(headerFirst);
+  if (headerLast)
+    xmlFree(headerLast);
   if (props)
     xmlFree(props);
 }
