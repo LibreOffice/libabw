@@ -1124,9 +1124,15 @@ void libabw::ABWContentCollector::_openSpan()
 
     sValue = _findCharacterProperty("text-decoration");
     if (sValue == "underline")
-      propList.insert("style:text-underline-type", "solid");
+    {
+      propList.insert("style:text-underline-type", "single");
+      propList.insert("style:text-underline-style", "solid");
+    }
     else if (sValue == "line-through")
+    {
       propList.insert("style:text-line-through-type", "single");
+      propList.insert("style:text-line-through-style", "solid");
+    }
 
     sValue = getColor(_findCharacterProperty("color"));
     if (!sValue.empty())
