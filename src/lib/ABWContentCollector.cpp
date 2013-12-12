@@ -777,7 +777,7 @@ void libabw::ABWContentCollector::startDocument()
   {
 
     if (m_iface && !m_ps->m_isDocumentStarted)
-      m_iface->startDocument();
+      m_iface->startDocument(librevenge::RVNGPropertyList());
 
     m_ps->m_isDocumentStarted = true;
   }
