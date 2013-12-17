@@ -54,8 +54,7 @@ static void parsePropString(const std::string &str, std::map<std::string, std::s
   if (str.empty())
     return;
 
-  std::string propString(str);
-  boost::trim(propString);
+  std::string propString = boost::trim_copy(str);
   std::vector<std::string> strVec;
   boost::algorithm::split(strVec, propString, boost::is_any_of(";"), boost::token_compress_on);
   for (std::vector<std::string>::size_type i = 0; i < strVec.size(); ++i)
