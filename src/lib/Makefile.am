@@ -20,7 +20,7 @@ libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_include_HEADERS = \
 	$(top_srcdir)/inc/libabw/libabw.h \
 	$(top_srcdir)/inc/libabw/AbiDocument.h
 
-AM_CXXFLAGS = -I$(top_srcdir)/inc $(REVENGE_CFLAGS) $(LIBXML2_CFLAGS) $(DEBUG_CXXFLAGS)
+AM_CXXFLAGS = -I$(top_srcdir)/inc $(REVENGE_CFLAGS) $(LIBXML2_CFLAGS) $(DEBUG_CXXFLAGS) -DLIBABW_BUILD=1
 
 generated_files = \
 	$(top_builddir)/src/lib/tokens.h \

@@ -12,6 +12,16 @@
 
 #include <librevenge/librevenge.h>
 
+#ifdef DLL_EXPORT
+#ifdef LIBABW_BUILD
+#define ABWAPI __declspec(dllexport)
+#else
+#define ABWAPI __declspec(dllimport)
+#endif
+#else
+#define ABWAPI
+#endif
+
 namespace libabw
 {
 
@@ -23,8 +33,8 @@ AbiWord documents.
 class AbiDocument
 {
 public:
-  static bool isFileFormatSupported(librevenge::RVNGInputStream *input);
-  static bool parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *documentInterface);
+  static ABWAPI bool isFileFormatSupported(librevenge::RVNGInputStream *input);
+  static ABWAPI bool parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *documentInterface);
 };
 
 } // namespace libabw
