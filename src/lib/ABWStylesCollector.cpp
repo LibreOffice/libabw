@@ -33,6 +33,34 @@ enum ABWUnit
   ABW_PERCENT
 };
 
+enum ABWListType
+{
+  NUMBERED_LIST = 0,
+  LOWERCASE_LIST = 1,
+  UPPERCASE_LIST = 2,
+  LOWERROMAN_LIST = 3,
+  UPPERROMAN_LIST = 4,
+
+  BULLETED_LIST = 5,
+  DASHED_LIST = 6,
+  SQUARE_LIST = 7,
+  TRIANGLE_LIST = 8,
+  DIAMOND_LIST = 9,
+  STAR_LIST = 10,
+  IMPLIES_LIST = 11,
+  TICK_LIST = 12,
+  BOX_LIST = 13,
+  HAND_LIST = 14,
+  HEART_LIST = 15,
+  ARROWHEAD_LIST = 16,
+
+  LAST_BULLETED_LIST = 17,
+  OTHER_NUMBERED_LISTS = 0x7f,
+  ARABICNUMBERED_LIST = 0x80,
+  HEBREW_LIST = 0x81,
+  NOT_A_LIST = 0xff
+};
+
 static bool findInt(const std::string &str, int &res)
 {
   using namespace ::boost::spirit::classic;

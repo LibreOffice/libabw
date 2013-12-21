@@ -29,6 +29,42 @@ struct ABWData
   librevenge::RVNGBinaryData m_binaryData;
 };
 
+struct ABWListElement
+{
+  ABWListElement()
+    : m_listId(-1), m_listLevel(-1), m_minLabelWidth(0.0), m_spaceBefore(0.0) {}
+  virtual ~ABWListElement() {}
+  virtual void writeOut(librevenge::RVNGPropertyList &propList) const;
+
+  int m_listId;
+  int m_listLevel;
+  double m_minLabelWidth;
+  double m_spaceBefore;
+};
+
+struct ABWOrderedListElement : public ABWListElement
+{
+  ABWOrderedListElement()
+    : ABWListElement(), m_numFormat(), m_numPrefix(), m_numSuffix(), m_startValue(-1) {}
+  ~ABWOrderedListElement() {}
+  void writeOut(librevenge::RVNGPropertyList &propList) const;
+
+  librevenge::RVNGString m_numFormat;
+  librevenge::RVNGString m_numPrefix;
+  librevenge::RVNGString m_numSuffix;
+  int m_startValue;
+};
+
+struct ABWUnorderedListElement : public ABWListElement
+{
+  ABWUnorderedListElement()
+    : ABWListElement(), m_bulletChar() {}
+  ~ABWUnorderedListElement() {}
+  void writeOut(librevenge::RVNGPropertyList &propList) const;
+
+  librevenge::RVNGString m_bulletChar;
+};
+
 class ABWCollector
 {
 public:
