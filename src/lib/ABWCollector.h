@@ -39,9 +39,9 @@ public:
 
   virtual void collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props) = 0;
   virtual void collectParagraphProperties(const char *style, const char *props) = 0;
-  virtual void collectSectionProperties(const char *footer, const char *footerLeft, const char *footerFirst, const char *footerLast,
-                                        const char *header, const char *headerLeft, const char *headerFirst, const char *headerLast,
-                                        const char *props) = 0;
+  virtual void collectSectionProperties(const char *footer, const char *footerLeft, const char *footerFirst,
+                                        const char *footerLast, const char *header, const char *headerLeft,
+                                        const char *headerFirst, const char *headerLast, const char *props) = 0;
   virtual void collectCharacterProperties(const char *style, const char *props) = 0;
   virtual void collectPageSize(const char *width, const char *height, const char *units, const char *pageScale) = 0;
   virtual void closeParagraph() = 0;
@@ -60,6 +60,8 @@ public:
   virtual void insertPageBreak() = 0;
   virtual void insertText(const librevenge::RVNGString &text) = 0;
   virtual void insertImage(const char *dataid, const char *props) = 0;
+  virtual void collectList(const char *id, const char *listDecimal, const char *listDelim,
+                           const char *parentid, const char *startValue, const char *type) = 0;
 
   virtual void collectData(const char *name, const char *mimeType, const librevenge::RVNGBinaryData &data) = 0;
   virtual void collectHeaderFooter(const char *id, const char *type) = 0;

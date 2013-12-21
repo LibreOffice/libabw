@@ -75,6 +75,8 @@ public:
 
   void collectData(const char *name, const char *mimeType, const librevenge::RVNGBinaryData &data);
   void collectHeaderFooter(const char *, const char *) {}
+  void collectList(const char *id, const char *listDecimal, const char *listDelim,
+                   const char *parentid, const char *startValue, const char *type);
 
   void openTable(const char *props);
   void closeTable();

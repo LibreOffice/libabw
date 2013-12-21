@@ -134,6 +134,7 @@ public:
   void insertPageBreak();
   void insertText(const librevenge::RVNGString &text);
   void insertImage(const char *dataid, const char *props);
+  void collectList(const char *, const char *, const char *, const char *, const char *, const char *) {}
 
   void collectData(const char *name, const char *mimeType, const librevenge::RVNGBinaryData &data);
   void collectHeaderFooter(const char *id, const char *type);

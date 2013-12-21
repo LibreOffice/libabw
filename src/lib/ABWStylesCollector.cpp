@@ -161,4 +161,8 @@ void libabw::ABWStylesCollector::collectData(const char *name, const char *mimeT
   m_data[name] = ABWData(mimeType, data);
 }
 
+
+void libabw::ABWStylesCollector::collectList(const char *, const char *, const char *, const char *, const char *, const char *)
+{
+}
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

@@ -157,9 +157,9 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
     if (XML_READER_TYPE_ELEMENT == tokenType)
       readS(reader);
     break;
-  case XML_LISTS:
+  case XML_L:
     if (XML_READER_TYPE_ELEMENT == tokenType)
-      readLists(reader);
+      readL(reader);
     break;
   case XML_PAGESIZE:
     if (XML_READER_TYPE_ELEMENT == tokenType)
@@ -368,29 +368,6 @@ void libabw::ABWParser::readIgnoredWords(xmlTextReaderPtr reader)
     }
   }
   while ((XML_IGNOREDWORDS != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
-}
-
-void libabw::ABWParser::readLists(xmlTextReaderPtr reader)
-{
-  int ret = 1;
-  int tokenId = XML_TOKEN_INVALID;
-  int tokenType = -1;
-  do
-  {
-    ret = xmlTextReaderRead(reader);
-    tokenId = getElementToken(reader);
-    if (XML_TOKEN_INVALID == tokenId)
-    {
-      ABW_DEBUG_MSG(("ABWParser::readLists: unknown token %s\n", xmlTextReaderConstName(reader)));
-    }
-    tokenType = xmlTextReaderNodeType(reader);
-    switch (tokenId)
-    {
-    default:
-      break;
-    }
-  }
-  while ((XML_LISTS != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
 }
 
 void libabw::ABWParser::readPageSize(xmlTextReaderPtr reader)
@@ -631,6 +608,33 @@ void libabw::ABWParser::readImage(xmlTextReaderPtr reader)
     xmlFree(props);
   if (dataid)
     xmlFree(dataid);
+}
+
+void libabw::ABWParser::readL(xmlTextReaderPtr reader)
+{
+  xmlChar *id = xmlTextReaderGetAttribute(reader, BAD_CAST("id"));
+  xmlChar *listDecimal = xmlTextReaderGetAttribute(reader, BAD_CAST("list-decimal"));
+  if (!listDecimal)
+    listDecimal = xmlCharStrdup("NULL");
+  xmlChar *listDelim = xmlTextReaderGetAttribute(reader, BAD_CAST("list-delim"));
+  xmlChar *parentid = xmlTextReaderGetAttribute(reader, BAD_CAST("parentid"));
+  xmlChar *startValue = xmlTextReaderGetAttribute(reader, BAD_CAST("start-value"));
+  xmlChar *type = xmlTextReaderGetAttribute(reader, BAD_CAST("type"));
+  if (m_collector)
+    m_collector->collectList((const char *)id, (const char *)listDecimal, (const char *)listDelim,
+                             (const char *)parentid, (const char *)startValue, (const char *)type);
+  if (id)
+    xmlFree(id);
+  if (listDecimal)
+    xmlFree(listDecimal);
+  if (listDelim)
+    xmlFree(listDelim);
+  if (parentid)
+    xmlFree(parentid);
+  if (startValue)
+    xmlFree(startValue);
+  if (type)
+    xmlFree(type);
 }
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */
