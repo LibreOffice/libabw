@@ -93,6 +93,7 @@ private:
   std::map<int, int> &m_tableSizes;
   std::map<std::string, ABWData> &m_data;
   int m_tableCounter;
+  std::map<librevenge::RVNGString, ABWListElement *> m_listElements;
 };
 
 } // namespace libabw

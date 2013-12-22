@@ -32,11 +32,10 @@ struct ABWData
 struct ABWListElement
 {
   ABWListElement()
-    : m_listId(-1), m_listLevel(-1), m_minLabelWidth(0.0), m_spaceBefore(0.0) {}
+    : m_listLevel(-1), m_minLabelWidth(0.0), m_spaceBefore(0.0) {}
   virtual ~ABWListElement() {}
   virtual void writeOut(librevenge::RVNGPropertyList &propList) const;
 
-  int m_listId;
   int m_listLevel;
   double m_minLabelWidth;
   double m_spaceBefore;

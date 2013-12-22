@@ -125,7 +125,8 @@ libabw::ABWStylesCollector::ABWStylesCollector(std::map<int, int> &tableSizes, s
   m_ps(new ABWStylesParsingState),
   m_tableSizes(tableSizes),
   m_data(data),
-  m_tableCounter(0) {}
+  m_tableCounter(0),
+  m_listElements() {}
 
 libabw::ABWStylesCollector::~ABWStylesCollector()
 {
@@ -190,7 +191,67 @@ void libabw::ABWStylesCollector::collectData(const char *name, const char *mimeT
 }
 
 
-void libabw::ABWStylesCollector::collectList(const char *, const char *, const char *, const char *, const char *, const char *)
+void libabw::ABWStylesCollector::collectList(const char *id, const char *, const char * /* listDelim */,
+                                             const char *, const char *startValue, const char *type)
 {
+  if (!id)
+    return;
+  if (m_listElements[id])
+    delete m_listElements[id];
+  int intType;
+  if (!type || !findInt(type, intType))
+    intType = 5;
+  if (intType >= BULLETED_LIST && intType < LAST_BULLETED_LIST)
+  {
+    ABWUnorderedListElement *tmpElement = new ABWUnorderedListElement();
+    switch (intType)
+    {
+    case BULLETED_LIST:
+    case DASHED_LIST:
+    case SQUARE_LIST:
+    case TRIANGLE_LIST:
+    case DIAMOND_LIST:
+    case STAR_LIST:
+    case IMPLIES_LIST:
+    case TICK_LIST:
+    case BOX_LIST:
+    case HAND_LIST:
+    case HEART_LIST:
+    case ARROWHEAD_LIST:
+    default:
+      tmpElement->m_bulletChar = "*"; // for the while
+      break;
+    }
+    m_listElements[id] = tmpElement;
+  }
+  else
+  {
+    ABWOrderedListElement *tmpElement = new ABWOrderedListElement();
+    switch (intType)
+    {
+    case NUMBERED_LIST:
+      tmpElement->m_numFormat = "1";
+      break;
+    case LOWERCASE_LIST:
+      tmpElement->m_numFormat = "a";
+      break;
+    case UPPERCASE_LIST:
+      tmpElement->m_numFormat = "A";
+      break;
+    case LOWERROMAN_LIST:
+      tmpElement->m_numFormat = "i";
+      break;
+    case UPPERROMAN_LIST:
+      tmpElement->m_numFormat = "I";
+      break;
+    default:
+      tmpElement->m_numFormat = "1";
+      break;
+    }
+    if (!startValue || !findInt(startValue, tmpElement->m_startValue))
+      tmpElement->m_startValue = 0;
+    // get prefix and suffix by splitting the listDelim
+    m_listElements[id] = tmpElement;
+  }
 }
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

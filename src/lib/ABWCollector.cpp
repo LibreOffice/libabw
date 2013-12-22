@@ -11,8 +11,6 @@
 
 void libabw::ABWListElement::writeOut(librevenge::RVNGPropertyList &propList) const
 {
-  if (m_listId >= 0)
-    propList.insert("librevenge:list-id", m_listId);
   if (m_listLevel >= 0)
     propList.insert("librevenge:level", m_listLevel);
   propList.insert("text:min-label-width", m_minLabelWidth);
