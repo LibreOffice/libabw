@@ -106,7 +106,9 @@ struct ABWContentParsingState
 class ABWContentCollector : public ABWCollector
 {
 public:
-  ABWContentCollector(::librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes, const std::map<std::string, ABWData> &data);
+  ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes,
+                      const std::map<std::string, ABWData> &data,
+                      const std::map<librevenge::RVNGString, ABWListElement *> &listElements);
   virtual ~ABWContentCollector();
 
   // collector functions
@@ -193,6 +195,7 @@ private:
   const std::map<int, int> &m_tableSizes;
   int m_tableCounter;
   ABWOutputElements m_outputElements;
+  const std::map<librevenge::RVNGString, ABWListElement *> &m_listElements;
 };
 
 } // namespace libabw

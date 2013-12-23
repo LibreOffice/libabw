@@ -44,7 +44,9 @@ struct ABWStylesParsingState
 class ABWStylesCollector : public ABWCollector
 {
 public:
-  ABWStylesCollector(std::map<int, int> &tableSizes, std::map<std::string, ABWData> &data);
+  ABWStylesCollector(std::map<int, int> &tableSizes,
+                     std::map<std::string, ABWData> &data,
+                     std::map<librevenge::RVNGString, ABWListElement *> &listElements);
   virtual ~ABWStylesCollector();
 
   // collector functions
@@ -93,7 +95,7 @@ private:
   std::map<int, int> &m_tableSizes;
   std::map<std::string, ABWData> &m_data;
   int m_tableCounter;
-  std::map<librevenge::RVNGString, ABWListElement *> m_listElements;
+  std::map<librevenge::RVNGString, ABWListElement *> &m_listElements;
 };
 
 } // namespace libabw

@@ -121,12 +121,14 @@ libabw::ABWStylesParsingState::ABWStylesParsingState(const ABWStylesParsingState
 
 libabw::ABWStylesParsingState::~ABWStylesParsingState() {}
 
-libabw::ABWStylesCollector::ABWStylesCollector(std::map<int, int> &tableSizes, std::map<std::string, ABWData> &data) :
+libabw::ABWStylesCollector::ABWStylesCollector(std::map<int, int> &tableSizes,
+                                               std::map<std::string, ABWData> &data,
+                                               std::map<librevenge::RVNGString, ABWListElement *> &listElements) :
   m_ps(new ABWStylesParsingState),
   m_tableSizes(tableSizes),
   m_data(data),
   m_tableCounter(0),
-  m_listElements() {}
+  m_listElements(listElements) {}
 
 libabw::ABWStylesCollector::~ABWStylesCollector()
 {
@@ -191,9 +193,12 @@ void libabw::ABWStylesCollector::collectData(const char *name, const char *mimeT
 }
 
 
-void libabw::ABWStylesCollector::collectList(const char *id, const char *, const char * /* listDelim */,
+void libabw::ABWStylesCollector::collectList(const char *id, const char *, const char *listDelim,
                                              const char *, const char *startValue, const char *type)
 {
+  using namespace boost;
+  using namespace boost::algorithm;
+
   if (!id)
     return;
   if (m_listElements[id])
@@ -250,7 +255,25 @@ void libabw::ABWStylesCollector::collectList(const char *id, const char *, const
     }
     if (!startValue || !findInt(startValue, tmpElement->m_startValue))
       tmpElement->m_startValue = 0;
+
     // get prefix and suffix by splitting the listDelim
+    if (listDelim)
+    {
+      std::string delim(listDelim);
+      std::vector<librevenge::RVNGString> strVec;
+
+      for (split_iterator<std::string::iterator> It =
+             make_split_iterator(delim, first_finder("%L", is_iequal()));
+           It != split_iterator<std::string::iterator>(); ++It)
+      {
+        strVec.push_back(copy_range<std::string>(*It).c_str());
+      }
+      if (2 <= strVec.size())
+      {
+        tmpElement->m_numPrefix = strVec[0];
+        tmpElement->m_numSuffix = strVec[1];
+      }
+    }
     m_listElements[id] = tmpElement;
   }
 }

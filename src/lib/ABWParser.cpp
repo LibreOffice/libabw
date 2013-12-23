@@ -27,7 +27,18 @@ namespace libabw
 namespace
 {
 
-bool findBool(const std::string &str, bool &res)
+static void clearListElements(std::map<librevenge::RVNGString, ABWListElement *> &listElements)
+{
+  for (std::map<librevenge::RVNGString, ABWListElement *>::iterator i = listElements.begin();
+       i != listElements.end(); ++i)
+  {
+    if (i->second)
+      delete i->second;
+  }
+  listElements.clear();
+}
+
+static bool findBool(const std::string &str, bool &res)
 {
   using namespace ::boost::spirit::classic;
 
@@ -53,8 +64,6 @@ bool findBool(const std::string &str, bool &res)
                space_p).full;
 }
 
-
-
 } // anonymous namespace
 
 } // namespace libabw
@@ -73,26 +82,35 @@ bool libabw::ABWParser::parse()
   if (!m_input)
     return false;
 
+  std::map<librevenge::RVNGString, ABWListElement *> listElements;
   try
   {
     std::map<int, int> tableSizes;
     std::map<std::string, ABWData> data;
-    ABWStylesCollector stylesCollector(tableSizes, data);
+    ABWStylesCollector stylesCollector(tableSizes, data, listElements);
     m_collector = &stylesCollector;
     m_input->seek(0, librevenge::RVNG_SEEK_SET);
     if (!processXmlDocument(m_input))
+    {
+      clearListElements(listElements);
       return false;
+    }
 
-    ABWContentCollector contentCollector(m_iface, tableSizes, data);
+    ABWContentCollector contentCollector(m_iface, tableSizes, data, listElements);
     m_collector = &contentCollector;
     m_input->seek(0, librevenge::RVNG_SEEK_SET);
     if (!processXmlDocument(m_input))
+    {
+      clearListElements(listElements);
       return false;
+    }
 
+    clearListElements(listElements);
     return true;
   }
   catch (...)
   {
+    clearListElements(listElements);
     return false;
   }
 }

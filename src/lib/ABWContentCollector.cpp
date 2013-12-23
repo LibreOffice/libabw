@@ -478,7 +478,9 @@ libabw::ABWContentParsingState::~ABWContentParsingState()
 {
 }
 
-libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes, const std::map<std::string, ABWData> &data) :
+libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes,
+                                                 const std::map<std::string, ABWData> &data,
+                                                 const std::map<librevenge::RVNGString, ABWListElement *> &listElements) :
   m_ps(new ABWContentParsingState),
   m_iface(iface),
   m_parsingStates(),
@@ -487,7 +489,8 @@ libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *
   m_data(data),
   m_tableSizes(tableSizes),
   m_tableCounter(0),
-  m_outputElements()
+  m_outputElements(),
+  m_listElements(listElements)
 {
 }
 
