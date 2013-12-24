@@ -73,7 +73,7 @@ public:
   // collector functions
 
   virtual void collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props) = 0;
-  virtual void collectParagraphProperties(const char *style, const char *props) = 0;
+  virtual void collectParagraphProperties(const char *level, const char *listid, const char *style, const char *props) = 0;
   virtual void collectSectionProperties(const char *footer, const char *footerLeft, const char *footerFirst,
                                         const char *footerLast, const char *header, const char *headerLeft,
                                         const char *headerFirst, const char *headerLast, const char *props) = 0;

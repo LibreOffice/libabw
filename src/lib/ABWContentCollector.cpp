@@ -480,7 +480,7 @@ libabw::ABWContentParsingState::~ABWContentParsingState()
 
 libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes,
                                                  const std::map<std::string, ABWData> &data,
-                                                 const std::map<librevenge::RVNGString, ABWListElement *> &listElements) :
+                                                 std::map<librevenge::RVNGString, ABWListElement *> &listElements) :
   m_ps(new ABWContentParsingState),
   m_iface(iface),
   m_parsingStates(),
@@ -581,7 +581,7 @@ std::string libabw::ABWContentCollector::_findCharacterProperty(const char *name
   return std::string();
 }
 
-void libabw::ABWContentCollector::collectParagraphProperties(const char *style, const char *props)
+void libabw::ABWContentCollector::collectParagraphProperties(const char * /* level */, const char * /* listid */, const char *style, const char *props)
 {
   m_ps->m_currentParagraphStyle.clear();
   if (style)

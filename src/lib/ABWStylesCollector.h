@@ -52,7 +52,7 @@ public:
   // collector functions
 
   void collectTextStyle(const char *, const char *, const char *, const char *) {}
-  void collectParagraphProperties(const char *, const char *) {}
+  void collectParagraphProperties(const char *, const char *, const char *, const char *) {}
   void collectSectionProperties(const char *, const char *, const char *, const char *,
                                 const char *, const char *, const char *, const char *,
                                 const char *) {}

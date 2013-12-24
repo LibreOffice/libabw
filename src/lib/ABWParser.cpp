@@ -557,10 +557,16 @@ void libabw::ABWParser::readA(xmlTextReaderPtr reader)
 
 void libabw::ABWParser::readP(xmlTextReaderPtr reader)
 {
+  xmlChar *level = xmlTextReaderGetAttribute(reader, BAD_CAST("level"));
+  xmlChar *listid = xmlTextReaderGetAttribute(reader, BAD_CAST("listid"));
   xmlChar *style = xmlTextReaderGetAttribute(reader, BAD_CAST("style"));
   xmlChar *props = xmlTextReaderGetAttribute(reader, BAD_CAST("props"));
   if (m_collector)
-    m_collector->collectParagraphProperties((const char *)style, (const char *)props);
+    m_collector->collectParagraphProperties((const char *)level, (const char *)listid, (const char *)style, (const char *)props);
+  if (level)
+    xmlFree(level);
+  if (listid)
+    xmlFree(listid);
   if (style)
     xmlFree(style);
   if (props)

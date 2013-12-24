@@ -95,6 +95,66 @@ static void parsePropString(const std::string &str, std::map<std::string, std::s
   }
 }
 
+static int abw_unichar_to_utf8(uint32_t c, char *outbuf)
+{
+  uint8_t len = 1;
+  uint8_t first = 0;
+
+  if (c < 0x80)
+  {
+    first = 0;
+    len = 1;
+  }
+  else if (c < 0x800)
+  {
+    first = 0xc0;
+    len = 2;
+  }
+  else if (c < 0x10000)
+  {
+    first = 0xe0;
+    len = 3;
+  }
+  else if (c < 0x200000)
+  {
+    first = 0xf0;
+    len = 4;
+  }
+  else if (c < 0x4000000)
+  {
+    first = 0xf8;
+    len = 5;
+  }
+  else
+  {
+    first = 0xfc;
+    len = 6;
+  }
+
+  if (outbuf)
+  {
+    for (uint8_t i = (uint8_t)(len - 1); i > 0; --i)
+    {
+      outbuf[i] = (char)((c & 0x3f) | 0x80);
+      c >>= 6;
+    }
+    outbuf[0] = (char)(c | first);
+  }
+
+  return len;
+}
+
+static void appendUCS4(librevenge::RVNGString &str, uint32_t ucs4)
+{
+  int charLength = abw_unichar_to_utf8(ucs4, 0);
+  char *utf8 = new char[charLength+1];
+  utf8[charLength] = '\0';
+  abw_unichar_to_utf8(ucs4, utf8);
+  str.append(utf8);
+
+  delete[] utf8;
+}
+
 } // anonymous namespace
 
 } // namespace libabw
@@ -212,17 +272,41 @@ void libabw::ABWStylesCollector::collectList(const char *id, const char *, const
     switch (intType)
     {
     case BULLETED_LIST:
+      appendUCS4(tmpElement->m_bulletChar, 0x2022);
+      break;
     case DASHED_LIST:
+      appendUCS4(tmpElement->m_bulletChar, 0x002D);
+      break;
     case SQUARE_LIST:
+      appendUCS4(tmpElement->m_bulletChar, 0x25A0);
+      break;
     case TRIANGLE_LIST:
+      appendUCS4(tmpElement->m_bulletChar, 0x25B2);
+      break;
     case DIAMOND_LIST:
+      appendUCS4(tmpElement->m_bulletChar, 0x2666);
+      break;
     case STAR_LIST:
+      appendUCS4(tmpElement->m_bulletChar, 0x2733);
+      break;
     case IMPLIES_LIST:
+      appendUCS4(tmpElement->m_bulletChar, 0x21D2);
+      break;
     case TICK_LIST:
+      appendUCS4(tmpElement->m_bulletChar, 0x2713);
+      break;
     case BOX_LIST:
+      appendUCS4(tmpElement->m_bulletChar, 0x2752);
+      break;
     case HAND_LIST:
+      appendUCS4(tmpElement->m_bulletChar, 0x261E);
+      break;
     case HEART_LIST:
+      appendUCS4(tmpElement->m_bulletChar, 0x2665);
+      break;
     case ARROWHEAD_LIST:
+      appendUCS4(tmpElement->m_bulletChar, 0x27A3);
+      break;
     default:
       tmpElement->m_bulletChar = "*"; // for the while
       break;

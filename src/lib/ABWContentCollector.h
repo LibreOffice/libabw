@@ -108,13 +108,13 @@ class ABWContentCollector : public ABWCollector
 public:
   ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes,
                       const std::map<std::string, ABWData> &data,
-                      const std::map<librevenge::RVNGString, ABWListElement *> &listElements);
+                      std::map<librevenge::RVNGString, ABWListElement *> &listElements);
   virtual ~ABWContentCollector();
 
   // collector functions
 
   void collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props);
-  void collectParagraphProperties(const char *style, const char *props);
+  void collectParagraphProperties(const char *level, const char *listid, const char *style, const char *props);
   void collectSectionProperties(const char *footer, const char *footerLeft, const char *footerFirst, const char *footerLast,
                                 const char *header, const char *headerLeft, const char *headerFirst, const char *headerLast,
                                 const char *props);
@@ -195,7 +195,7 @@ private:
   const std::map<int, int> &m_tableSizes;
   int m_tableCounter;
   ABWOutputElements m_outputElements;
-  const std::map<librevenge::RVNGString, ABWListElement *> &m_listElements;
+  std::map<librevenge::RVNGString, ABWListElement *> &m_listElements;
 };
 
 } // namespace libabw
