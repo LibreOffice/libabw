@@ -208,7 +208,7 @@ void libabw::ABWStylesCollector::collectData(const char *name, const char *mimeT
 
 
 void libabw::ABWStylesCollector::collectList(const char *id, const char *, const char *listDelim,
-                                             const char *, const char *startValue, const char *type)
+                                             const char *parentid, const char *startValue, const char *type)
 {
   using namespace boost;
   using namespace boost::algorithm;
@@ -314,6 +314,8 @@ void libabw::ABWStylesCollector::collectList(const char *id, const char *, const
     }
     m_listElements[id] = tmpElement;
   }
+  if (parentid)
+    m_listElements[id]->m_parentId = parentid;
 }
 
 void libabw::ABWStylesCollector::collectParagraphProperties(const char *level, const char *listid, const char * /* style */, const char *props)

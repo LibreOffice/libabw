@@ -29,6 +29,12 @@ enum ABWUnit
   ABW_PERCENT
 };
 
+enum ABWListType
+{
+  ABW_ORDERED,
+  ABW_UNORDERED
+};
+
 bool findInt(const std::string &str, int &res);
 bool findDouble(const std::string &str, double &res, ABWUnit &unit);
 void parsePropString(const std::string &str, std::map<std::string, std::string> &props);
@@ -50,13 +56,15 @@ struct ABWData
 struct ABWListElement
 {
   ABWListElement()
-    : m_listLevel(-1), m_minLabelWidth(0.0), m_spaceBefore(0.0) {}
+    : m_listLevel(-1), m_minLabelWidth(0.0), m_spaceBefore(0.0), m_parentId() {}
   virtual ~ABWListElement() {}
   virtual void writeOut(librevenge::RVNGPropertyList &propList) const;
+  virtual ABWListType getType() const = 0;
 
   int m_listLevel;
   double m_minLabelWidth;
   double m_spaceBefore;
+  librevenge::RVNGString m_parentId;
 };
 
 struct ABWOrderedListElement : public ABWListElement
@@ -65,6 +73,11 @@ struct ABWOrderedListElement : public ABWListElement
     : ABWListElement(), m_numFormat(), m_numPrefix(), m_numSuffix(), m_startValue(-1) {}
   ~ABWOrderedListElement() {}
   void writeOut(librevenge::RVNGPropertyList &propList) const;
+  ABWListType getType() const
+  {
+    return ABW_ORDERED;
+  }
+
 
   librevenge::RVNGString m_numFormat;
   librevenge::RVNGString m_numPrefix;
@@ -78,6 +91,10 @@ struct ABWUnorderedListElement : public ABWListElement
     : ABWListElement(), m_bulletChar() {}
   ~ABWUnorderedListElement() {}
   void writeOut(librevenge::RVNGPropertyList &propList) const;
+  ABWListType getType() const
+  {
+    return ABW_UNORDERED;
+  }
 
   librevenge::RVNGString m_bulletChar;
 };

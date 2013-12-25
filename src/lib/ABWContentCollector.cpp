@@ -288,6 +288,7 @@ libabw::ABWContentParsingState::ABWContentParsingState() :
 
   m_isSpanOpened(false),
   m_isParagraphOpened(false),
+  m_isListElementOpened(false),
 
   m_currentSectionStyle(),
   m_currentParagraphStyle(),
@@ -330,6 +331,7 @@ libabw::ABWContentParsingState::ABWContentParsingState(const ABWContentParsingSt
 
   m_isSpanOpened(ps.m_isSpanOpened),
   m_isParagraphOpened(ps.m_isParagraphOpened),
+  m_isListElementOpened(ps.m_isListElementOpened),
 
   m_currentSectionStyle(ps.m_currentSectionStyle),
   m_currentParagraphStyle(ps.m_currentParagraphStyle),
@@ -369,7 +371,7 @@ libabw::ABWContentParsingState::~ABWContentParsingState()
 
 libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes,
                                                  const std::map<std::string, ABWData> &data,
-                                                 std::map<librevenge::RVNGString, ABWListElement *> &listElements) :
+                                                 const std::map<librevenge::RVNGString, ABWListElement *> &listElements) :
   m_ps(new ABWContentParsingState),
   m_iface(iface),
   m_parsingStates(),
@@ -1420,4 +1422,18 @@ void libabw::ABWContentCollector::insertImage(const char *dataid, const char *pr
     }
   }
 }
+
+void libabw::ABWContentCollector::_handleListChange()
+{
+}
+
+void libabw::ABWContentCollector::_changeList()
+{
+  if (m_ps->m_isParagraphOpened)
+    _closeParagraph();
+  if (m_ps->m_isListElementOpened)
+    _closeListElement();
+  _handleListChange();
+}
+
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

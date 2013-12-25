@@ -70,6 +70,7 @@ struct ABWContentParsingState
 
   bool m_isSpanOpened;
   bool m_isParagraphOpened;
+  bool m_isListElementOpened;
 
   std::map<std::string, std::string> m_currentSectionStyle;
   std::map<std::string, std::string> m_currentParagraphStyle;
@@ -108,7 +109,7 @@ class ABWContentCollector : public ABWCollector
 public:
   ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes,
                       const std::map<std::string, ABWData> &data,
-                      std::map<librevenge::RVNGString, ABWListElement *> &listElements);
+                      const std::map<librevenge::RVNGString, ABWListElement *> &listElements);
   virtual ~ABWContentCollector();
 
   // collector functions
@@ -163,6 +164,9 @@ private:
   void _openListElement();
   void _closeListElement();
 
+  void _handleListChange();
+  void _changeList();
+
   void _openSpan();
   void _closeSpan();
 
@@ -185,6 +189,7 @@ private:
   std::string _findCellProperty(const char *name);
   std::string _findSectionProperty(const char *name);
 
+
   ABWContentParsingState *m_ps;
   librevenge::RVNGTextInterface *m_iface;
   std::stack<ABWContentParsingState *> m_parsingStates;
@@ -195,7 +200,7 @@ private:
   const std::map<int, int> &m_tableSizes;
   int m_tableCounter;
   ABWOutputElements m_outputElements;
-  std::map<librevenge::RVNGString, ABWListElement *> &m_listElements;
+  const std::map<librevenge::RVNGString, ABWListElement *> &m_listElements;
 };
 
 } // namespace libabw
