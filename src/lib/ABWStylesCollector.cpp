@@ -21,18 +21,6 @@ namespace libabw
 namespace
 {
 
-enum ABWUnit
-{
-  ABW_NONE,
-  ABW_CM,
-  ABW_IN,
-  ABW_MM,
-  ABW_PI,
-  ABW_PT,
-  ABW_PX,
-  ABW_PERCENT
-};
-
 enum ABWListType
 {
   NUMBERED_LIST = 0,
@@ -60,40 +48,6 @@ enum ABWListType
   HEBREW_LIST = 0x81,
   NOT_A_LIST = 0xff
 };
-
-static bool findInt(const std::string &str, int &res)
-{
-  using namespace ::boost::spirit::classic;
-
-  if (str.empty())
-    return false;
-
-  return parse(str.c_str(),
-               //  Begin grammar
-               (
-                 int_p[assign_a(res)]
-               ) >> end_p,
-               //  End grammar
-               space_p).full;
-}
-
-static void parsePropString(const std::string &str, std::map<std::string, std::string> &props)
-{
-  if (str.empty())
-    return;
-
-  std::string propString = boost::trim_copy(str);
-  std::vector<std::string> strVec;
-  boost::algorithm::split(strVec, propString, boost::is_any_of(";"), boost::token_compress_on);
-  for (std::vector<std::string>::size_type i = 0; i < strVec.size(); ++i)
-  {
-    boost::algorithm::trim(strVec[i]);
-    std::vector<std::string> tmpVec;
-    boost::algorithm::split(tmpVec, strVec[i], boost::is_any_of(":"), boost::token_compress_on);
-    if (tmpVec.size() == 2)
-      props[tmpVec[0]] = tmpVec[1];
-  }
-}
 
 static int abw_unichar_to_utf8(uint32_t c, char *outbuf)
 {
@@ -361,4 +315,37 @@ void libabw::ABWStylesCollector::collectList(const char *id, const char *, const
     m_listElements[id] = tmpElement;
   }
 }
+
+void libabw::ABWStylesCollector::collectParagraphProperties(const char *level, const char *listid, const char * /* style */, const char *props)
+{
+  if (listid)
+  {
+    std::map<librevenge::RVNGString, ABWListElement *>::iterator iter = m_listElements.find(listid);
+    if (iter != m_listElements.end() && iter->second)
+    {
+      ABWListElement *listElement = iter->second;
+
+      if (!level || !findInt(level, listElement->m_listLevel))
+        listElement->m_listLevel = 0;
+
+      if (props)
+      {
+        std::map<std::string, std::string> properties;
+        parsePropString(props, properties);
+        std::map<std::string, std::string>::const_iterator i = properties.find("margin-left");
+        ABWUnit unit(ABW_NONE);
+        double marginLeft(0.0);
+        if (i == properties.end() || !findDouble(i->second, marginLeft, unit) || unit != ABW_IN)
+          marginLeft = 0.0;
+        i = properties.find("text-indent");
+        double textIndent(0.0);
+        if (i == properties.end() || !findDouble(i->second, textIndent, unit) || unit != ABW_IN)
+          textIndent = 0.0;
+        listElement->m_minLabelWidth = -textIndent;
+        listElement->m_spaceBefore = marginLeft + textIndent;
+      }
+    }
+  }
+}
+
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

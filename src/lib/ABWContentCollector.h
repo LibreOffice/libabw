@@ -10,11 +10,9 @@
 #ifndef __ABWCONTENTCOLLECTOR_H__
 #define __ABWCONTENTCOLLECTOR_H__
 
-#include <map>
 #include <vector>
 #include <stack>
 #include <set>
-#include <string>
 #include <librevenge/librevenge.h>
 #include "ABWOutputElements.h"
 #include "ABWCollector.h"
@@ -99,6 +97,8 @@ struct ABWContentParsingState
   bool m_deferredColumnBreak;
 
   bool m_isNote;
+
+  int m_currentListLevel;
 
   std::stack<ABWContentTableState> m_tableStates;
 };

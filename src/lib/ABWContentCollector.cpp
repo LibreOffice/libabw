@@ -21,101 +21,6 @@ namespace libabw
 namespace
 {
 
-enum ABWUnit
-{
-  ABW_NONE,
-  ABW_CM,
-  ABW_IN,
-  ABW_MM,
-  ABW_PI,
-  ABW_PT,
-  ABW_PX,
-  ABW_PERCENT
-};
-
-static bool findDouble(const std::string &str, double &res, ABWUnit &unit)
-{
-  using namespace ::boost::spirit::classic;
-
-  if (str.empty())
-    return false;
-
-  unit = ABW_NONE;
-
-  if (!parse(str.c_str(),
-             //  Begin grammar
-             (
-               real_p[assign_a(res)] >>
-               (
-                 str_p("cm")[assign_a(unit,ABW_CM)]
-                 |
-                 str_p("inch")[assign_a(unit,ABW_IN)]
-                 |
-                 str_p("in")[assign_a(unit,ABW_IN)]
-                 |
-                 str_p("mm")[assign_a(unit,ABW_MM)]
-                 |
-                 str_p("pi")[assign_a(unit,ABW_PI)]
-                 |
-                 str_p("pt")[assign_a(unit,ABW_PT)]
-                 |
-                 str_p("px")[assign_a(unit,ABW_PT)]
-                 |
-                 str_p("%")[assign_a(unit,ABW_PERCENT)]
-                 |
-                 eps_p
-               )
-             ) >> end_p,
-             //  End grammar
-             space_p).full)
-  {
-    return false;
-  }
-
-  if (unit == ABW_PERCENT)
-    res /= 100.0;
-  if (unit == ABW_PI)
-  {
-    res = res / 6.0;
-    unit = ABW_IN;
-  }
-  if (unit == ABW_PT || unit == ABW_PX)
-  {
-    res = res / 72.0;
-    unit = ABW_IN;
-  }
-  if (unit == ABW_CM)
-  {
-    res = res / 2.54;
-    unit = ABW_IN;
-  }
-  if (unit == ABW_MM)
-  {
-    res = res / 25.4;
-    unit = ABW_IN;
-  }
-  if (unit == ABW_NONE)
-    unit = ABW_PERCENT;
-
-  return true;
-}
-
-static bool findInt(const std::string &str, int &res)
-{
-  using namespace ::boost::spirit::classic;
-
-  if (str.empty())
-    return false;
-
-  return parse(str.c_str(),
-               //  Begin grammar
-               (
-                 int_p[assign_a(res)]
-               ) >> end_p,
-               //  End grammar
-               space_p).full;
-}
-
 static std::string getColor(const std::string &s)
 {
   if (s.empty())
@@ -134,24 +39,6 @@ static std::string getColor(const std::string &s)
   std::string out = ("#");
   out.append(s);
   return out;
-}
-
-static void parsePropString(const std::string &str, std::map<std::string, std::string> &props)
-{
-  if (str.empty())
-    return;
-
-  std::string propString(boost::trim_copy(str));
-  std::vector<std::string> strVec;
-  boost::algorithm::split(strVec, propString, boost::is_any_of(";"), boost::token_compress_on);
-  for (std::vector<std::string>::size_type i = 0; i < strVec.size(); ++i)
-  {
-    boost::algorithm::trim(strVec[i]);
-    std::vector<std::string> tmpVec;
-    boost::algorithm::split(tmpVec, strVec[i], boost::is_any_of(":"), boost::token_compress_on);
-    if (tmpVec.size() == 2)
-      props[tmpVec[0]] = tmpVec[1];
-  }
 }
 
 static void separateTabsAndInsertText(ABWOutputElements &outputElements, const librevenge::RVNGString &text)
@@ -428,6 +315,7 @@ libabw::ABWContentParsingState::ABWContentParsingState() :
   m_deferredColumnBreak(false),
 
   m_isNote(false),
+  m_currentListLevel(-1),
 
   m_tableStates()
 {
@@ -469,6 +357,7 @@ libabw::ABWContentParsingState::ABWContentParsingState(const ABWContentParsingSt
   m_deferredColumnBreak(ps.m_deferredColumnBreak),
 
   m_isNote(ps.m_isNote),
+  m_currentListLevel(ps.m_currentListLevel),
 
   m_tableStates(ps.m_tableStates)
 {

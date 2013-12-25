@@ -10,10 +10,28 @@
 #ifndef __ABWCOLLECTOR_H__
 #define __ABWCOLLECTOR_H__
 
+#include <string>
+#include <map>
 #include <librevenge/librevenge.h>
 
 namespace libabw
 {
+
+enum ABWUnit
+{
+  ABW_NONE,
+  ABW_CM,
+  ABW_IN,
+  ABW_MM,
+  ABW_PI,
+  ABW_PT,
+  ABW_PX,
+  ABW_PERCENT
+};
+
+bool findInt(const std::string &str, int &res);
+bool findDouble(const std::string &str, double &res, ABWUnit &unit);
+void parsePropString(const std::string &str, std::map<std::string, std::string> &props);
 
 struct ABWData
 {

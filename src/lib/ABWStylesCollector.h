@@ -10,9 +10,7 @@
 #ifndef __ABWSTYLESCOLLECTOR_H__
 #define __ABWSTYLESCOLLECTOR_H__
 
-#include <map>
 #include <stack>
-#include <string>
 #include <librevenge/librevenge.h>
 #include "ABWCollector.h"
 
@@ -52,7 +50,7 @@ public:
   // collector functions
 
   void collectTextStyle(const char *, const char *, const char *, const char *) {}
-  void collectParagraphProperties(const char *, const char *, const char *, const char *) {}
+  void collectParagraphProperties(const char *level, const char *listid, const char *style, const char *props);
   void collectSectionProperties(const char *, const char *, const char *, const char *,
                                 const char *, const char *, const char *, const char *,
                                 const char *) {}
