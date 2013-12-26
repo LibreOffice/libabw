@@ -1436,4 +1436,8 @@ void libabw::ABWContentCollector::_changeList()
   _handleListChange();
 }
 
+void libabw::ABWContentCollector::_closeListElement()
+{
+}
+
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */
