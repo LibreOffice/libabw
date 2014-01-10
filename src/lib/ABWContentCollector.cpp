@@ -316,9 +316,10 @@ libabw::ABWContentParsingState::ABWContentParsingState() :
   m_deferredColumnBreak(false),
 
   m_isNote(false),
-  m_currentListLevel(-1),
+  m_currentListLevel(0),
 
-  m_tableStates()
+  m_tableStates(),
+  m_listLevels()
 {
 }
 
@@ -361,7 +362,8 @@ libabw::ABWContentParsingState::ABWContentParsingState(const ABWContentParsingSt
   m_isNote(ps.m_isNote),
   m_currentListLevel(ps.m_currentListLevel),
 
-  m_tableStates(ps.m_tableStates)
+  m_tableStates(ps.m_tableStates),
+  m_listLevels(ps.m_listLevels)
 {
 }
 
@@ -1425,6 +1427,32 @@ void libabw::ABWContentCollector::insertImage(const char *dataid, const char *pr
 
 void libabw::ABWContentCollector::_handleListChange()
 {
+  unsigned oldListLevel;
+  if (m_ps->m_listLevels.empty())
+    oldListLevel = 0;
+  else
+    oldListLevel = m_ps->m_listLevels.top().first;
+
+  if (m_ps->m_currentListLevel > oldListLevel)
+    _recurseListLevels(oldListLevel, m_ps->m_currentListLevel);
+  else if (m_ps->m_currentListLevel < oldListLevel)
+  {
+    while (!m_ps->m_listLevels.empty() && m_ps->m_listLevels.top().first > m_ps->m_currentListLevel)
+    {
+      if (!m_ps->m_listLevels.top().second || m_ps->m_listLevels.top().second->getType() == ABW_UNORDERED)
+        m_outputElements.addCloseUnorderedListLevel();
+      else
+        m_outputElements.addCloseOrderedListLevel();
+      ABW_DEBUG_MSG(("Popped level %i off the list level stack\n", m_ps->m_listLevels.top().first));
+      m_ps->m_listLevels.pop();
+    }
+  }
+}
+
+void libabw::ABWContentCollector::_recurseListLevels(unsigned oldLevel, unsigned newLevel)
+{
+  (void)oldLevel;
+  (void)newLevel;
 }
 
 void libabw::ABWContentCollector::_changeList()

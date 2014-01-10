@@ -87,6 +87,34 @@ public:
   }
 };
 
+class ABWCloseListElementElement : public ABWOutputElement
+{
+public:
+  ABWCloseListElementElement() {}
+  ~ABWCloseListElementElement() {}
+  void write(librevenge::RVNGTextInterface *iface,
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
+  ABWOutputElement *clone()
+  {
+    return new ABWCloseListElementElement();
+  }
+};
+
+class ABWCloseOrderedListLevelElement : public ABWOutputElement
+{
+public:
+  ABWCloseOrderedListLevelElement() {}
+  ~ABWCloseOrderedListLevelElement() {}
+  void write(librevenge::RVNGTextInterface *iface,
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
+  ABWOutputElement *clone()
+  {
+    return new ABWCloseOrderedListLevelElement();
+  }
+};
+
 class ABWClosePageSpanElement : public ABWOutputElement
 {
 public:
@@ -182,6 +210,20 @@ public:
   ABWOutputElement *clone()
   {
     return new ABWCloseTableRowElement();
+  }
+};
+
+class ABWCloseUnorderedListLevelElement : public ABWOutputElement
+{
+public:
+  ABWCloseUnorderedListLevelElement() {}
+  ~ABWCloseUnorderedListLevelElement() {}
+  void write(librevenge::RVNGTextInterface *iface,
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
+  ABWOutputElement *clone()
+  {
+    return new ABWCloseUnorderedListLevelElement();
   }
 };
 
@@ -537,6 +579,22 @@ void libabw::ABWCloseLinkElement::write(librevenge::RVNGTextInterface *iface,
     iface->closeLink();
 }
 
+void libabw::ABWCloseListElementElement::write(librevenge::RVNGTextInterface *iface,
+                                               const std::map<int, std::list<ABWOutputElement *> > *,
+                                               const std::map<int, std::list<ABWOutputElement *> > *) const
+{
+  if (iface)
+    iface->closeLink();
+}
+
+void libabw::ABWCloseOrderedListLevelElement::write(librevenge::RVNGTextInterface *iface,
+                                                    const std::map<int, std::list<ABWOutputElement *> > *,
+                                                    const std::map<int, std::list<ABWOutputElement *> > *) const
+{
+  if (iface)
+    iface->closeOrderedListLevel();
+}
+
 void libabw::ABWClosePageSpanElement::write(librevenge::RVNGTextInterface *iface,
                                             const std::map<int, std::list<ABWOutputElement *> > *,
                                             const std::map<int, std::list<ABWOutputElement *> > *) const
@@ -591,6 +649,14 @@ void libabw::ABWCloseTableRowElement::write(librevenge::RVNGTextInterface *iface
 {
   if (iface)
     iface->closeTableRow();
+}
+
+void libabw::ABWCloseUnorderedListLevelElement::write(librevenge::RVNGTextInterface *iface,
+                                                      const std::map<int, std::list<ABWOutputElement *> > *,
+                                                      const std::map<int, std::list<ABWOutputElement *> > *) const
+{
+  if (iface)
+    iface->closeUnorderedListLevel();
 }
 
 void libabw::ABWInsertBinaryObjectElement::write(librevenge::RVNGTextInterface *iface,
@@ -848,6 +914,18 @@ void libabw::ABWOutputElements::addCloseLink()
     m_elements->push_back(new ABWCloseLinkElement());
 }
 
+void libabw::ABWOutputElements::addCloseListElement()
+{
+  if (m_elements)
+    m_elements->push_back(new ABWCloseListElementElement());
+}
+
+void libabw::ABWOutputElements::addCloseOrderedListLevel()
+{
+  if (m_elements)
+    m_elements->push_back(new ABWCloseOrderedListLevelElement());
+}
+
 void libabw::ABWOutputElements::addClosePageSpan()
 {
   if (m_elements)
@@ -888,6 +966,12 @@ void libabw::ABWOutputElements::addCloseTableRow()
 {
   if (m_elements)
     m_elements->push_back(new ABWCloseTableRowElement());
+}
+
+void libabw::ABWOutputElements::addCloseUnorderedListLevel()
+{
+  if (m_elements)
+    m_elements->push_back(new ABWCloseUnorderedListLevelElement());
 }
 
 void libabw::ABWOutputElements::addInsertBinaryObject(const librevenge::RVNGPropertyList &propList)

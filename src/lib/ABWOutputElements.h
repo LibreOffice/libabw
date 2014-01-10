@@ -32,6 +32,8 @@ public:
   void addCloseFrame();
   void addCloseHeader();
   void addCloseLink();
+  void addCloseListElement();
+  void addCloseOrderedListLevel();
   void addClosePageSpan();
   void addCloseParagraph();
   void addCloseSection();
@@ -39,6 +41,7 @@ public:
   void addCloseTable();
   void addCloseTableCell();
   void addCloseTableRow();
+  void addCloseUnorderedListLevel();
   void addInsertBinaryObject(const librevenge::RVNGPropertyList &propList);
   void addInsertCoveredTableCell(const librevenge::RVNGPropertyList &propList);
   void addInsertLineBreak();
@@ -51,6 +54,8 @@ public:
   void addOpenFrame(const librevenge::RVNGPropertyList &propList);
   void addOpenHeader(const librevenge::RVNGPropertyList &propList, int id);
   void addOpenLink(const librevenge::RVNGPropertyList &propList);
+  void addOpenListElement(const librevenge::RVNGPropertyList &propList);
+  void addOpenOrderedListLevel(const librevenge::RVNGPropertyList &propList);
   void addOpenPageSpan(const librevenge::RVNGPropertyList &propList,
                        int footer, int footerLeft, int footerFirst, int footerLast,
                        int header, int headerLeft, int headerFirst, int headerLast);
@@ -60,6 +65,7 @@ public:
   void addOpenTable(const librevenge::RVNGPropertyList &propList);
   void addOpenTableCell(const librevenge::RVNGPropertyList &propList);
   void addOpenTableRow(const librevenge::RVNGPropertyList &propList);
+  void addOpenUnorderedListLevel(const librevenge::RVNGPropertyList &propList);
   void addStartDocument(const librevenge::RVNGPropertyList &propList);
   bool empty() const
   {

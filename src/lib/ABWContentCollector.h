@@ -99,9 +99,10 @@ struct ABWContentParsingState
 
   bool m_isNote;
 
-  int m_currentListLevel;
+  unsigned m_currentListLevel;
 
   std::stack<ABWContentTableState> m_tableStates;
+  std::stack<std::pair<unsigned, ABWListElement *> > m_listLevels;
 };
 
 class ABWContentCollector : public ABWCollector
@@ -166,6 +167,7 @@ private:
 
   void _handleListChange();
   void _changeList();
+  void _recurseListLevels(unsigned oldLevel, unsigned newLevel);
 
   void _openSpan();
   void _closeSpan();
