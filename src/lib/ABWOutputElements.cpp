@@ -418,6 +418,32 @@ private:
   librevenge::RVNGPropertyList m_propList;
 };
 
+class ABWOpenListElementElement : public ABWOutputElement
+{
+public:
+  ABWOpenListElementElement(const librevenge::RVNGPropertyList &propList) :
+    m_propList(propList) {}
+  ~ABWOpenListElementElement() {}
+  void write(librevenge::RVNGTextInterface *iface,
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
+private:
+  librevenge::RVNGPropertyList m_propList;
+};
+
+class ABWOpenOrderedListLevelElement : public ABWOutputElement
+{
+public:
+  ABWOpenOrderedListLevelElement(const librevenge::RVNGPropertyList &propList) :
+    m_propList(propList) {}
+  ~ABWOpenOrderedListLevelElement() {}
+  void write(librevenge::RVNGTextInterface *iface,
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
+private:
+  librevenge::RVNGPropertyList m_propList;
+};
+
 class ABWOpenPageSpanElement : public ABWOutputElement
 {
 public:
@@ -529,6 +555,19 @@ private:
   librevenge::RVNGPropertyList m_propList;
 };
 
+class ABWOpenUnorderedListLevelElement : public ABWOutputElement
+{
+public:
+  ABWOpenUnorderedListLevelElement(const librevenge::RVNGPropertyList &propList) :
+    m_propList(propList) {}
+  ~ABWOpenUnorderedListLevelElement() {}
+  void write(librevenge::RVNGTextInterface *iface,
+             const std::map<int, std::list<ABWOutputElement *> > *footers,
+             const std::map<int, std::list<ABWOutputElement *> > *headers) const;
+private:
+  librevenge::RVNGPropertyList m_propList;
+};
+
 } // namespace libabw
 
 void libabw::ABWCloseEndnoteElement::write(librevenge::RVNGTextInterface *iface,
@@ -584,7 +623,7 @@ void libabw::ABWCloseListElementElement::write(librevenge::RVNGTextInterface *if
                                                const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
-    iface->closeLink();
+    iface->closeListElement();
 }
 
 void libabw::ABWCloseOrderedListLevelElement::write(librevenge::RVNGTextInterface *iface,
@@ -747,12 +786,28 @@ void libabw::ABWOpenHeaderElement::write(librevenge::RVNGTextInterface *iface,
     iface->openHeader(m_propList);
 }
 
+void libabw::ABWOpenListElementElement::write(librevenge::RVNGTextInterface *iface,
+                                              const std::map<int, std::list<ABWOutputElement *> > *,
+                                              const std::map<int, std::list<ABWOutputElement *> > *) const
+{
+  if (iface)
+    iface->openListElement(m_propList);
+}
+
 void libabw::ABWOpenLinkElement::write(librevenge::RVNGTextInterface *iface,
                                        const std::map<int, std::list<ABWOutputElement *> > *,
                                        const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
     iface->openLink(m_propList);
+}
+
+void libabw::ABWOpenOrderedListLevelElement::write(librevenge::RVNGTextInterface *iface,
+                                                   const std::map<int, std::list<ABWOutputElement *> > *,
+                                                   const std::map<int, std::list<ABWOutputElement *> > *) const
+{
+  if (iface)
+    iface->openOrderedListLevel(m_propList);
 }
 
 void libabw::ABWOpenPageSpanElement::write(librevenge::RVNGTextInterface *iface,
@@ -841,6 +896,13 @@ void libabw::ABWOpenTableRowElement::write(librevenge::RVNGTextInterface *iface,
     iface->openTableRow(m_propList);
 }
 
+void libabw::ABWOpenUnorderedListLevelElement::write(librevenge::RVNGTextInterface *iface,
+                                                     const std::map<int, std::list<ABWOutputElement *> > *,
+                                                     const std::map<int, std::list<ABWOutputElement *> > *) const
+{
+  if (iface)
+    iface->openUnorderedListLevel(m_propList);
+}
 
 // ABWOutputElements
 
@@ -1047,10 +1109,22 @@ void libabw::ABWOutputElements::addOpenHeader(const librevenge::RVNGPropertyList
     m_elements->push_back(new ABWOpenHeaderElement(propList));
 }
 
+void libabw::ABWOutputElements::addOpenListElement(const librevenge::RVNGPropertyList &propList)
+{
+  if (m_elements)
+    m_elements->push_back(new ABWOpenListElementElement(propList));
+}
+
 void libabw::ABWOutputElements::addOpenLink(const librevenge::RVNGPropertyList &propList)
 {
   if (m_elements)
     m_elements->push_back(new ABWOpenLinkElement(propList));
+}
+
+void libabw::ABWOutputElements::addOpenOrderedListLevel(const librevenge::RVNGPropertyList &propList)
+{
+  if (m_elements)
+    m_elements->push_back(new ABWOpenOrderedListLevelElement(propList));
 }
 
 void libabw::ABWOutputElements::addOpenPageSpan(const librevenge::RVNGPropertyList &propList,
@@ -1096,6 +1170,12 @@ void libabw::ABWOutputElements::addOpenTableRow(const librevenge::RVNGPropertyLi
 {
   if (m_elements)
     m_elements->push_back(new ABWOpenTableRowElement(propList));
+}
+
+void libabw::ABWOutputElements::addOpenUnorderedListLevel(const librevenge::RVNGPropertyList &propList)
+{
+  if (m_elements)
+    m_elements->push_back(new ABWOpenUnorderedListLevelElement(propList));
 }
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

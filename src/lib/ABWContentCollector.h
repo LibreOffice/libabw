@@ -99,10 +99,11 @@ struct ABWContentParsingState
 
   bool m_isNote;
 
-  unsigned m_currentListLevel;
+  int m_currentListLevel;
+  librevenge::RVNGString m_currentListId;
 
   std::stack<ABWContentTableState> m_tableStates;
-  std::stack<std::pair<unsigned, ABWListElement *> > m_listLevels;
+  std::stack<std::pair<int, ABWListElement *> > m_listLevels;
 };
 
 class ABWContentCollector : public ABWCollector
@@ -116,13 +117,13 @@ public:
   // collector functions
 
   void collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props);
-  void collectParagraphProperties(const char *level, const char *listid, const char *style, const char *props);
+  void collectParagraphProperties(const char *level, const char *listid, const char *parentid, const char *style, const char *props);
   void collectSectionProperties(const char *footer, const char *footerLeft, const char *footerFirst, const char *footerLast,
                                 const char *header, const char *headerLeft, const char *headerFirst, const char *headerLast,
                                 const char *props);
   void collectCharacterProperties(const char *style, const char *props);
   void collectPageSize(const char *width, const char *height, const char *units, const char *pageScale);
-  void closeParagraph();
+  void closeParagraphOrListElement();
   void closeSpan();
   void openLink(const char *href);
   void closeLink();
@@ -167,7 +168,7 @@ private:
 
   void _handleListChange();
   void _changeList();
-  void _recurseListLevels(unsigned oldLevel, unsigned newLevel);
+  void _recurseListLevels(int oldLevel, int newLevel, const librevenge::RVNGString &listId);
 
   void _openSpan();
   void _closeSpan();
@@ -191,6 +192,7 @@ private:
   std::string _findCellProperty(const char *name);
   std::string _findSectionProperty(const char *name);
 
+  void _fillParagraphProperties(librevenge::RVNGPropertyList &propList);
 
   ABWContentParsingState *m_ps;
   librevenge::RVNGTextInterface *m_iface;

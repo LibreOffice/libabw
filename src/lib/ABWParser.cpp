@@ -204,7 +204,7 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
     {
       m_inParagraph = false;
       if (m_collector)
-        m_collector->closeParagraph();
+        m_collector->closeParagraphOrListElement();
     }
     break;
   case XML_C:
@@ -559,14 +559,18 @@ void libabw::ABWParser::readP(xmlTextReaderPtr reader)
 {
   xmlChar *level = xmlTextReaderGetAttribute(reader, BAD_CAST("level"));
   xmlChar *listid = xmlTextReaderGetAttribute(reader, BAD_CAST("listid"));
+  xmlChar *parentid = xmlTextReaderGetAttribute(reader, BAD_CAST("listid"));
   xmlChar *style = xmlTextReaderGetAttribute(reader, BAD_CAST("style"));
   xmlChar *props = xmlTextReaderGetAttribute(reader, BAD_CAST("props"));
   if (m_collector)
-    m_collector->collectParagraphProperties((const char *)level, (const char *)listid, (const char *)style, (const char *)props);
+    m_collector->collectParagraphProperties((const char *)level, (const char *)listid, (const char *)parentid,
+                                            (const char *)style, (const char *)props);
   if (level)
     xmlFree(level);
   if (listid)
     xmlFree(listid);
+  if (parentid)
+    xmlFree(parentid);
   if (style)
     xmlFree(style);
   if (props)

@@ -50,13 +50,14 @@ public:
   // collector functions
 
   void collectTextStyle(const char *, const char *, const char *, const char *) {}
-  void collectParagraphProperties(const char *level, const char *listid, const char *style, const char *props);
+  void collectParagraphProperties(const char *level, const char *listid, const char *parentid,
+                                  const char *style, const char *props);
   void collectSectionProperties(const char *, const char *, const char *, const char *,
                                 const char *, const char *, const char *, const char *,
                                 const char *) {}
   void collectCharacterProperties(const char *, const char *) {}
   void collectPageSize(const char *, const char *, const char *, const char *) {}
-  void closeParagraph() {}
+  void closeParagraphOrListElement() {}
   void closeSpan() {}
   void openLink(const char *) {}
   void closeLink() {}
@@ -88,6 +89,8 @@ private:
   ABWStylesCollector &operator=(const ABWStylesCollector &);
 
   std::string _findCellProperty(const char *name);
+  void _processList(const char *id, const char *listDelim,
+                    const char *parentid, const char *startValue, int type);
 
   ABWStylesParsingState *m_ps;
   std::map<int, int> &m_tableSizes;

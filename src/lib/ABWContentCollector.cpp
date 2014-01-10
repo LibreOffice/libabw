@@ -317,6 +317,7 @@ libabw::ABWContentParsingState::ABWContentParsingState() :
 
   m_isNote(false),
   m_currentListLevel(0),
+  m_currentListId(),
 
   m_tableStates(),
   m_listLevels()
@@ -361,6 +362,7 @@ libabw::ABWContentParsingState::ABWContentParsingState(const ABWContentParsingSt
 
   m_isNote(ps.m_isNote),
   m_currentListLevel(ps.m_currentListLevel),
+  m_currentListId(ps.m_currentListId),
 
   m_tableStates(ps.m_tableStates),
   m_listLevels(ps.m_listLevels)
@@ -474,8 +476,17 @@ std::string libabw::ABWContentCollector::_findCharacterProperty(const char *name
   return std::string();
 }
 
-void libabw::ABWContentCollector::collectParagraphProperties(const char * /* level */, const char * /* listid */, const char *style, const char *props)
+void libabw::ABWContentCollector::collectParagraphProperties(const char *level, const char *listid, const char * /*parentid*/, const char *style, const char *props)
 {
+  _closeParagraph();
+  _closeListElement();
+  if (!level || !findInt(level, m_ps->m_currentListLevel) || m_ps->m_currentListLevel < 1)
+    m_ps->m_currentListLevel = 0;
+  if (listid)
+    m_ps->m_currentListId = listid;
+  else
+    m_ps->m_currentListId.clear();
+
   m_ps->m_currentParagraphStyle.clear();
   if (style)
     _recurseTextProperties(style, m_ps->m_currentParagraphStyle);
@@ -682,8 +693,11 @@ void libabw::ABWContentCollector::endDocument()
     if (!m_ps->m_isPageSpanOpened)
       _openSpan();
 
-    if (m_ps->m_isParagraphOpened)
-      _closeParagraph();
+    _closeParagraph();
+    _closeListElement();
+
+    m_ps->m_currentListLevel = 0;
+    _changeList(); // flush the list
 
     // close the document nice and tight
     _closeSection();
@@ -702,17 +716,20 @@ void libabw::ABWContentCollector::endDocument()
 
 void libabw::ABWContentCollector::endSection()
 {
+  m_ps->m_currentListLevel = 0;
+  _changeList(); // flush the list exterior
   _closeHeader();
   _closeFooter();
   _closeSection();
 }
 
-void libabw::ABWContentCollector::closeParagraph()
+void libabw::ABWContentCollector::closeParagraphOrListElement()
 {
   // we have an empty paragraph, insert it
-  if (!m_ps->m_isParagraphOpened)
+  if (!m_ps->m_isParagraphOpened && !m_ps->m_isListElementOpened)
     _openSpan();
   _closeParagraph();
+  _closeListElement();
   m_ps->m_currentParagraphStyle.clear();
 }
 
@@ -720,8 +737,14 @@ void libabw::ABWContentCollector::openLink(const char *href)
 {
   if (m_ps->m_isSpanOpened)
     _closeSpan();
-  if (!m_ps->m_isParagraphOpened)
-    _openParagraph();
+  if (!m_ps->m_isParagraphOpened && !m_ps->m_isListElementOpened)
+  {
+    _changeList();
+    if (m_ps->m_currentListLevel == 0)
+      _openParagraph();
+    else
+      _openListElement();
+  }
   librevenge::RVNGPropertyList propList;
   if (href)
     propList.insert("xlink:href", decodeUrl(href).c_str());
@@ -754,12 +777,14 @@ void libabw::ABWContentCollector::insertLineBreak()
 void libabw::ABWContentCollector::insertColumnBreak()
 {
   _closeParagraph();
+  _closeListElement();
   m_ps->m_deferredColumnBreak = true;
 }
 
 void libabw::ABWContentCollector::insertPageBreak()
 {
   _closeParagraph();
+  _closeListElement();
   m_ps->m_deferredPageBreak = true;
 }
 
@@ -881,13 +906,87 @@ void libabw::ABWContentCollector::_openHeader()
   m_ps->m_isHeaderOpened = true;
 }
 
+void libabw::ABWContentCollector::_fillParagraphProperties(librevenge::RVNGPropertyList &propList)
+{
+  ABWUnit unit(ABW_NONE);
+  double value(0.0);
+  int intValue(0);
+
+  if (findDouble(_findParagraphProperty("margin-right"), value, unit) && unit == ABW_IN)
+    propList.insert("fo:margin-right", value);
+
+  if (findDouble(_findParagraphProperty("margin-left"), value, unit) && unit == ABW_IN)
+    propList.insert("fo:margin-left", value);
+
+  if (findDouble(_findParagraphProperty("margin-top"), value, unit) && unit == ABW_IN)
+    propList.insert("fo:margin-top", value);
+
+  if (findDouble(_findParagraphProperty("margin-left"), value, unit) && unit == ABW_IN)
+    propList.insert("fo:margin-left", value);
+
+  if (findDouble(_findParagraphProperty("text-indent"), value, unit) && unit == ABW_IN)
+    propList.insert("fo:text-indent", value);
+
+  std::string sValue = _findParagraphProperty("text-align");
+  if (!sValue.empty())
+  {
+    if (sValue == "left")
+      propList.insert("fo:text-align", "start");
+    else if (sValue == "right")
+      propList.insert("fo:text-align", "end");
+    else
+      propList.insert("fo:text-align", sValue.c_str());
+  }
+
+  sValue = _findParagraphProperty("line-height");
+  if (!sValue.empty())
+  {
+    std::string propName("fo:line-height");
+    size_t position = sValue.find_last_of('+');
+    if (position && position != std::string::npos)
+    {
+      propName = "style:line-height-at-least";
+      sValue.erase(position);
+    }
+    if (findDouble(sValue, value, unit))
+    {
+      if (ABW_IN == unit)
+        propList.insert(propName.c_str(), value);
+      else if (ABW_PERCENT == unit)
+        propList.insert(propName.c_str(), value, librevenge::RVNG_PERCENT);
+    }
+  }
+
+  if (findInt(_findParagraphProperty("orphans"), intValue))
+    propList.insert("fo:orphans", intValue);
+
+  if (findInt(_findParagraphProperty("widows"), intValue))
+    propList.insert("fo:widows", intValue);
+
+  librevenge::RVNGPropertyListVector tabStops;
+  parseTabStops(_findParagraphProperty("tabstops"), tabStops);
+
+  if (tabStops.count())
+    propList.insert("style:tab-stops", tabStops);
+
+  sValue = _findParagraphProperty("dom-dir");
+  if (sValue == "ltr")
+    propList.insert("style:writing-mode", "lr-tb");
+  else if (sValue == "rtl")
+    propList.insert("style:writing-mode", "rl-tb");
+
+  if (m_ps->m_deferredPageBreak)
+    propList.insert("fo:break-before", "page");
+  else if (m_ps->m_deferredColumnBreak)
+    propList.insert("fo:break-before", "column");
+  m_ps->m_deferredPageBreak = false;
+  m_ps->m_deferredColumnBreak = false;
+}
+
 void libabw::ABWContentCollector::_openParagraph()
 {
   if (!m_ps->m_isParagraphOpened)
   {
-    if (!m_ps->m_tableStates.empty() && !m_ps->m_tableStates.top().m_isTableCellOpened)
-      _openTableCell();
-
     switch (m_ps->m_parsingContext)
     {
     case ABW_HEADER:
@@ -905,78 +1004,14 @@ void libabw::ABWContentCollector::_openParagraph()
       break;
     }
 
+    if (!m_ps->m_tableStates.empty() && !m_ps->m_tableStates.top().m_isTableCellOpened)
+      _openTableCell();
+
+    _changeList();
+
     librevenge::RVNGPropertyList propList;
-    ABWUnit unit(ABW_NONE);
-    double value(0.0);
-    int intValue(0);
+    _fillParagraphProperties(propList);
 
-    if (findDouble(_findParagraphProperty("margin-right"), value, unit) && unit == ABW_IN)
-      propList.insert("fo:margin-right", value);
-
-    if (findDouble(_findParagraphProperty("margin-left"), value, unit) && unit == ABW_IN)
-      propList.insert("fo:margin-left", value);
-
-    if (findDouble(_findParagraphProperty("margin-top"), value, unit) && unit == ABW_IN)
-      propList.insert("fo:margin-top", value);
-
-    if (findDouble(_findParagraphProperty("margin-left"), value, unit) && unit == ABW_IN)
-      propList.insert("fo:margin-left", value);
-
-    if (findDouble(_findParagraphProperty("text-indent"), value, unit) && unit == ABW_IN)
-      propList.insert("fo:text-indent", value);
-
-    std::string sValue = _findParagraphProperty("text-align");
-    if (!sValue.empty())
-    {
-      if (sValue == "left")
-        propList.insert("fo:text-align", "start");
-      else if (sValue == "right")
-        propList.insert("fo:text-align", "end");
-      else
-        propList.insert("fo:text-align", sValue.c_str());
-    }
-
-    sValue = _findParagraphProperty("line-height");
-    if (!sValue.empty())
-    {
-      std::string propName("fo:line-height");
-      size_t position = sValue.find_last_of('+');
-      if (position && position != std::string::npos)
-      {
-        propName = "style:line-height-at-least";
-        sValue.erase(position);
-      }
-      if (findDouble(sValue, value, unit))
-      {
-        if (ABW_IN == unit)
-          propList.insert(propName.c_str(), value);
-        else if (ABW_PERCENT == unit)
-          propList.insert(propName.c_str(), value, librevenge::RVNG_PERCENT);
-      }
-    }
-
-    if (findInt(_findParagraphProperty("orphans"), intValue))
-      propList.insert("fo:orphans", intValue);
-
-    if (findInt(_findParagraphProperty("widows"), intValue))
-      propList.insert("fo:widows", intValue);
-
-    librevenge::RVNGPropertyListVector tabStops;
-    parseTabStops(_findParagraphProperty("tabstops"), tabStops);
-
-    if (tabStops.count())
-      propList.insert("style:tab-stops", tabStops);
-
-    sValue = _findParagraphProperty("dom-dir");
-    if (sValue == "ltr")
-      propList.insert("style:writing-mode", "lr-tb");
-    else if (sValue == "rtl")
-      propList.insert("style:writing-mode", "rl-tb");
-
-    if (m_ps->m_deferredPageBreak)
-      propList.insert("fo:break-before", "page");
-    else if (m_ps->m_deferredColumnBreak)
-      propList.insert("fo:break-before", "column");
     m_ps->m_deferredPageBreak = false;
     m_ps->m_deferredColumnBreak = false;
 
@@ -988,12 +1023,54 @@ void libabw::ABWContentCollector::_openParagraph()
   }
 }
 
+void libabw::ABWContentCollector::_openListElement()
+{
+  if (!m_ps->m_isListElementOpened)
+  {
+    switch (m_ps->m_parsingContext)
+    {
+    case ABW_HEADER:
+      if (!m_ps->m_isHeaderOpened)
+        _openHeader();
+      break;
+    case ABW_FOOTER:
+      if (!m_ps->m_isFooterOpened)
+        _openFooter();
+      break;
+    case ABW_SECTION:
+    default:
+      if (!m_ps->m_isSectionOpened)
+        _openSection();
+      break;
+    }
+
+    if (!m_ps->m_tableStates.empty() && !m_ps->m_tableStates.top().m_isTableCellOpened)
+      _openTableCell();
+
+    _changeList();
+
+    librevenge::RVNGPropertyList propList;
+    _fillParagraphProperties(propList);
+
+    m_outputElements.addOpenListElement(propList);
+
+    m_ps->m_isListElementOpened = true;
+    if (!m_ps->m_tableStates.empty())
+      m_ps->m_tableStates.top().m_isCellWithoutParagraph = false;
+  }
+}
+
 void libabw::ABWContentCollector::_openSpan()
 {
   if (!m_ps->m_isSpanOpened)
   {
-    if (!m_ps->m_isParagraphOpened)
-      _openParagraph();
+    if (!m_ps->m_isParagraphOpened && !m_ps->m_isListElementOpened)
+    {
+      if (m_ps->m_currentListLevel == 0)
+        _openParagraph();
+      else
+        _openListElement();
+    }
 
     librevenge::RVNGPropertyList propList;
     ABWUnit unit(ABW_NONE);
@@ -1052,8 +1129,10 @@ void libabw::ABWContentCollector::_closeSection()
     while (!m_ps->m_tableStates.empty())
       _closeTable();
 
-    if (m_ps->m_isParagraphOpened)
-      _closeParagraph();
+    _closeParagraph();
+    _closeListElement();
+    m_ps->m_currentListLevel = 0;
+    _changeList();
 
     m_outputElements.addCloseSection();
 
@@ -1068,8 +1147,10 @@ void libabw::ABWContentCollector::_closeHeader()
     while (!m_ps->m_tableStates.empty())
       _closeTable();
 
-    if (m_ps->m_isParagraphOpened)
-      _closeParagraph();
+    _closeParagraph();
+    _closeListElement();
+    m_ps->m_currentListLevel = 0;
+    _changeList();
 
     m_outputElements.addCloseHeader();
 
@@ -1086,8 +1167,10 @@ void libabw::ABWContentCollector::_closeFooter()
     while (!m_ps->m_tableStates.empty())
       _closeTable();
 
-    if (m_ps->m_isParagraphOpened)
-      _closeParagraph();
+    _closeParagraph();
+    _closeListElement();
+    m_ps->m_currentListLevel = 0;
+    _changeList();
 
     m_outputElements.addCloseFooter();
 
@@ -1135,9 +1218,6 @@ void libabw::ABWContentCollector::_openTable()
       _openSection();
     break;
   }
-
-  if (m_ps->m_isParagraphOpened)
-    _closeParagraph();
 
   librevenge::RVNGPropertyList propList;
   if (m_ps->m_deferredPageBreak)
@@ -1225,9 +1305,6 @@ void libabw::ABWContentCollector::_closeTableRow()
 
 void libabw::ABWContentCollector::_openTableCell()
 {
-  if (m_ps->m_tableStates.top().m_isTableCellOpened)
-    _closeTableCell();
-
   librevenge::RVNGPropertyList propList;
   propList.insert("librevenge:column", m_ps->m_tableStates.top().m_currentTableCol);
   propList.insert("librevenge:row", m_ps->m_tableStates.top().m_currentTableRow);
@@ -1258,8 +1335,10 @@ void libabw::ABWContentCollector::_closeTableCell()
   {
     if (m_ps->m_tableStates.top().m_isCellWithoutParagraph)
       _openSpan();
-    if (m_ps->m_isParagraphOpened)
-      _closeParagraph();
+    _closeParagraph();
+    _closeListElement();
+    m_ps->m_currentListLevel = 0;
+    _changeList();
 
     m_outputElements.addCloseTableCell();
   }
@@ -1268,7 +1347,7 @@ void libabw::ABWContentCollector::_closeTableCell()
 
 void libabw::ABWContentCollector::openFoot(const char *id)
 {
-  if (!m_ps->m_isParagraphOpened)
+  if (!m_ps->m_isParagraphOpened && !m_ps->m_isListElementOpened)
     _openSpan();
   _closeSpan();
 
@@ -1285,6 +1364,11 @@ void libabw::ABWContentCollector::openFoot(const char *id)
 
 void libabw::ABWContentCollector::closeFoot()
 {
+  _closeParagraph();
+  _closeListElement();
+  m_ps->m_currentListLevel = 0;
+  _changeList();
+
   m_outputElements.addCloseFootnote();
 
   if (!m_parsingStates.empty())
@@ -1297,7 +1381,7 @@ void libabw::ABWContentCollector::closeFoot()
 
 void libabw::ABWContentCollector::openEndnote(const char *id)
 {
-  if (!m_ps->m_isParagraphOpened)
+  if (!m_ps->m_isParagraphOpened && !m_ps->m_isListElementOpened)
     _openSpan();
   _closeSpan();
 
@@ -1314,6 +1398,11 @@ void libabw::ABWContentCollector::openEndnote(const char *id)
 
 void libabw::ABWContentCollector::closeEndnote()
 {
+  _closeParagraph();
+  _closeListElement();
+  m_ps->m_currentListLevel = 0;
+  _changeList();
+
   m_outputElements.addCloseEndnote();
 
   if (!m_parsingStates.empty())
@@ -1326,6 +1415,11 @@ void libabw::ABWContentCollector::closeEndnote()
 
 void libabw::ABWContentCollector::openTable(const char *props)
 {
+  _closeParagraph();
+  _closeListElement();
+  m_ps->m_currentListLevel = 0;
+  _changeList();
+
   if (m_ps->m_tableStates.empty())
   {
     switch (m_ps->m_parsingContext)
@@ -1344,8 +1438,6 @@ void libabw::ABWContentCollector::openTable(const char *props)
         _openSection();
       break;
     }
-    if (m_ps->m_isParagraphOpened)
-      _closeParagraph();
   }
 
   m_ps->m_tableStates.push(ABWContentTableState());
@@ -1358,6 +1450,10 @@ void libabw::ABWContentCollector::openTable(const char *props)
 
 void libabw::ABWContentCollector::closeTable()
 {
+  _closeParagraph();
+  _closeListElement();
+  m_ps->m_currentListLevel = 0;
+  _changeList();
   _closeTable();
 }
 
@@ -1427,14 +1523,18 @@ void libabw::ABWContentCollector::insertImage(const char *dataid, const char *pr
 
 void libabw::ABWContentCollector::_handleListChange()
 {
-  unsigned oldListLevel;
+  int oldListLevel;
   if (m_ps->m_listLevels.empty())
     oldListLevel = 0;
   else
     oldListLevel = m_ps->m_listLevels.top().first;
 
   if (m_ps->m_currentListLevel > oldListLevel)
-    _recurseListLevels(oldListLevel, m_ps->m_currentListLevel);
+  {
+    if (!m_ps->m_isSectionOpened)
+      _openSection();
+    _recurseListLevels(oldListLevel, m_ps->m_currentListLevel, m_ps->m_currentListId);
+  }
   else if (m_ps->m_currentListLevel < oldListLevel)
   {
     while (!m_ps->m_listLevels.empty() && m_ps->m_listLevels.top().first > m_ps->m_currentListLevel)
@@ -1449,23 +1549,42 @@ void libabw::ABWContentCollector::_handleListChange()
   }
 }
 
-void libabw::ABWContentCollector::_recurseListLevels(unsigned oldLevel, unsigned newLevel)
+void libabw::ABWContentCollector::_recurseListLevels(int oldLevel, int newLevel, const librevenge::RVNGString &newListId)
 {
-  (void)oldLevel;
-  (void)newLevel;
+  if (oldLevel >= newLevel || newListId.empty())
+    return;
+  std::map<librevenge::RVNGString, ABWListElement *>::const_iterator iter = m_listElements.find(newListId);
+  if (iter != m_listElements.end() && iter->second)
+  {
+    _recurseListLevels(oldLevel, newLevel-1, iter->second->m_parentId);
+    m_ps->m_listLevels.push(std::make_pair(newLevel, iter->second));
+    librevenge::RVNGPropertyList propList;
+    iter->second->writeOut(propList);
+    propList.insert("librevenge:list-id", newListId);
+    if (iter->second->getType() == ABW_UNORDERED)
+      m_outputElements.addOpenUnorderedListLevel(propList);
+    else
+      m_outputElements.addOpenOrderedListLevel(propList);
+  }
 }
 
 void libabw::ABWContentCollector::_changeList()
 {
-  if (m_ps->m_isParagraphOpened)
-    _closeParagraph();
-  if (m_ps->m_isListElementOpened)
-    _closeListElement();
+  _closeParagraph();
+  _closeListElement();
   _handleListChange();
 }
 
 void libabw::ABWContentCollector::_closeListElement()
 {
+  if (m_ps->m_isListElementOpened)
+  {
+    if (m_ps->m_isSpanOpened)
+      _closeSpan();
+
+    m_outputElements.addCloseListElement();
+  }
+  m_ps->m_isListElementOpened = false;
 }
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

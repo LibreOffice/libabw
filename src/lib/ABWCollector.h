@@ -78,7 +78,6 @@ struct ABWOrderedListElement : public ABWListElement
     return ABW_ORDERED;
   }
 
-
   librevenge::RVNGString m_numFormat;
   librevenge::RVNGString m_numPrefix;
   librevenge::RVNGString m_numSuffix;
@@ -108,13 +107,14 @@ public:
   // collector functions
 
   virtual void collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props) = 0;
-  virtual void collectParagraphProperties(const char *level, const char *listid, const char *style, const char *props) = 0;
+  virtual void collectParagraphProperties(const char *level, const char *listid, const char *parentid,
+                                          const char *style, const char *props) = 0;
   virtual void collectSectionProperties(const char *footer, const char *footerLeft, const char *footerFirst,
                                         const char *footerLast, const char *header, const char *headerLeft,
                                         const char *headerFirst, const char *headerLast, const char *props) = 0;
   virtual void collectCharacterProperties(const char *style, const char *props) = 0;
   virtual void collectPageSize(const char *width, const char *height, const char *units, const char *pageScale) = 0;
-  virtual void closeParagraph() = 0;
+  virtual void closeParagraphOrListElement() = 0;
   virtual void closeSpan() = 0;
   virtual void openLink(const char *href) = 0;
   virtual void closeLink() = 0;

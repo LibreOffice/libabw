@@ -114,7 +114,7 @@ bool libabw::findDouble(const std::string &str, double &res, ABWUnit &unit)
 
 void libabw::ABWListElement::writeOut(librevenge::RVNGPropertyList &propList) const
 {
-  if (m_listLevel >= 0)
+  if (m_listLevel > 0)
     propList.insert("librevenge:level", m_listLevel);
   propList.insert("text:min-label-width", m_minLabelWidth);
   propList.insert("text:space-before", m_spaceBefore);
