@@ -12,7 +12,7 @@
 
 #include <list>
 #include <map>
-#include <libwpd/libwpd.h>
+#include <librevenge/librevenge.h>
 
 namespace libabw
 {
@@ -25,7 +25,7 @@ public:
   ABWOutputElements();
   virtual ~ABWOutputElements();
   void append(const ABWOutputElements &elements);
-  void write(WPXDocumentInterface *iface) const;
+  void write(librevenge::RVNGTextInterface *iface) const;
   void addCloseEndnote();
   void addCloseFooter();
   void addCloseFootnote();
@@ -42,31 +42,31 @@ public:
   void addCloseTableCell();
   void addCloseTableRow();
   void addCloseUnorderedListLevel();
-  void addInsertBinaryObject(const WPXPropertyList &propList, const WPXBinaryData &data);
-  void addInsertCoveredTableCell(const WPXPropertyList &propList);
+  void addInsertBinaryObject(const librevenge::RVNGPropertyList &propList);
+  void addInsertCoveredTableCell(const librevenge::RVNGPropertyList &propList);
   void addInsertLineBreak();
   void addInsertSpace();
   void addInsertTab();
-  void addInsertText(const WPXString &text);
-  void addOpenEndnote(const WPXPropertyList &propList);
-  void addOpenFooter(const WPXPropertyList &propList, int id);
-  void addOpenFootnote(const WPXPropertyList &propList);
-  void addOpenFrame(const WPXPropertyList &propList);
-  void addOpenHeader(const WPXPropertyList &propList, int id);
-  void addOpenLink(const WPXPropertyList &propList);
-  void addOpenListElement(const WPXPropertyList &propList, const WPXPropertyListVector &tabStops);
-  void addOpenOrderedListLevel(const WPXPropertyList &propList);
-  void addOpenPageSpan(const WPXPropertyList &propList,
+  void addInsertText(const librevenge::RVNGString &text);
+  void addOpenEndnote(const librevenge::RVNGPropertyList &propList);
+  void addOpenFooter(const librevenge::RVNGPropertyList &propList, int id);
+  void addOpenFootnote(const librevenge::RVNGPropertyList &propList);
+  void addOpenFrame(const librevenge::RVNGPropertyList &propList);
+  void addOpenHeader(const librevenge::RVNGPropertyList &propList, int id);
+  void addOpenLink(const librevenge::RVNGPropertyList &propList);
+  void addOpenListElement(const librevenge::RVNGPropertyList &propList);
+  void addOpenOrderedListLevel(const librevenge::RVNGPropertyList &propList);
+  void addOpenPageSpan(const librevenge::RVNGPropertyList &propList,
                        int footer, int footerLeft, int footerFirst, int footerLast,
                        int header, int headerLeft, int headerFirst, int headerLast);
-  void addOpenParagraph(const WPXPropertyList &propList, const WPXPropertyListVector &tabStops);
-  void addOpenSection(const WPXPropertyList &propList, const WPXPropertyListVector &columns);
-  void addOpenSpan(const WPXPropertyList &propList);
-  void addOpenTable(const WPXPropertyList &propList, const WPXPropertyListVector &columns);
-  void addOpenTableCell(const WPXPropertyList &propList);
-  void addOpenTableRow(const WPXPropertyList &propList);
-  void addOpenUnorderedListLevel(const WPXPropertyList &propList);
-  void addStartDocument(const WPXPropertyList &propList);
+  void addOpenParagraph(const librevenge::RVNGPropertyList &propList);
+  void addOpenSection(const librevenge::RVNGPropertyList &propList);
+  void addOpenSpan(const librevenge::RVNGPropertyList &propList);
+  void addOpenTable(const librevenge::RVNGPropertyList &propList);
+  void addOpenTableCell(const librevenge::RVNGPropertyList &propList);
+  void addOpenTableRow(const librevenge::RVNGPropertyList &propList);
+  void addOpenUnorderedListLevel(const librevenge::RVNGPropertyList &propList);
+  void addStartDocument(const librevenge::RVNGPropertyList &propList);
   bool empty() const
   {
     return m_bodyElements.empty();

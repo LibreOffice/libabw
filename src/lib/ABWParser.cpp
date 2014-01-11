@@ -10,12 +10,7 @@
 #include <string.h>
 #include <libxml/xmlIO.h>
 #include <libxml/xmlstring.h>
-#include <libwpd-stream/libwpd-stream.h>
-#include <boost/archive/iterators/binary_from_base64.hpp>
-#include <boost/archive/iterators/base64_from_binary.hpp>
-#include <boost/archive/iterators/remove_whitespace.hpp>
-#include <boost/archive/iterators/transform_width.hpp>
-#include <boost/range/iterator_range.hpp>
+#include <librevenge-stream/librevenge-stream.h>
 #include <boost/spirit/include/classic.hpp>
 #include <boost/algorithm/string.hpp>
 #include "ABWParser.h"
@@ -32,9 +27,9 @@ namespace libabw
 namespace
 {
 
-static void clearListElements(std::map<std::string, ABWListElement *> &listElements)
+static void clearListElements(std::map<librevenge::RVNGString, ABWListElement *> &listElements)
 {
-  for (std::map<std::string, ABWListElement *>::iterator i = listElements.begin();
+  for (std::map<librevenge::RVNGString, ABWListElement *>::iterator i = listElements.begin();
        i != listElements.end(); ++i)
   {
     if (i->second)
@@ -69,32 +64,11 @@ static bool findBool(const std::string &str, bool &res)
                space_p).full;
 }
 
-void appendFromBase64(WPXBinaryData &data, const unsigned char *base64Data, size_t base64DataLength)
-{
-  std::string base64String((const char *)base64Data, base64DataLength);
-  unsigned numPadding = std::count(base64String.begin(), base64String.end(), '=');
-  std::replace(base64String.begin(),base64String.end(),'=','A'); // replace '=' by base64 encoding of '\0'
-  typedef boost::archive::iterators::transform_width<
-  boost::archive::iterators::binary_from_base64<
-  boost::archive::iterators::remove_whitespace< std::string::const_iterator > >, 8, 6 > base64_decoder;
-
-  std::vector<unsigned char> buffer;
-  std::copy(base64_decoder(base64String.begin()), base64_decoder(base64String.end()), std::back_inserter(buffer));
-  if (!buffer.empty())
-  {
-    buffer.erase(buffer.end()-numPadding,buffer.end());  // erase padding '\0' characters
-    if (!buffer.empty())
-      data.append(&buffer[0], buffer.size());
-  }
-}
-
-
-
 } // anonymous namespace
 
 } // namespace libabw
 
-libabw::ABWParser::ABWParser(WPXInputStream *input, WPXDocumentInterface *iface)
+libabw::ABWParser::ABWParser(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *iface)
   : m_input(input), m_iface(iface), m_collector(0), m_inParagraph(false)
 {
 }
@@ -108,14 +82,14 @@ bool libabw::ABWParser::parse()
   if (!m_input)
     return false;
 
-  std::map<std::string, ABWListElement *> listElements;
+  std::map<librevenge::RVNGString, ABWListElement *> listElements;
   try
   {
     std::map<int, int> tableSizes;
     std::map<std::string, ABWData> data;
     ABWStylesCollector stylesCollector(tableSizes, data, listElements);
     m_collector = &stylesCollector;
-    m_input->seek(0, WPX_SEEK_SET);
+    m_input->seek(0, librevenge::RVNG_SEEK_SET);
     if (!processXmlDocument(m_input))
     {
       clearListElements(listElements);
@@ -124,7 +98,7 @@ bool libabw::ABWParser::parse()
 
     ABWContentCollector contentCollector(m_iface, tableSizes, data, listElements);
     m_collector = &contentCollector;
-    m_input->seek(0, WPX_SEEK_SET);
+    m_input->seek(0, librevenge::RVNG_SEEK_SET);
     if (!processXmlDocument(m_input))
     {
       clearListElements(listElements);
@@ -141,7 +115,7 @@ bool libabw::ABWParser::parse()
   }
 }
 
-bool libabw::ABWParser::processXmlDocument(WPXInputStream *input)
+bool libabw::ABWParser::processXmlDocument(librevenge::RVNGInputStream *input)
 {
   if (!input)
     return false;
@@ -174,7 +148,7 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
   int emptyToken = xmlTextReaderIsEmptyElement(reader);
   if (XML_READER_TYPE_TEXT == tokenType)
   {
-    WPXString text((const char *)xmlTextReaderConstValue(reader));
+    librevenge::RVNGString text((const char *)xmlTextReaderConstValue(reader));
     ABW_DEBUG_MSG(("ABWParser::processXmlNode: text %s\n", text.cstr()));
     if (m_inParagraph && m_collector)
       m_collector->insertText(text);
@@ -518,9 +492,9 @@ void libabw::ABWParser::readD(xmlTextReaderPtr reader)
       const xmlChar *data = xmlTextReaderConstValue(reader);
       if (data)
       {
-        WPXBinaryData binaryData;
+        librevenge::RVNGBinaryData binaryData;
         if (base64)
-          appendFromBase64(binaryData, data, xmlStrlen(data));
+          binaryData.appendBase64Data((const char *)data);
         else
           binaryData.append(data, xmlStrlen(data));
         if (m_collector)

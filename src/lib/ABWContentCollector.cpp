@@ -9,7 +9,7 @@
 
 #include <boost/spirit/include/classic.hpp>
 #include <boost/algorithm/string.hpp>
-#include <libwpd/libwpd.h>
+#include <librevenge/librevenge.h>
 #include "ABWContentCollector.h"
 #include "libabw_internal.h"
 
@@ -41,17 +41,17 @@ static std::string getColor(const std::string &s)
   return out;
 }
 
-static void separateTabsAndInsertText(ABWOutputElements &outputElements, const WPXString &text)
+static void separateTabsAndInsertText(ABWOutputElements &outputElements, const librevenge::RVNGString &text)
 {
-  if (!text.len())
+  if (text.empty())
     return;
-  WPXString tmpText;
-  WPXString::Iter i(text);
+  librevenge::RVNGString tmpText;
+  librevenge::RVNGString::Iter i(text);
   for (i.rewind(); i.next();)
   {
     if (*(i()) == '\t')
     {
-      if (tmpText.len())
+      if (!tmpText.empty())
       {
         outputElements.addInsertText(tmpText);
         tmpText.clear();
@@ -60,7 +60,7 @@ static void separateTabsAndInsertText(ABWOutputElements &outputElements, const W
     }
     else if (*(i()) == '\n')
     {
-      if (tmpText.len())
+      if (!tmpText.empty())
       {
         outputElements.addInsertText(tmpText);
         tmpText.clear();
@@ -72,20 +72,20 @@ static void separateTabsAndInsertText(ABWOutputElements &outputElements, const W
       tmpText.append(i());
     }
   }
-  if (tmpText.len())
+  if (!tmpText.empty())
     outputElements.addInsertText(tmpText);
 }
 
-static void separateSpacesAndInsertText(ABWOutputElements &outputElements, const WPXString &text)
+static void separateSpacesAndInsertText(ABWOutputElements &outputElements, const librevenge::RVNGString &text)
 {
-  if (!text.len())
+  if (text.empty())
   {
     outputElements.addInsertText(text);
     return;
   }
-  WPXString tmpText;
+  librevenge::RVNGString tmpText;
   int numConsecutiveSpaces = 0;
-  WPXString::Iter i(text);
+  librevenge::RVNGString::Iter i(text);
   for (i.rewind(); i.next();)
   {
     if (*(i()) == ' ')
@@ -95,7 +95,7 @@ static void separateSpacesAndInsertText(ABWOutputElements &outputElements, const
 
     if (numConsecutiveSpaces > 1)
     {
-      if (tmpText.len())
+      if (!tmpText.empty())
       {
         separateTabsAndInsertText(outputElements, tmpText);
         tmpText.clear();
@@ -108,7 +108,7 @@ static void separateSpacesAndInsertText(ABWOutputElements &outputElements, const
   separateTabsAndInsertText(outputElements, tmpText);
 }
 
-void parseTableColumns(const std::string &str, WPXPropertyListVector &columns)
+void parseTableColumns(const std::string &str, librevenge::RVNGPropertyListVector &columns)
 {
   if (str.empty())
     return;
@@ -124,14 +124,14 @@ void parseTableColumns(const std::string &str, WPXPropertyListVector &columns)
     boost::algorithm::trim(strVec[i]);
     if (findDouble(strVec[i], value, unit) || ABW_IN != unit)
     {
-      WPXPropertyList propList;
+      librevenge::RVNGPropertyList propList;
       propList.insert("style:column-width", value);
       columns.append(propList);
     }
   }
 }
 
-bool parseTabStop(const std::string &str, WPXPropertyList &tabStop)
+bool parseTabStop(const std::string &str, librevenge::RVNGPropertyList &tabStop)
 {
   if (str.empty())
     return false;
@@ -191,7 +191,7 @@ bool parseTabStop(const std::string &str, WPXPropertyList &tabStop)
   return true;
 }
 
-void parseTabStops(const std::string &str, WPXPropertyListVector &tabStops)
+void parseTabStops(const std::string &str, librevenge::RVNGPropertyListVector &tabStops)
 {
   if (str.empty())
     return;
@@ -201,7 +201,7 @@ void parseTabStops(const std::string &str, WPXPropertyListVector &tabStops)
   for (std::vector<std::string>::size_type i = 0; i < strVec.size(); ++i)
   {
     boost::trim(strVec[i]);
-    WPXPropertyList tabStop;
+    librevenge::RVNGPropertyList tabStop;
     if (parseTabStop(strVec[i], tabStop))
       tabStops.append(tabStop);
   }
@@ -373,9 +373,9 @@ libabw::ABWContentParsingState::~ABWContentParsingState()
 {
 }
 
-libabw::ABWContentCollector::ABWContentCollector(WPXDocumentInterface *iface, const std::map<int, int> &tableSizes,
+libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes,
                                                  const std::map<std::string, ABWData> &data,
-                                                 const std::map<std::string, ABWListElement *> &listElements) :
+                                                 const std::map<librevenge::RVNGString, ABWListElement *> &listElements) :
   m_ps(new ABWContentParsingState),
   m_iface(iface),
   m_parsingStates(),
@@ -680,29 +680,8 @@ void libabw::ABWContentCollector::startDocument()
   {
 
     if (m_iface && !m_ps->m_isDocumentStarted)
-    {
-      m_iface->startDocument();
-      for (std::map<std::string, ABWListElement *>::const_iterator iter = m_listElements.begin();
-           iter != m_listElements.end(); ++iter)
-      {
-        if (iter->second)
-        {
-          int intValue = 0;
-          if (!findInt(iter->first, intValue) || intValue < 1)
-            intValue = 0;
-          if (intValue)
-          {
-            WPXPropertyList propList;
-            propList.insert("libwpd:list-id", iter->first.c_str());
-            iter->second->writeOut(propList);
-            if (iter->second->getType() == ABW_UNORDERED)
-              m_iface->defineUnorderedListLevel(propList);
-            else
-              m_iface->defineOrderedListLevel(propList);
-          }
-        }
-      }
-    }
+      m_iface->startDocument(librevenge::RVNGPropertyList());
+
     m_ps->m_isDocumentStarted = true;
   }
 }
@@ -766,7 +745,7 @@ void libabw::ABWContentCollector::openLink(const char *href)
     else
       _openListElement();
   }
-  WPXPropertyList propList;
+  librevenge::RVNGPropertyList propList;
   if (href)
     propList.insert("xlink:href", decodeUrl(href).c_str());
   m_outputElements.addOpenLink(propList);
@@ -809,7 +788,7 @@ void libabw::ABWContentCollector::insertPageBreak()
   m_ps->m_deferredPageBreak = true;
 }
 
-void libabw::ABWContentCollector::insertText(const WPXString &text)
+void libabw::ABWContentCollector::insertText(const librevenge::RVNGString &text)
 {
   if (!m_ps->m_isSpanOpened)
     _openSpan();
@@ -825,7 +804,7 @@ void libabw::ABWContentCollector::_openPageSpan()
     if (!m_ps->m_isDocumentStarted)
       startDocument();
 
-    WPXPropertyList propList;
+    librevenge::RVNGPropertyList propList;
     propList.insert("fo:page-width", m_ps->m_pageWidth);
     propList.insert("fo:page-height", m_ps->m_pageHeight);
     propList.insert("fo:margin-left", m_ps->m_pageMarginLeft);
@@ -863,7 +842,7 @@ void libabw::ABWContentCollector::_openSection()
     if (!m_ps->m_isPageSpanOpened)
       _openPageSpan();
 
-    WPXPropertyList propList;
+    librevenge::RVNGPropertyList propList;
 
     ABWUnit unit(ABW_NONE);
     double value(0.0);
@@ -874,7 +853,7 @@ void libabw::ABWContentCollector::_openSection()
       propList.insert("fo:margin-left", value - m_ps->m_pageMarginLeft);
 
     if (findDouble(_findSectionProperty("section-space-after"), value, unit) && unit == ABW_IN)
-      propList.insert("libwpd:margin-bottom", value);
+      propList.insert("librevenge:margin-bottom", value);
 
     std::string sValue = _findSectionProperty("dom-dir");
     if (sValue == "ltr")
@@ -882,22 +861,23 @@ void libabw::ABWContentCollector::_openSection()
     else if (sValue == "rtl")
       propList.insert("style:writing-mode", "rl-tb");
 
-    WPXPropertyListVector columns;
     int intValue(0);
     if (findInt(_findSectionProperty("columns"), intValue) && intValue > 1)
     {
+      librevenge::RVNGPropertyListVector columns;
       for (int i = 0; i < intValue; ++i)
       {
-        WPXPropertyList column;
-        column.insert("style:rel-width", 1.0 / (double)intValue, WPX_PERCENT);
+        librevenge::RVNGPropertyList column;
+        column.insert("style:rel-width", 1.0 / (double)intValue, librevenge::RVNG_PERCENT);
         columns.append(column);
       }
       if (columns.count())
       {
+        propList.insert("style:columns", columns);
         propList.insert("text:dont-balance-text-columns", true);
       }
     }
-    m_outputElements.addOpenSection(propList, columns);
+    m_outputElements.addOpenSection(propList);
   }
   m_ps->m_isSectionOpened = true;
 }
@@ -906,8 +886,8 @@ void libabw::ABWContentCollector::_openFooter()
 {
   if (!m_ps->m_isFooterOpened && !m_ps->m_isNote && m_ps->m_tableStates.empty())
   {
-    WPXPropertyList propList;
-    propList.insert("libwpd:occurrence", m_ps->m_currentHeaderFooterOccurrence);
+    librevenge::RVNGPropertyList propList;
+    propList.insert("librevenge:occurrence", m_ps->m_currentHeaderFooterOccurrence);
 
     m_outputElements.addOpenFooter(propList, m_ps->m_currentHeaderFooterId);
   }
@@ -918,15 +898,15 @@ void libabw::ABWContentCollector::_openHeader()
 {
   if (!m_ps->m_isHeaderOpened && !m_ps->m_isNote && m_ps->m_tableStates.empty())
   {
-    WPXPropertyList propList;
-    propList.insert("libwpd:occurrence", m_ps->m_currentHeaderFooterOccurrence);
+    librevenge::RVNGPropertyList propList;
+    propList.insert("librevenge:occurrence", m_ps->m_currentHeaderFooterOccurrence);
 
     m_outputElements.addOpenHeader(propList, m_ps->m_currentHeaderFooterId);
   }
   m_ps->m_isHeaderOpened = true;
 }
 
-void libabw::ABWContentCollector::_fillParagraphProperties(WPXPropertyList &propList, WPXPropertyListVector &tabStops)
+void libabw::ABWContentCollector::_fillParagraphProperties(librevenge::RVNGPropertyList &propList)
 {
   ABWUnit unit(ABW_NONE);
   double value(0.0);
@@ -973,7 +953,7 @@ void libabw::ABWContentCollector::_fillParagraphProperties(WPXPropertyList &prop
       if (ABW_IN == unit)
         propList.insert(propName.c_str(), value);
       else if (ABW_PERCENT == unit)
-        propList.insert(propName.c_str(), value, WPX_PERCENT);
+        propList.insert(propName.c_str(), value, librevenge::RVNG_PERCENT);
     }
   }
 
@@ -983,7 +963,11 @@ void libabw::ABWContentCollector::_fillParagraphProperties(WPXPropertyList &prop
   if (findInt(_findParagraphProperty("widows"), intValue))
     propList.insert("fo:widows", intValue);
 
+  librevenge::RVNGPropertyListVector tabStops;
   parseTabStops(_findParagraphProperty("tabstops"), tabStops);
+
+  if (tabStops.count())
+    propList.insert("style:tab-stops", tabStops);
 
   sValue = _findParagraphProperty("dom-dir");
   if (sValue == "ltr")
@@ -1025,14 +1009,13 @@ void libabw::ABWContentCollector::_openParagraph()
 
     _changeList();
 
-    WPXPropertyList propList;
-    WPXPropertyListVector tabStops;
-    _fillParagraphProperties(propList, tabStops);
+    librevenge::RVNGPropertyList propList;
+    _fillParagraphProperties(propList);
 
     m_ps->m_deferredPageBreak = false;
     m_ps->m_deferredColumnBreak = false;
 
-    m_outputElements.addOpenParagraph(propList, tabStops);
+    m_outputElements.addOpenParagraph(propList);
 
     m_ps->m_isParagraphOpened = true;
     if (!m_ps->m_tableStates.empty())
@@ -1066,11 +1049,10 @@ void libabw::ABWContentCollector::_openListElement()
 
     _changeList();
 
-    WPXPropertyList propList;
-    WPXPropertyListVector tabStops;
-    _fillParagraphProperties(propList, tabStops);
+    librevenge::RVNGPropertyList propList;
+    _fillParagraphProperties(propList);
 
-    m_outputElements.addOpenListElement(propList, tabStops);
+    m_outputElements.addOpenListElement(propList);
 
     m_ps->m_isListElementOpened = true;
     if (!m_ps->m_tableStates.empty())
@@ -1090,7 +1072,7 @@ void libabw::ABWContentCollector::_openSpan()
         _openListElement();
     }
 
-    WPXPropertyList propList;
+    librevenge::RVNGPropertyList propList;
     ABWUnit unit(ABW_NONE);
     double value(0.0);
 
@@ -1237,7 +1219,7 @@ void libabw::ABWContentCollector::_openTable()
     break;
   }
 
-  WPXPropertyList propList;
+  librevenge::RVNGPropertyList propList;
   if (m_ps->m_deferredPageBreak)
     propList.insert("fo:break-before", "page");
   else if (m_ps->m_deferredColumnBreak)
@@ -1245,7 +1227,7 @@ void libabw::ABWContentCollector::_openTable()
   m_ps->m_deferredPageBreak = false;
   m_ps->m_deferredColumnBreak = false;
 
-  WPXPropertyListVector columns;
+  librevenge::RVNGPropertyListVector columns;
   parseTableColumns(_findTableProperty("table-column-props"), columns);
   if (!columns.count())
   {
@@ -1253,9 +1235,11 @@ void libabw::ABWContentCollector::_openTable()
     if (iter != m_tableSizes.end())
     {
       for (int j = 0; j < iter->second; ++j)
-        columns.append(WPXPropertyList());
+        columns.append(librevenge::RVNGPropertyList());
     }
   }
+  if (columns.count())
+    propList.insert("librevenge:table-columns", columns);
 
   ABWUnit unit(ABW_NONE);
   double value(0.0);
@@ -1267,7 +1251,7 @@ void libabw::ABWContentCollector::_openTable()
   else
     propList.insert("table:align", "left");
 
-  m_outputElements.addOpenTable(propList, columns);
+  m_outputElements.addOpenTable(propList);
 
   m_ps->m_tableStates.top().m_currentTableRow = (-1);
   m_ps->m_tableStates.top().m_currentTableCol = (-1);
@@ -1295,7 +1279,7 @@ void libabw::ABWContentCollector::_openTableRow()
   m_ps->m_tableStates.top().m_currentTableCol = 0;
   m_ps->m_tableStates.top().m_currentTableCellNumberInRow = 0;
 
-  m_outputElements.addOpenTableRow(WPXPropertyList());
+  m_outputElements.addOpenTableRow(librevenge::RVNGPropertyList());
 
   m_ps->m_tableStates.top().m_isTableRowOpened = true;
   m_ps->m_tableStates.top().m_isRowWithoutCell = true;
@@ -1312,7 +1296,7 @@ void libabw::ABWContentCollector::_closeTableRow()
     if (m_ps->m_tableStates.top().m_isRowWithoutCell)
     {
       m_ps->m_tableStates.top().m_isRowWithoutCell = false;
-      m_outputElements.addInsertCoveredTableCell(WPXPropertyList());
+      m_outputElements.addInsertCoveredTableCell(librevenge::RVNGPropertyList());
     }
     m_outputElements.addCloseTableRow();
   }
@@ -1321,9 +1305,9 @@ void libabw::ABWContentCollector::_closeTableRow()
 
 void libabw::ABWContentCollector::_openTableCell()
 {
-  WPXPropertyList propList;
-  propList.insert("libwpd:column", m_ps->m_tableStates.top().m_currentTableCol);
-  propList.insert("libwpd:row", m_ps->m_tableStates.top().m_currentTableRow);
+  librevenge::RVNGPropertyList propList;
+  propList.insert("librevenge:column", m_ps->m_tableStates.top().m_currentTableCol);
+  propList.insert("librevenge:row", m_ps->m_tableStates.top().m_currentTableRow);
 
   int rightAttach(0);
   if (findInt(_findCellProperty("right-attach"), rightAttach))
@@ -1367,9 +1351,9 @@ void libabw::ABWContentCollector::openFoot(const char *id)
     _openSpan();
   _closeSpan();
 
-  WPXPropertyList propList;
+  librevenge::RVNGPropertyList propList;
   if (id)
-    propList.insert("libwpd:number", id);
+    propList.insert("librevenge:number", id);
   m_outputElements.addOpenFootnote(propList);
 
   m_parsingStates.push(m_ps);
@@ -1401,9 +1385,9 @@ void libabw::ABWContentCollector::openEndnote(const char *id)
     _openSpan();
   _closeSpan();
 
-  WPXPropertyList propList;
+  librevenge::RVNGPropertyList propList;
   if (id)
-    propList.insert("libwpd:number", id);
+    propList.insert("librevenge:number", id);
   m_outputElements.addOpenEndnote(propList);
 
   m_parsingStates.push(m_ps);
@@ -1497,7 +1481,7 @@ void libabw::ABWContentCollector::closeCell()
   m_ps->m_tableStates.top().m_currentCellProperties.clear();
 }
 
-void libabw::ABWContentCollector::collectData(const char *, const char *, const WPXBinaryData &)
+void libabw::ABWContentCollector::collectData(const char *, const char *, const librevenge::RVNGBinaryData &)
 {
 }
 
@@ -1514,7 +1498,7 @@ void libabw::ABWContentCollector::insertImage(const char *dataid, const char *pr
     std::map<std::string, ABWData>::const_iterator iter = m_data.find(dataid);
     if (iter != m_data.end())
     {
-      WPXPropertyList propList;
+      librevenge::RVNGPropertyList propList;
       ABWUnit unit(ABW_NONE);
       double value(0.0);
       std::map<std::string, std::string>::const_iterator i = properties.find("height");
@@ -1528,9 +1512,9 @@ void libabw::ABWContentCollector::insertImage(const char *dataid, const char *pr
       m_outputElements.addOpenFrame(propList);
 
       propList.clear();
-      propList.insert("libwpd:mime-type", iter->second.m_mimeType);
-
-      m_outputElements.addInsertBinaryObject(propList, iter->second.m_binaryData);
+      propList.insert("librevenge:mime-type", iter->second.m_mimeType);
+      propList.insert("office:binary-data", iter->second.m_binaryData);
+      m_outputElements.addInsertBinaryObject(propList);
 
       m_outputElements.addCloseFrame();
     }
@@ -1565,21 +1549,18 @@ void libabw::ABWContentCollector::_handleListChange()
   }
 }
 
-void libabw::ABWContentCollector::_recurseListLevels(int oldLevel, int newLevel, const std::string &newListId)
+void libabw::ABWContentCollector::_recurseListLevels(int oldLevel, int newLevel, const librevenge::RVNGString &newListId)
 {
   if (oldLevel >= newLevel || newListId.empty())
     return;
-  std::map<std::string, ABWListElement *>::const_iterator iter = m_listElements.find(newListId);
+  std::map<librevenge::RVNGString, ABWListElement *>::const_iterator iter = m_listElements.find(newListId);
   if (iter != m_listElements.end() && iter->second)
   {
     _recurseListLevels(oldLevel, newLevel-1, iter->second->m_parentId);
     m_ps->m_listLevels.push(std::make_pair(newLevel, iter->second));
-    WPXPropertyList propList;
-    int intValue = 0;
-    if (!findInt(newListId, intValue) || intValue < 1)
-      intValue = 0;
-    if (intValue)
-      propList.insert("libwpd:list-id", intValue);
+    librevenge::RVNGPropertyList propList;
+    iter->second->writeOut(propList);
+    propList.insert("librevenge:list-id", newListId);
     if (iter->second->getType() == ABW_UNORDERED)
       m_outputElements.addOpenUnorderedListLevel(propList);
     else

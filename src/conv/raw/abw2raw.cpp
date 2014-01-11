@@ -8,10 +8,10 @@
  */
 
 #include <stdio.h>
-#include <libwpd-stream/libwpd-stream.h>
+#include <librevenge-stream/librevenge-stream.h>
+#include <librevenge-generators/librevenge-generators.h>
 #include <libabw/libabw.h>
 #include <string.h>
-#include "RawDocumentGenerator.h"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
   if (!file)
     return printUsage();
 
-  WPXFileStream input(file);
+  librevenge::RVNGFileStream input(file);
 
   if (!libabw::AbiDocument::isFileFormatSupported(&input))
   {
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  RawDocumentGenerator documentGenerator(printIndentLevel);
+  librevenge::RVNGRawTextGenerator documentGenerator(printIndentLevel);
   if (libabw::AbiDocument::parse(&input, &documentGenerator))
     return 0;
   return 1;

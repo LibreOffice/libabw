@@ -10,7 +10,7 @@
 #ifndef ABIDOCUMENT_H
 #define ABIDOCUMENT_H
 
-#include <libwpd/libwpd.h>
+#include <librevenge/librevenge.h>
 
 #ifdef DLL_EXPORT
 #ifdef LIBABW_BUILD
@@ -33,8 +33,8 @@ AbiWord documents.
 class AbiDocument
 {
 public:
-  static ABWAPI bool isFileFormatSupported(WPXInputStream *input);
-  static ABWAPI bool parse(WPXInputStream *input, WPXDocumentInterface *documentInterface);
+  static ABWAPI bool isFileFormatSupported(librevenge::RVNGInputStream *input);
+  static ABWAPI bool parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *documentInterface);
 };
 
 } // namespace libabw

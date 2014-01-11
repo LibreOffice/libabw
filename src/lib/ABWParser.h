@@ -10,7 +10,7 @@
 #ifndef __ABWPARSER_H__
 #define __ABWPARSER_H__
 
-#include <libwpd/libwpd.h>
+#include <librevenge/librevenge.h>
 #include "ABWXMLHelper.h"
 
 namespace libabw
@@ -21,7 +21,7 @@ class ABWCollector;
 class ABWParser
 {
 public:
-  explicit ABWParser(WPXInputStream *input, WPXDocumentInterface *iface);
+  explicit ABWParser(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *iface);
   virtual ~ABWParser();
   bool parse();
 
@@ -36,7 +36,7 @@ private:
 
   // Functions to read the AWML document structure
 
-  bool processXmlDocument(WPXInputStream *input);
+  bool processXmlDocument(librevenge::RVNGInputStream *input);
   void processXmlNode(xmlTextReaderPtr reader);
 
   void readMetadata(xmlTextReaderPtr reader);
@@ -58,8 +58,8 @@ private:
   void readTable(xmlTextReaderPtr reader);
   void readCell(xmlTextReaderPtr reader);
 
-  WPXInputStream *m_input;
-  WPXDocumentInterface *m_iface;
+  librevenge::RVNGInputStream *m_input;
+  librevenge::RVNGTextInterface *m_iface;
   ABWCollector *m_collector;
   bool m_inParagraph;
 };

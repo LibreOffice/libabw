@@ -4,21 +4,21 @@ bin_PROGRAMS = abw2text
 
 AM_CXXFLAGS = \
 	-I$(top_srcdir)/inc \
-	$(WPD_CFLAGS) \
-	$(WPD_STREAM_CFLAGS) \
+	$(REVENGE_CFLAGS) \
+	$(REVENGE_GENERATORS_CFLAGS) \
+	$(REVENGE_STREAM_CFLAGS) \
 	$(DEBUG_CXXFLAGS)
 
 abw2text_DEPENDENCIES = @ABW2TEXT_WIN32_RESOURCE@ 
 
 abw2text_LDADD = \
 	../../lib/libabw-@ABW_MAJOR_VERSION@.@ABW_MINOR_VERSION@.la \
-	$(WPD_LIBS) \
-	$(WPD_STREAM_LIBS) \
+	$(REVENGE_GENERATORS_LIBS) \
+	$(REVENGE_LIBS) \
+	$(REVENGE_STREAM_LIBS) \
 	@ABW2TEXT_WIN32_RESOURCE@
  
 abw2text_SOURCES = \
-	TextDocumentGenerator.cpp \
-	TextDocumentGenerator.h \
 	abw2text.cpp
 
 if OS_WIN32

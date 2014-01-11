@@ -112,30 +112,30 @@ bool libabw::findDouble(const std::string &str, double &res, ABWUnit &unit)
   return true;
 }
 
-void libabw::ABWListElement::writeOut(WPXPropertyList &propList) const
+void libabw::ABWListElement::writeOut(librevenge::RVNGPropertyList &propList) const
 {
   if (m_listLevel > 0)
-    propList.insert("libwpd:level", m_listLevel);
+    propList.insert("librevenge:level", m_listLevel);
   propList.insert("text:min-label-width", m_minLabelWidth);
   propList.insert("text:space-before", m_spaceBefore);
 }
 
-void libabw::ABWOrderedListElement::writeOut(WPXPropertyList &propList) const
+void libabw::ABWOrderedListElement::writeOut(librevenge::RVNGPropertyList &propList) const
 {
   libabw::ABWListElement::writeOut(propList);
   propList.insert("style:num-format", m_numFormat);
-  if (m_numPrefix.len())
+  if (!m_numPrefix.empty())
     propList.insert("style:num-prefix", m_numPrefix);
-  if (m_numSuffix.len())
+  if (!m_numSuffix.empty())
     propList.insert("style:num-suffix", m_numSuffix);
   if (m_startValue >= 0)
     propList.insert("text:start-value", m_startValue);
 }
 
-void libabw::ABWUnorderedListElement::writeOut(WPXPropertyList &propList) const
+void libabw::ABWUnorderedListElement::writeOut(librevenge::RVNGPropertyList &propList) const
 {
   libabw::ABWListElement::writeOut(propList);
-  if (m_bulletChar.len())
+  if (!m_bulletChar.empty())
     propList.insert("text:bullet-char", m_bulletChar);
 }
 

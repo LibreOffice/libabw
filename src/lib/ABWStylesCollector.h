@@ -11,7 +11,7 @@
 #define __ABWSTYLESCOLLECTOR_H__
 
 #include <stack>
-#include <libwpd/libwpd.h>
+#include <librevenge/librevenge.h>
 #include "ABWCollector.h"
 
 namespace libabw
@@ -44,7 +44,7 @@ class ABWStylesCollector : public ABWCollector
 public:
   ABWStylesCollector(std::map<int, int> &tableSizes,
                      std::map<std::string, ABWData> &data,
-                     std::map<std::string, ABWListElement *> &listElements);
+                     std::map<librevenge::RVNGString, ABWListElement *> &listElements);
   virtual ~ABWStylesCollector();
 
   // collector functions
@@ -71,10 +71,10 @@ public:
   void insertLineBreak() {}
   void insertColumnBreak() {}
   void insertPageBreak() {}
-  void insertText(const WPXString &) {}
+  void insertText(const librevenge::RVNGString &) {}
   void insertImage(const char *, const char *) {}
 
-  void collectData(const char *name, const char *mimeType, const WPXBinaryData &data);
+  void collectData(const char *name, const char *mimeType, const librevenge::RVNGBinaryData &data);
   void collectHeaderFooter(const char *, const char *) {}
   void collectList(const char *id, const char *listDecimal, const char *listDelim,
                    const char *parentid, const char *startValue, const char *type);
@@ -96,7 +96,7 @@ private:
   std::map<int, int> &m_tableSizes;
   std::map<std::string, ABWData> &m_data;
   int m_tableCounter;
-  std::map<std::string, ABWListElement *> &m_listElements;
+  std::map<librevenge::RVNGString, ABWListElement *> &m_listElements;
 };
 
 } // namespace libabw

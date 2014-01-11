@@ -218,13 +218,13 @@ fi
 AC_SUBST(GPERF)
 
 # ===============
-# Find libwpd
+# Find librevenge
 # ===============
-PKG_CHECK_MODULES([WPD],[
-	libwpd-0.9
+PKG_CHECK_MODULES([REVENGE],[
+	librevenge-0.0
 ])
-AC_SUBST([WPD_CFLAGS])
-AC_SUBST([WPD_LIBS])
+AC_SUBST([REVENGE_CFLAGS])
+AC_SUBST([REVENGE_LIBS])
 
 # ============
 # Find libxml2
@@ -240,11 +240,6 @@ AC_SUBST([LIBXML2_LIBS])
 # ==================
 AC_CHECK_HEADERS(
 	boost/algorithm/string.hpp \
-	boost/archive/iterators/base64_from_binary.hpp \
-	boost/archive/iterators/binary_from_base64.hpp \
-	boost/archive/iterators/remove_whitespace.hpp \
-	boost/archive/iterators/transform_width.hpp \
-	boost/range/iterator_range.hpp \
 	boost/spirit/include/classic.hpp,
 	[],
 	[AC_MSG_ERROR([Required boost headers not found.])],
@@ -260,12 +255,17 @@ AC_ARG_ENABLE([tools],
 	[enable_tools=yes]
 )
 AS_IF([test "x$enable_tools" = "xyes"], [
-	PKG_CHECK_MODULES([WPD_STREAM],[
-		libwpd-stream-0.9
+	PKG_CHECK_MODULES([REVENGE_GENERATORS],[
+		librevenge-generators-0.0
+	])
+	PKG_CHECK_MODULES([REVENGE_STREAM],[
+		librevenge-stream-0.0
 	])
 ])
-AC_SUBST([WPD_STREAM_CFLAGS])
-AC_SUBST([WPD_STREAM_LIBS])
+AC_SUBST([REVENGE_GENERATORS_CFLAGS])
+AC_SUBST([REVENGE_GENERATORS_LIBS])
+AC_SUBST([REVENGE_STREAM_CFLAGS])
+AC_SUBST([REVENGE_STREAM_LIBS])
 AM_CONDITIONAL(BUILD_TOOLS, [test "x$enable_tools" = "xyes"])
 
 # =====================

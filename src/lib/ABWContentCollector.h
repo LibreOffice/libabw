@@ -13,7 +13,7 @@
 #include <vector>
 #include <stack>
 #include <set>
-#include <libwpd/libwpd.h>
+#include <librevenge/librevenge.h>
 #include "ABWOutputElements.h"
 #include "ABWCollector.h"
 
@@ -91,7 +91,7 @@ struct ABWContentParsingState
   int m_headerFirstId;
   int m_headerLastId;
   int m_currentHeaderFooterId;
-  WPXString m_currentHeaderFooterOccurrence;
+  librevenge::RVNGString m_currentHeaderFooterOccurrence;
   ABWContext m_parsingContext;
 
   bool m_deferredPageBreak;
@@ -100,7 +100,7 @@ struct ABWContentParsingState
   bool m_isNote;
 
   int m_currentListLevel;
-  std::string m_currentListId;
+  librevenge::RVNGString m_currentListId;
 
   std::stack<ABWContentTableState> m_tableStates;
   std::stack<std::pair<int, ABWListElement *> > m_listLevels;
@@ -109,9 +109,9 @@ struct ABWContentParsingState
 class ABWContentCollector : public ABWCollector
 {
 public:
-  ABWContentCollector(WPXDocumentInterface *iface, const std::map<int, int> &tableSizes,
+  ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes,
                       const std::map<std::string, ABWData> &data,
-                      const std::map<std::string, ABWListElement *> &listElements);
+                      const std::map<librevenge::RVNGString, ABWListElement *> &listElements);
   virtual ~ABWContentCollector();
 
   // collector functions
@@ -137,11 +137,11 @@ public:
   void insertLineBreak();
   void insertColumnBreak();
   void insertPageBreak();
-  void insertText(const WPXString &text);
+  void insertText(const librevenge::RVNGString &text);
   void insertImage(const char *dataid, const char *props);
   void collectList(const char *, const char *, const char *, const char *, const char *, const char *) {}
 
-  void collectData(const char *name, const char *mimeType, const WPXBinaryData &data);
+  void collectData(const char *name, const char *mimeType, const librevenge::RVNGBinaryData &data);
   void collectHeaderFooter(const char *id, const char *type);
 
   void openTable(const char *props);
@@ -168,7 +168,7 @@ private:
 
   void _handleListChange();
   void _changeList();
-  void _recurseListLevels(int oldLevel, int newLevel, const std::string &listId);
+  void _recurseListLevels(int oldLevel, int newLevel, const librevenge::RVNGString &listId);
 
   void _openSpan();
   void _closeSpan();
@@ -192,10 +192,10 @@ private:
   std::string _findCellProperty(const char *name);
   std::string _findSectionProperty(const char *name);
 
-  void _fillParagraphProperties(WPXPropertyList &propList, WPXPropertyListVector &tabStops);
+  void _fillParagraphProperties(librevenge::RVNGPropertyList &propList);
 
   ABWContentParsingState *m_ps;
-  WPXDocumentInterface *m_iface;
+  librevenge::RVNGTextInterface *m_iface;
   std::stack<ABWContentParsingState *> m_parsingStates;
   std::set<std::string> m_dontLoop;
   std::map<std::string, ABWStyle> m_textStyles;
@@ -204,7 +204,7 @@ private:
   const std::map<int, int> &m_tableSizes;
   int m_tableCounter;
   ABWOutputElements m_outputElements;
-  const std::map<std::string, ABWListElement *> &m_listElements;
+  const std::map<librevenge::RVNGString, ABWListElement *> &m_listElements;
 };
 
 } // namespace libabw
