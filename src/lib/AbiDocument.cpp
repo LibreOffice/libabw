@@ -21,8 +21,8 @@ The external libabw API is provided by the AbiDocument class. This class, combin
 with the librevenge::RVNGTextInterface class, are the only two classes that will be of interest
 for the application programmer using libabw.
 \section lib_docs libabw documentation
-If you are interrested in the structure of libabw itself, this whole document
-would be a good starting point for exploring the interals of libabw. Mind that
+If you are interested in the structure of libabw itself, this whole document
+would be a good starting point for exploring the internals of libabw. Mind that
 this document is a work-in-progress, and will most likely not cover libabw for
 the full 100%.
 */
@@ -30,7 +30,7 @@ the full 100%.
 /**
 Analyzes the content of an input stream to see if it can be parsed
 \param input The input stream
-\return A confidence value which represents the likelyhood that the content from
+\return A confidence value which represents the likelihood that the content from
 the input stream can be parsed
 */
 ABWAPI bool libabw::AbiDocument::isFileFormatSupported(librevenge::RVNGInputStream *input)

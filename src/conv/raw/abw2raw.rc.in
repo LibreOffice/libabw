@@ -17,7 +17,7 @@ VS_VERSION_INFO VERSIONINFO
 	VALUE "FileDescription", "abw2raw"
 	VALUE "FileVersion", "@ABW_MAJOR_VERSION@.@ABW_MINOR_VERSION@.@ABW_MICRO_VERSION@.BUILDNUMBER"
 	VALUE "InternalName", "abw2raw"
-	VALUE "LegalCopyright", "Copyright (C) 2002-2006 William Lachance, Marc Maurer, Fridrich Strba, other contributers"
+	VALUE "LegalCopyright", "Copyright (C) 2002-2006 William Lachance, Marc Maurer, Fridrich Strba, other contributors"
 	VALUE "OriginalFilename", "abw2raw.exe"
 	VALUE "ProductName", "libabw"
 	VALUE "ProductVersion", "@ABW_MAJOR_VERSION@.@ABW_MINOR_VERSION@.@ABW_MICRO_VERSION@"

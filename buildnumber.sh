@@ -12,5 +12,5 @@
 #Success
 exit 0
 }
-#Unsucessful
+#Unsuccessful
 exit 1

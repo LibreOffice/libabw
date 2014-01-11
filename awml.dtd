@@ -9,7 +9,7 @@
 	  AbiWord file format.  A more comprehsive view can be gained 
 	  from the code in files ie_exp_AbiWord_1.cpp and 
 	  ie_imp_AbiWord_1.cpp  These are currently definitive.  Other 
-	  documentation is availible in docs/AbiWord_DocumentFormat.abw
+	  documentation is available in docs/AbiWord_DocumentFormat.abw
 
 	  Sam Tobin-Hochstadt
 	  Christian Biesinger    - Updated in August 2002

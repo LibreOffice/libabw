@@ -93,7 +93,7 @@ By default, the configure script uses as prefix "/usr/local" and configures to
 create only shared libraries. Myself, I build using following options:
 "./configure --prefix=/target --enable-static --enable-shared"
 
-4. In the "libtool" created by the configure script, replace any occurence of
+4. In the "libtool" created by the configure script, replace any occurrence of
 
   deplibs_check_method="file_magic ^x86 archive import|^x86 DLL"
 
