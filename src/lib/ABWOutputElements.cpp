@@ -18,7 +18,7 @@ class ABWOutputElement
 public:
   ABWOutputElement() {}
   virtual ~ABWOutputElement() {}
-  virtual void write(librevenge::RVNGTextInterface *iface,
+  virtual void write(WPXDocumentInterface *iface,
                      const std::map<int, std::list<ABWOutputElement *> > *footers,
                      const std::map<int, std::list<ABWOutputElement *> > *headers) const = 0;
 };
@@ -28,7 +28,7 @@ class ABWCloseEndnoteElement : public ABWOutputElement
 public:
   ABWCloseEndnoteElement() {}
   ~ABWCloseEndnoteElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 };
@@ -38,7 +38,7 @@ class ABWCloseFooterElement : public ABWOutputElement
 public:
   ABWCloseFooterElement() {}
   ~ABWCloseFooterElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 };
@@ -48,7 +48,7 @@ class ABWCloseFootnoteElement : public ABWOutputElement
 public:
   ABWCloseFootnoteElement() {}
   ~ABWCloseFootnoteElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 };
@@ -58,7 +58,7 @@ class ABWCloseFrameElement : public ABWOutputElement
 public:
   ABWCloseFrameElement() {}
   ~ABWCloseFrameElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 };
@@ -68,7 +68,7 @@ class ABWCloseHeaderElement : public ABWOutputElement
 public:
   ABWCloseHeaderElement() {}
   ~ABWCloseHeaderElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 };
@@ -78,7 +78,7 @@ class ABWCloseLinkElement : public ABWOutputElement
 public:
   ABWCloseLinkElement() {}
   ~ABWCloseLinkElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -92,7 +92,7 @@ class ABWCloseListElementElement : public ABWOutputElement
 public:
   ABWCloseListElementElement() {}
   ~ABWCloseListElementElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -106,7 +106,7 @@ class ABWCloseOrderedListLevelElement : public ABWOutputElement
 public:
   ABWCloseOrderedListLevelElement() {}
   ~ABWCloseOrderedListLevelElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -120,7 +120,7 @@ class ABWClosePageSpanElement : public ABWOutputElement
 public:
   ABWClosePageSpanElement() {}
   ~ABWClosePageSpanElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -134,7 +134,7 @@ class ABWCloseParagraphElement : public ABWOutputElement
 public:
   ABWCloseParagraphElement() {}
   ~ABWCloseParagraphElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -148,7 +148,7 @@ class ABWCloseSectionElement : public ABWOutputElement
 public:
   ABWCloseSectionElement() {}
   ~ABWCloseSectionElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -162,7 +162,7 @@ class ABWCloseSpanElement : public ABWOutputElement
 public:
   ABWCloseSpanElement() {}
   ~ABWCloseSpanElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -176,7 +176,7 @@ class ABWCloseTableElement : public ABWOutputElement
 public:
   ABWCloseTableElement() {}
   ~ABWCloseTableElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -190,7 +190,7 @@ class ABWCloseTableCellElement : public ABWOutputElement
 public:
   ABWCloseTableCellElement() {}
   ~ABWCloseTableCellElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -204,7 +204,7 @@ class ABWCloseTableRowElement : public ABWOutputElement
 public:
   ABWCloseTableRowElement() {}
   ~ABWCloseTableRowElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -218,7 +218,7 @@ class ABWCloseUnorderedListLevelElement : public ABWOutputElement
 public:
   ABWCloseUnorderedListLevelElement() {}
   ~ABWCloseUnorderedListLevelElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -230,27 +230,28 @@ public:
 class ABWInsertBinaryObjectElement : public ABWOutputElement
 {
 public:
-  ABWInsertBinaryObjectElement(const librevenge::RVNGPropertyList &propList) :
-    m_propList(propList) {}
+  ABWInsertBinaryObjectElement(const WPXPropertyList &propList, const WPXBinaryData &data) :
+    m_propList(propList), m_data(data) {}
   ~ABWInsertBinaryObjectElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
   {
-    return new ABWInsertBinaryObjectElement(m_propList);
+    return new ABWInsertBinaryObjectElement(m_propList, m_data);
   }
 private:
-  librevenge::RVNGPropertyList m_propList;
+  WPXPropertyList m_propList;
+  WPXBinaryData m_data;
 };
 
 class ABWInsertCoveredTableCellElement : public ABWOutputElement
 {
 public:
-  ABWInsertCoveredTableCellElement(const librevenge::RVNGPropertyList &propList) :
+  ABWInsertCoveredTableCellElement(const WPXPropertyList &propList) :
     m_propList(propList) {}
   ~ABWInsertCoveredTableCellElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -258,7 +259,7 @@ public:
     return new ABWInsertCoveredTableCellElement(m_propList);
   }
 private:
-  librevenge::RVNGPropertyList m_propList;
+  WPXPropertyList m_propList;
 };
 
 class ABWInsertLineBreakElement : public ABWOutputElement
@@ -266,7 +267,7 @@ class ABWInsertLineBreakElement : public ABWOutputElement
 public:
   ABWInsertLineBreakElement() {}
   ~ABWInsertLineBreakElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -280,7 +281,7 @@ class ABWInsertSpaceElement : public ABWOutputElement
 public:
   ABWInsertSpaceElement() {}
   ~ABWInsertSpaceElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -294,7 +295,7 @@ class ABWInsertTabElement : public ABWOutputElement
 public:
   ABWInsertTabElement() {}
   ~ABWInsertTabElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -306,10 +307,10 @@ public:
 class ABWInsertTextElement : public ABWOutputElement
 {
 public:
-  ABWInsertTextElement(const librevenge::RVNGString &text) :
+  ABWInsertTextElement(const WPXString &text) :
     m_text(text) {}
   ~ABWInsertTextElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -317,16 +318,16 @@ public:
     return new ABWInsertTextElement(m_text);
   }
 private:
-  librevenge::RVNGString m_text;
+  WPXString m_text;
 };
 
 class ABWOpenEndnoteElement : public ABWOutputElement
 {
 public:
-  ABWOpenEndnoteElement(const librevenge::RVNGPropertyList &propList) :
+  ABWOpenEndnoteElement(const WPXPropertyList &propList) :
     m_propList(propList) {}
   ~ABWOpenEndnoteElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -334,16 +335,16 @@ public:
     return new ABWOpenEndnoteElement(m_propList);
   }
 private:
-  librevenge::RVNGPropertyList m_propList;
+  WPXPropertyList m_propList;
 };
 
 class ABWOpenFooterElement : public ABWOutputElement
 {
 public:
-  ABWOpenFooterElement(const librevenge::RVNGPropertyList &propList) :
+  ABWOpenFooterElement(const WPXPropertyList &propList) :
     m_propList(propList) {}
   ~ABWOpenFooterElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -351,16 +352,16 @@ public:
     return new ABWOpenFooterElement(m_propList);
   }
 private:
-  librevenge::RVNGPropertyList m_propList;
+  WPXPropertyList m_propList;
 };
 
 class ABWOpenFootnoteElement : public ABWOutputElement
 {
 public:
-  ABWOpenFootnoteElement(const librevenge::RVNGPropertyList &propList) :
+  ABWOpenFootnoteElement(const WPXPropertyList &propList) :
     m_propList(propList) {}
   ~ABWOpenFootnoteElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -368,16 +369,16 @@ public:
     return new ABWOpenFootnoteElement(m_propList);
   }
 private:
-  librevenge::RVNGPropertyList m_propList;
+  WPXPropertyList m_propList;
 };
 
 class ABWOpenFrameElement : public ABWOutputElement
 {
 public:
-  ABWOpenFrameElement(const librevenge::RVNGPropertyList &propList) :
+  ABWOpenFrameElement(const WPXPropertyList &propList) :
     m_propList(propList) {}
   ~ABWOpenFrameElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -385,16 +386,16 @@ public:
     return new ABWOpenFrameElement(m_propList);
   }
 private:
-  librevenge::RVNGPropertyList m_propList;
+  WPXPropertyList m_propList;
 };
 
 class ABWOpenHeaderElement : public ABWOutputElement
 {
 public:
-  ABWOpenHeaderElement(const librevenge::RVNGPropertyList &propList) :
+  ABWOpenHeaderElement(const WPXPropertyList &propList) :
     m_propList(propList) {}
   ~ABWOpenHeaderElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
   ABWOutputElement *clone()
@@ -402,52 +403,53 @@ public:
     return new ABWOpenHeaderElement(m_propList);
   }
 private:
-  librevenge::RVNGPropertyList m_propList;
+  WPXPropertyList m_propList;
 };
 
 class ABWOpenLinkElement : public ABWOutputElement
 {
 public:
-  ABWOpenLinkElement(const librevenge::RVNGPropertyList &propList) :
+  ABWOpenLinkElement(const WPXPropertyList &propList) :
     m_propList(propList) {}
   ~ABWOpenLinkElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 private:
-  librevenge::RVNGPropertyList m_propList;
+  WPXPropertyList m_propList;
 };
 
 class ABWOpenListElementElement : public ABWOutputElement
 {
 public:
-  ABWOpenListElementElement(const librevenge::RVNGPropertyList &propList) :
-    m_propList(propList) {}
+  ABWOpenListElementElement(const WPXPropertyList &propList, const WPXPropertyListVector &tabStops) :
+    m_propList(propList), m_tabStops(tabStops) {}
   ~ABWOpenListElementElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 private:
-  librevenge::RVNGPropertyList m_propList;
+  WPXPropertyList m_propList;
+  WPXPropertyListVector m_tabStops;
 };
 
 class ABWOpenOrderedListLevelElement : public ABWOutputElement
 {
 public:
-  ABWOpenOrderedListLevelElement(const librevenge::RVNGPropertyList &propList) :
+  ABWOpenOrderedListLevelElement(const WPXPropertyList &propList) :
     m_propList(propList) {}
   ~ABWOpenOrderedListLevelElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 private:
-  librevenge::RVNGPropertyList m_propList;
+  WPXPropertyList m_propList;
 };
 
 class ABWOpenPageSpanElement : public ABWOutputElement
 {
 public:
-  ABWOpenPageSpanElement(const librevenge::RVNGPropertyList &propList,
+  ABWOpenPageSpanElement(const WPXPropertyList &propList,
                          int footer, int footerLeft, int footerFirst, int footerLast,
                          int header, int headerLeft, int headerFirst, int headerLast) :
     m_propList(propList),
@@ -460,13 +462,13 @@ public:
     m_headerFirst(headerFirst),
     m_headerLast(headerLast) {}
   ~ABWOpenPageSpanElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 private:
-  void _writeElements(librevenge::RVNGTextInterface *iface, int id,
+  void _writeElements(WPXDocumentInterface *iface, int id,
                       const std::map<int, std::list<ABWOutputElement *> > *elements) const;
-  librevenge::RVNGPropertyList m_propList;
+  WPXPropertyList m_propList;
   int m_footer;
   int m_footerLeft;
   int m_footerFirst;
@@ -480,97 +482,100 @@ private:
 class ABWOpenParagraphElement : public ABWOutputElement
 {
 public:
-  ABWOpenParagraphElement(const librevenge::RVNGPropertyList &propList) :
-    m_propList(propList) {}
+  ABWOpenParagraphElement(const WPXPropertyList &propList, const WPXPropertyListVector &tabStops) :
+    m_propList(propList), m_tabStops(tabStops) {}
   ~ABWOpenParagraphElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 private:
-  librevenge::RVNGPropertyList m_propList;
+  WPXPropertyList m_propList;
+  WPXPropertyListVector m_tabStops;
 };
 
 class ABWOpenSectionElement : public ABWOutputElement
 {
 public:
-  ABWOpenSectionElement(const librevenge::RVNGPropertyList &propList) :
-    m_propList(propList) {}
+  ABWOpenSectionElement(const WPXPropertyList &propList, const WPXPropertyListVector &columns) :
+    m_propList(propList), m_columns(columns) {}
   ~ABWOpenSectionElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 private:
-  librevenge::RVNGPropertyList m_propList;
+  WPXPropertyList m_propList;
+  WPXPropertyListVector m_columns;
 };
 
 class ABWOpenSpanElement : public ABWOutputElement
 {
 public:
-  ABWOpenSpanElement(const librevenge::RVNGPropertyList &propList) :
+  ABWOpenSpanElement(const WPXPropertyList &propList) :
     m_propList(propList) {}
   ~ABWOpenSpanElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 private:
-  librevenge::RVNGPropertyList m_propList;
+  WPXPropertyList m_propList;
 };
 
 class ABWOpenTableElement : public ABWOutputElement
 {
 public:
-  ABWOpenTableElement(const librevenge::RVNGPropertyList &propList) :
-    m_propList(propList) {}
+  ABWOpenTableElement(const WPXPropertyList &propList, const WPXPropertyListVector &columns) :
+    m_propList(propList), m_columns(columns) {}
   ~ABWOpenTableElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 private:
-  librevenge::RVNGPropertyList m_propList;
+  WPXPropertyList m_propList;
+  WPXPropertyListVector m_columns;
 };
 
 class ABWOpenTableCellElement : public ABWOutputElement
 {
 public:
-  ABWOpenTableCellElement(const librevenge::RVNGPropertyList &propList) :
+  ABWOpenTableCellElement(const WPXPropertyList &propList) :
     m_propList(propList) {}
   ~ABWOpenTableCellElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 private:
-  librevenge::RVNGPropertyList m_propList;
+  WPXPropertyList m_propList;
 };
 
 class ABWOpenTableRowElement : public ABWOutputElement
 {
 public:
-  ABWOpenTableRowElement(const librevenge::RVNGPropertyList &propList) :
+  ABWOpenTableRowElement(const WPXPropertyList &propList) :
     m_propList(propList) {}
   ~ABWOpenTableRowElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 private:
-  librevenge::RVNGPropertyList m_propList;
+  WPXPropertyList m_propList;
 };
 
 class ABWOpenUnorderedListLevelElement : public ABWOutputElement
 {
 public:
-  ABWOpenUnorderedListLevelElement(const librevenge::RVNGPropertyList &propList) :
+  ABWOpenUnorderedListLevelElement(const WPXPropertyList &propList) :
     m_propList(propList) {}
   ~ABWOpenUnorderedListLevelElement() {}
-  void write(librevenge::RVNGTextInterface *iface,
+  void write(WPXDocumentInterface *iface,
              const std::map<int, std::list<ABWOutputElement *> > *footers,
              const std::map<int, std::list<ABWOutputElement *> > *headers) const;
 private:
-  librevenge::RVNGPropertyList m_propList;
+  WPXPropertyList m_propList;
 };
 
 } // namespace libabw
 
-void libabw::ABWCloseEndnoteElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWCloseEndnoteElement::write(WPXDocumentInterface *iface,
                                            const std::map<int, std::list<ABWOutputElement *> > *,
                                            const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -578,7 +583,7 @@ void libabw::ABWCloseEndnoteElement::write(librevenge::RVNGTextInterface *iface,
     iface->closeEndnote();
 }
 
-void libabw::ABWCloseFooterElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWCloseFooterElement::write(WPXDocumentInterface *iface,
                                           const std::map<int, std::list<ABWOutputElement *> > *,
                                           const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -586,7 +591,7 @@ void libabw::ABWCloseFooterElement::write(librevenge::RVNGTextInterface *iface,
     iface->closeFooter();
 }
 
-void libabw::ABWCloseFootnoteElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWCloseFootnoteElement::write(WPXDocumentInterface *iface,
                                             const std::map<int, std::list<ABWOutputElement *> > *,
                                             const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -594,7 +599,7 @@ void libabw::ABWCloseFootnoteElement::write(librevenge::RVNGTextInterface *iface
     iface->closeFootnote();
 }
 
-void libabw::ABWCloseFrameElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWCloseFrameElement::write(WPXDocumentInterface *iface,
                                          const std::map<int, std::list<ABWOutputElement *> > *,
                                          const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -602,7 +607,7 @@ void libabw::ABWCloseFrameElement::write(librevenge::RVNGTextInterface *iface,
     iface->closeFrame();
 }
 
-void libabw::ABWCloseHeaderElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWCloseHeaderElement::write(WPXDocumentInterface *iface,
                                           const std::map<int, std::list<ABWOutputElement *> > *,
                                           const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -610,15 +615,13 @@ void libabw::ABWCloseHeaderElement::write(librevenge::RVNGTextInterface *iface,
     iface->closeHeader();
 }
 
-void libabw::ABWCloseLinkElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWCloseLinkElement::write(WPXDocumentInterface *,
                                         const std::map<int, std::list<ABWOutputElement *> > *,
                                         const std::map<int, std::list<ABWOutputElement *> > *) const
 {
-  if (iface)
-    iface->closeLink();
 }
 
-void libabw::ABWCloseListElementElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWCloseListElementElement::write(WPXDocumentInterface *iface,
                                                const std::map<int, std::list<ABWOutputElement *> > *,
                                                const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -626,7 +629,7 @@ void libabw::ABWCloseListElementElement::write(librevenge::RVNGTextInterface *if
     iface->closeListElement();
 }
 
-void libabw::ABWCloseOrderedListLevelElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWCloseOrderedListLevelElement::write(WPXDocumentInterface *iface,
                                                     const std::map<int, std::list<ABWOutputElement *> > *,
                                                     const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -634,7 +637,7 @@ void libabw::ABWCloseOrderedListLevelElement::write(librevenge::RVNGTextInterfac
     iface->closeOrderedListLevel();
 }
 
-void libabw::ABWClosePageSpanElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWClosePageSpanElement::write(WPXDocumentInterface *iface,
                                             const std::map<int, std::list<ABWOutputElement *> > *,
                                             const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -642,7 +645,7 @@ void libabw::ABWClosePageSpanElement::write(librevenge::RVNGTextInterface *iface
     iface->closePageSpan();
 }
 
-void libabw::ABWCloseParagraphElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWCloseParagraphElement::write(WPXDocumentInterface *iface,
                                              const std::map<int, std::list<ABWOutputElement *> > *,
                                              const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -650,7 +653,7 @@ void libabw::ABWCloseParagraphElement::write(librevenge::RVNGTextInterface *ifac
     iface->closeParagraph();
 }
 
-void libabw::ABWCloseSectionElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWCloseSectionElement::write(WPXDocumentInterface *iface,
                                            const std::map<int, std::list<ABWOutputElement *> > *,
                                            const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -658,7 +661,7 @@ void libabw::ABWCloseSectionElement::write(librevenge::RVNGTextInterface *iface,
     iface->closeSection();
 }
 
-void libabw::ABWCloseSpanElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWCloseSpanElement::write(WPXDocumentInterface *iface,
                                         const std::map<int, std::list<ABWOutputElement *> > *,
                                         const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -666,7 +669,7 @@ void libabw::ABWCloseSpanElement::write(librevenge::RVNGTextInterface *iface,
     iface->closeSpan();
 }
 
-void libabw::ABWCloseTableElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWCloseTableElement::write(WPXDocumentInterface *iface,
                                          const std::map<int, std::list<ABWOutputElement *> > *,
                                          const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -674,7 +677,7 @@ void libabw::ABWCloseTableElement::write(librevenge::RVNGTextInterface *iface,
     iface->closeTable();
 }
 
-void libabw::ABWCloseTableCellElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWCloseTableCellElement::write(WPXDocumentInterface *iface,
                                              const std::map<int, std::list<ABWOutputElement *> > *,
                                              const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -682,7 +685,7 @@ void libabw::ABWCloseTableCellElement::write(librevenge::RVNGTextInterface *ifac
     iface->closeTableCell();
 }
 
-void libabw::ABWCloseTableRowElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWCloseTableRowElement::write(WPXDocumentInterface *iface,
                                             const std::map<int, std::list<ABWOutputElement *> > *,
                                             const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -690,7 +693,7 @@ void libabw::ABWCloseTableRowElement::write(librevenge::RVNGTextInterface *iface
     iface->closeTableRow();
 }
 
-void libabw::ABWCloseUnorderedListLevelElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWCloseUnorderedListLevelElement::write(WPXDocumentInterface *iface,
                                                       const std::map<int, std::list<ABWOutputElement *> > *,
                                                       const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -698,15 +701,15 @@ void libabw::ABWCloseUnorderedListLevelElement::write(librevenge::RVNGTextInterf
     iface->closeUnorderedListLevel();
 }
 
-void libabw::ABWInsertBinaryObjectElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWInsertBinaryObjectElement::write(WPXDocumentInterface *iface,
                                                  const std::map<int, std::list<ABWOutputElement *> > *,
                                                  const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
-    iface->insertBinaryObject(m_propList);
+    iface->insertBinaryObject(m_propList, m_data);
 }
 
-void libabw::ABWInsertCoveredTableCellElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWInsertCoveredTableCellElement::write(WPXDocumentInterface *iface,
                                                      const std::map<int, std::list<ABWOutputElement *> > *,
                                                      const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -714,7 +717,7 @@ void libabw::ABWInsertCoveredTableCellElement::write(librevenge::RVNGTextInterfa
     iface->insertCoveredTableCell(m_propList);
 }
 
-void libabw::ABWInsertLineBreakElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWInsertLineBreakElement::write(WPXDocumentInterface *iface,
                                               const std::map<int, std::list<ABWOutputElement *> > *,
                                               const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -722,7 +725,7 @@ void libabw::ABWInsertLineBreakElement::write(librevenge::RVNGTextInterface *ifa
     iface->insertLineBreak();
 }
 
-void libabw::ABWInsertSpaceElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWInsertSpaceElement::write(WPXDocumentInterface *iface,
                                           const std::map<int, std::list<ABWOutputElement *> > *,
                                           const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -730,7 +733,7 @@ void libabw::ABWInsertSpaceElement::write(librevenge::RVNGTextInterface *iface,
     iface->insertSpace();
 }
 
-void libabw::ABWInsertTabElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWInsertTabElement::write(WPXDocumentInterface *iface,
                                         const std::map<int, std::list<ABWOutputElement *> > *,
                                         const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -738,7 +741,7 @@ void libabw::ABWInsertTabElement::write(librevenge::RVNGTextInterface *iface,
     iface->insertTab();
 }
 
-void libabw::ABWInsertTextElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWInsertTextElement::write(WPXDocumentInterface *iface,
                                          const std::map<int, std::list<ABWOutputElement *> > *,
                                          const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -746,7 +749,7 @@ void libabw::ABWInsertTextElement::write(librevenge::RVNGTextInterface *iface,
     iface->insertText(m_text);
 }
 
-void libabw::ABWOpenEndnoteElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWOpenEndnoteElement::write(WPXDocumentInterface *iface,
                                           const std::map<int, std::list<ABWOutputElement *> > *,
                                           const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -754,7 +757,7 @@ void libabw::ABWOpenEndnoteElement::write(librevenge::RVNGTextInterface *iface,
     iface->openEndnote(m_propList);
 }
 
-void libabw::ABWOpenFooterElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWOpenFooterElement::write(WPXDocumentInterface *iface,
                                          const std::map<int, std::list<ABWOutputElement *> > *,
                                          const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -762,7 +765,7 @@ void libabw::ABWOpenFooterElement::write(librevenge::RVNGTextInterface *iface,
     iface->openFooter(m_propList);
 }
 
-void libabw::ABWOpenFootnoteElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWOpenFootnoteElement::write(WPXDocumentInterface *iface,
                                            const std::map<int, std::list<ABWOutputElement *> > *,
                                            const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -770,7 +773,7 @@ void libabw::ABWOpenFootnoteElement::write(librevenge::RVNGTextInterface *iface,
     iface->openFootnote(m_propList);
 }
 
-void libabw::ABWOpenFrameElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWOpenFrameElement::write(WPXDocumentInterface *iface,
                                         const std::map<int, std::list<ABWOutputElement *> > *,
                                         const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -778,7 +781,7 @@ void libabw::ABWOpenFrameElement::write(librevenge::RVNGTextInterface *iface,
     iface->openFrame(m_propList);
 }
 
-void libabw::ABWOpenHeaderElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWOpenHeaderElement::write(WPXDocumentInterface *iface,
                                          const std::map<int, std::list<ABWOutputElement *> > *,
                                          const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -786,23 +789,21 @@ void libabw::ABWOpenHeaderElement::write(librevenge::RVNGTextInterface *iface,
     iface->openHeader(m_propList);
 }
 
-void libabw::ABWOpenListElementElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWOpenListElementElement::write(WPXDocumentInterface *iface,
                                               const std::map<int, std::list<ABWOutputElement *> > *,
                                               const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
-    iface->openListElement(m_propList);
+    iface->openListElement(m_propList, m_tabStops);
 }
 
-void libabw::ABWOpenLinkElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWOpenLinkElement::write(WPXDocumentInterface *,
                                        const std::map<int, std::list<ABWOutputElement *> > *,
                                        const std::map<int, std::list<ABWOutputElement *> > *) const
 {
-  if (iface)
-    iface->openLink(m_propList);
 }
 
-void libabw::ABWOpenOrderedListLevelElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWOpenOrderedListLevelElement::write(WPXDocumentInterface *iface,
                                                    const std::map<int, std::list<ABWOutputElement *> > *,
                                                    const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -810,7 +811,7 @@ void libabw::ABWOpenOrderedListLevelElement::write(librevenge::RVNGTextInterface
     iface->openOrderedListLevel(m_propList);
 }
 
-void libabw::ABWOpenPageSpanElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWOpenPageSpanElement::write(WPXDocumentInterface *iface,
                                            const std::map<int, std::list<ABWOutputElement *> > *footers,
                                            const std::map<int, std::list<ABWOutputElement *> > *headers) const
 {
@@ -833,7 +834,7 @@ void libabw::ABWOpenPageSpanElement::write(librevenge::RVNGTextInterface *iface,
 
 }
 
-void libabw::ABWOpenPageSpanElement::_writeElements(librevenge::RVNGTextInterface *iface, int id,
+void libabw::ABWOpenPageSpanElement::_writeElements(WPXDocumentInterface *iface, int id,
                                                     const std::map<int, std::list<ABWOutputElement *> > *elements) const
 {
   if (!elements || id < 0 || !iface)
@@ -848,23 +849,23 @@ void libabw::ABWOpenPageSpanElement::_writeElements(librevenge::RVNGTextInterfac
     (*iterVec)->write(iface, 0, 0);
 }
 
-void libabw::ABWOpenParagraphElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWOpenParagraphElement::write(WPXDocumentInterface *iface,
                                             const std::map<int, std::list<ABWOutputElement *> > *,
                                             const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
-    iface->openParagraph(m_propList);
+    iface->openParagraph(m_propList, m_tabStops);
 }
 
-void libabw::ABWOpenSectionElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWOpenSectionElement::write(WPXDocumentInterface *iface,
                                           const std::map<int, std::list<ABWOutputElement *> > *,
                                           const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
-    iface->openSection(m_propList);
+    iface->openSection(m_propList, m_columns);
 }
 
-void libabw::ABWOpenSpanElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWOpenSpanElement::write(WPXDocumentInterface *iface,
                                        const std::map<int, std::list<ABWOutputElement *> > *,
                                        const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -872,15 +873,15 @@ void libabw::ABWOpenSpanElement::write(librevenge::RVNGTextInterface *iface,
     iface->openSpan(m_propList);
 }
 
-void libabw::ABWOpenTableElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWOpenTableElement::write(WPXDocumentInterface *iface,
                                         const std::map<int, std::list<ABWOutputElement *> > *,
                                         const std::map<int, std::list<ABWOutputElement *> > *) const
 {
   if (iface)
-    iface->openTable(m_propList);
+    iface->openTable(m_propList, m_columns);
 }
 
-void libabw::ABWOpenTableCellElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWOpenTableCellElement::write(WPXDocumentInterface *iface,
                                             const std::map<int, std::list<ABWOutputElement *> > *,
                                             const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -888,7 +889,7 @@ void libabw::ABWOpenTableCellElement::write(librevenge::RVNGTextInterface *iface
     iface->openTableCell(m_propList);
 }
 
-void libabw::ABWOpenTableRowElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWOpenTableRowElement::write(WPXDocumentInterface *iface,
                                            const std::map<int, std::list<ABWOutputElement *> > *,
                                            const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -896,7 +897,7 @@ void libabw::ABWOpenTableRowElement::write(librevenge::RVNGTextInterface *iface,
     iface->openTableRow(m_propList);
 }
 
-void libabw::ABWOpenUnorderedListLevelElement::write(librevenge::RVNGTextInterface *iface,
+void libabw::ABWOpenUnorderedListLevelElement::write(WPXDocumentInterface *iface,
                                                      const std::map<int, std::list<ABWOutputElement *> > *,
                                                      const std::map<int, std::list<ABWOutputElement *> > *) const
 {
@@ -931,7 +932,7 @@ libabw::ABWOutputElements::~ABWOutputElements()
   }
 }
 
-void libabw::ABWOutputElements::write(librevenge::RVNGTextInterface *iface) const
+void libabw::ABWOutputElements::write(WPXDocumentInterface *iface) const
 {
   std::list<ABWOutputElement *>::const_iterator iter;
   for (iter = m_bodyElements.begin(); iter != m_bodyElements.end(); ++iter)
@@ -1036,13 +1037,13 @@ void libabw::ABWOutputElements::addCloseUnorderedListLevel()
     m_elements->push_back(new ABWCloseUnorderedListLevelElement());
 }
 
-void libabw::ABWOutputElements::addInsertBinaryObject(const librevenge::RVNGPropertyList &propList)
+void libabw::ABWOutputElements::addInsertBinaryObject(const WPXPropertyList &propList, const WPXBinaryData &data)
 {
   if (m_elements)
-    m_elements->push_back(new ABWInsertBinaryObjectElement(propList));
+    m_elements->push_back(new ABWInsertBinaryObjectElement(propList, data));
 }
 
-void libabw::ABWOutputElements::addInsertCoveredTableCell(const librevenge::RVNGPropertyList &propList)
+void libabw::ABWOutputElements::addInsertCoveredTableCell(const WPXPropertyList &propList)
 {
   if (m_elements)
     m_elements->push_back(new ABWInsertCoveredTableCellElement(propList));
@@ -1066,19 +1067,19 @@ void libabw::ABWOutputElements::addInsertTab()
     m_elements->push_back(new ABWInsertTabElement());
 }
 
-void libabw::ABWOutputElements::addInsertText(const librevenge::RVNGString &text)
+void libabw::ABWOutputElements::addInsertText(const WPXString &text)
 {
   if (m_elements)
     m_elements->push_back(new ABWInsertTextElement(text));
 }
 
-void libabw::ABWOutputElements::addOpenEndnote(const librevenge::RVNGPropertyList &propList)
+void libabw::ABWOutputElements::addOpenEndnote(const WPXPropertyList &propList)
 {
   if (m_elements)
     m_elements->push_back(new ABWOpenEndnoteElement(propList));
 }
 
-void libabw::ABWOutputElements::addOpenFooter(const librevenge::RVNGPropertyList &propList, int id)
+void libabw::ABWOutputElements::addOpenFooter(const WPXPropertyList &propList, int id)
 {
   // if the corresponding element of the map does not exist, this will default-construct it.
   // In that case we will get an empty list to fill with the footer content. If the element
@@ -1089,19 +1090,19 @@ void libabw::ABWOutputElements::addOpenFooter(const librevenge::RVNGPropertyList
     m_elements->push_back(new ABWOpenFooterElement(propList));
 }
 
-void libabw::ABWOutputElements::addOpenFootnote(const librevenge::RVNGPropertyList &propList)
+void libabw::ABWOutputElements::addOpenFootnote(const WPXPropertyList &propList)
 {
   if (m_elements)
     m_elements->push_back(new ABWOpenFootnoteElement(propList));
 }
 
-void libabw::ABWOutputElements::addOpenFrame(const librevenge::RVNGPropertyList &propList)
+void libabw::ABWOutputElements::addOpenFrame(const WPXPropertyList &propList)
 {
   if (m_elements)
     m_elements->push_back(new ABWOpenFrameElement(propList));
 }
 
-void libabw::ABWOutputElements::addOpenHeader(const librevenge::RVNGPropertyList &propList, int id)
+void libabw::ABWOutputElements::addOpenHeader(const WPXPropertyList &propList, int id)
 {
   // Check the comment in addOpenFooter to see what happens here
   m_elements = &m_headerElements[id];
@@ -1109,25 +1110,25 @@ void libabw::ABWOutputElements::addOpenHeader(const librevenge::RVNGPropertyList
     m_elements->push_back(new ABWOpenHeaderElement(propList));
 }
 
-void libabw::ABWOutputElements::addOpenListElement(const librevenge::RVNGPropertyList &propList)
+void libabw::ABWOutputElements::addOpenListElement(const WPXPropertyList &propList, const WPXPropertyListVector &tabStops)
 {
   if (m_elements)
-    m_elements->push_back(new ABWOpenListElementElement(propList));
+    m_elements->push_back(new ABWOpenListElementElement(propList, tabStops));
 }
 
-void libabw::ABWOutputElements::addOpenLink(const librevenge::RVNGPropertyList &propList)
+void libabw::ABWOutputElements::addOpenLink(const WPXPropertyList &propList)
 {
   if (m_elements)
     m_elements->push_back(new ABWOpenLinkElement(propList));
 }
 
-void libabw::ABWOutputElements::addOpenOrderedListLevel(const librevenge::RVNGPropertyList &propList)
+void libabw::ABWOutputElements::addOpenOrderedListLevel(const WPXPropertyList &propList)
 {
   if (m_elements)
     m_elements->push_back(new ABWOpenOrderedListLevelElement(propList));
 }
 
-void libabw::ABWOutputElements::addOpenPageSpan(const librevenge::RVNGPropertyList &propList,
+void libabw::ABWOutputElements::addOpenPageSpan(const WPXPropertyList &propList,
                                                 int footer, int footerLeft, int footerFirst, int footerLast,
                                                 int header, int headerLeft, int headerFirst, int headerLast)
 {
@@ -1136,43 +1137,43 @@ void libabw::ABWOutputElements::addOpenPageSpan(const librevenge::RVNGPropertyLi
                                                      header, headerLeft, headerFirst, headerLast));
 }
 
-void libabw::ABWOutputElements::addOpenParagraph(const librevenge::RVNGPropertyList &propList)
+void libabw::ABWOutputElements::addOpenParagraph(const WPXPropertyList &propList, const WPXPropertyListVector &tabStops)
 {
   if (m_elements)
-    m_elements->push_back(new ABWOpenParagraphElement(propList));
+    m_elements->push_back(new ABWOpenParagraphElement(propList, tabStops));
 }
 
-void libabw::ABWOutputElements::addOpenSection(const librevenge::RVNGPropertyList &propList)
+void libabw::ABWOutputElements::addOpenSection(const WPXPropertyList &propList, const WPXPropertyListVector &columns)
 {
   if (m_elements)
-    m_elements->push_back(new ABWOpenSectionElement(propList));
+    m_elements->push_back(new ABWOpenSectionElement(propList, columns));
 }
 
-void libabw::ABWOutputElements::addOpenSpan(const librevenge::RVNGPropertyList &propList)
+void libabw::ABWOutputElements::addOpenSpan(const WPXPropertyList &propList)
 {
   if (m_elements)
     m_elements->push_back(new ABWOpenSpanElement(propList));
 }
 
-void libabw::ABWOutputElements::addOpenTable(const librevenge::RVNGPropertyList &propList)
+void libabw::ABWOutputElements::addOpenTable(const WPXPropertyList &propList, const WPXPropertyListVector &columns)
 {
   if (m_elements)
-    m_elements->push_back(new ABWOpenTableElement(propList));
+    m_elements->push_back(new ABWOpenTableElement(propList, columns));
 }
 
-void libabw::ABWOutputElements::addOpenTableCell(const librevenge::RVNGPropertyList &propList)
+void libabw::ABWOutputElements::addOpenTableCell(const WPXPropertyList &propList)
 {
   if (m_elements)
     m_elements->push_back(new ABWOpenTableCellElement(propList));
 }
 
-void libabw::ABWOutputElements::addOpenTableRow(const librevenge::RVNGPropertyList &propList)
+void libabw::ABWOutputElements::addOpenTableRow(const WPXPropertyList &propList)
 {
   if (m_elements)
     m_elements->push_back(new ABWOpenTableRowElement(propList));
 }
 
-void libabw::ABWOutputElements::addOpenUnorderedListLevel(const librevenge::RVNGPropertyList &propList)
+void libabw::ABWOutputElements::addOpenUnorderedListLevel(const WPXPropertyList &propList)
 {
   if (m_elements)
     m_elements->push_back(new ABWOpenUnorderedListLevelElement(propList));

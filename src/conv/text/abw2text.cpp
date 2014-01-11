@@ -7,12 +7,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-
 #include <stdio.h>
 #include <string.h>
-#include <librevenge-stream/librevenge-stream.h>
-#include <librevenge-generators/librevenge-generators.h>
+#include <libwpd-stream/libwpd-stream.h>
 #include <libabw/libabw.h>
+#include "TextDocumentGenerator.h"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -67,7 +66,7 @@ int main(int argc, char *argv[])
   if (!szInputFile)
     return printUsage();
 
-  librevenge::RVNGFileStream input(szInputFile);
+  WPXFileStream input(szInputFile);
 
   if (!libabw::AbiDocument::isFileFormatSupported(&input))
   {
@@ -75,12 +74,9 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  librevenge::RVNGString document;
-  librevenge::RVNGTextTextGenerator documentGenerator(document, isInfo);
+  TextDocumentGenerator documentGenerator(isInfo);
   if (!libabw::AbiDocument::parse(&input, &documentGenerator))
     return 1;
-
-  printf("%s", document.cstr());
 
   return 0;
 }

@@ -18,7 +18,7 @@ This document contains both the libabw API specification and the normal libabw
 documentation.
 \section api_docs libabw API documentation
 The external libabw API is provided by the AbiDocument class. This class, combined
-with the librevenge::RVNGTextInterface class, are the only two classes that will be of interest
+with the WPXDocumentInterface class, are the only two classes that will be of interest
 for the application programmer using libabw.
 \section lib_docs libabw documentation
 If you are interested in the structure of libabw itself, this whole document
@@ -33,7 +33,7 @@ Analyzes the content of an input stream to see if it can be parsed
 \return A confidence value which represents the likelihood that the content from
 the input stream can be parsed
 */
-ABWAPI bool libabw::AbiDocument::isFileFormatSupported(librevenge::RVNGInputStream *input)
+ABWAPI bool libabw::AbiDocument::isFileFormatSupported(WPXInputStream *input)
 {
   ABW_DEBUG_MSG(("AbiDocument::isFileFormatSupported\n"));
   if (!input)
@@ -41,7 +41,7 @@ ABWAPI bool libabw::AbiDocument::isFileFormatSupported(librevenge::RVNGInputStre
   xmlTextReaderPtr reader = 0;
   try
   {
-    input->seek(0, librevenge::RVNG_SEEK_SET);
+    input->seek(0, WPX_SEEK_SET);
     reader = libabw::xmlReaderForStream(input, 0, 0, XML_PARSE_NOBLANKS|XML_PARSE_NOENT|XML_PARSE_NONET|XML_PARSE_RECOVER);
     if (!reader)
       return false;
@@ -98,19 +98,19 @@ ABWAPI bool libabw::AbiDocument::isFileFormatSupported(librevenge::RVNGInputStre
 
 /**
 Parses the input stream content. It will make callbacks to the functions provided by a
-librevenge::RVNGTextInterface class implementation when needed. This is often commonly called the
+WPXDocumentInterface class implementation when needed. This is often commonly called the
 'main parsing routine'.
 \param input The input stream
-\param textInterface A librevenge::RVNGTextInterface implementation
+\param textInterface A WPXDocumentInterface implementation
 \param password The password used to protect the document or NULL if the document
 is not protected
 \return A value that indicates whether the conversion was successful and in case it
 was not, it indicates the reason of the error
 */
-ABWAPI bool libabw::AbiDocument::parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *textInterface)
+ABWAPI bool libabw::AbiDocument::parse(WPXInputStream *input, WPXDocumentInterface *textInterface)
 {
   ABW_DEBUG_MSG(("AbiDocument::parse\n"));
-  input->seek(0, librevenge::RVNG_SEEK_SET);
+  input->seek(0, WPX_SEEK_SET);
   libabw::ABWParser parser(input, textInterface);
   if (parser.parse())
     return true;
