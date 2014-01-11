@@ -203,7 +203,7 @@ void libabw::ABWStylesCollector::collectData(const char *name, const char *mimeT
 {
   if (!name)
     return;
-  m_data[name] = ABWData(mimeType, data);
+  m_data[name] = ABWData(mimeType ? mimeType : "", data);
 }
 
 void libabw::ABWStylesCollector::_processList(const char *id, const char *listDelim,
