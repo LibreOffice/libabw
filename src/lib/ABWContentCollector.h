@@ -100,7 +100,7 @@ struct ABWContentParsingState
   bool m_isNote;
 
   int m_currentListLevel;
-  WPXString m_currentListId;
+  std::string m_currentListId;
 
   std::stack<ABWContentTableState> m_tableStates;
   std::stack<std::pair<int, ABWListElement *> > m_listLevels;
@@ -168,7 +168,7 @@ private:
 
   void _handleListChange();
   void _changeList();
-  void _recurseListLevels(int oldLevel, int newLevel, const WPXString &listId);
+  void _recurseListLevels(int oldLevel, int newLevel, const std::string &listId);
 
   void _openSpan();
   void _closeSpan();

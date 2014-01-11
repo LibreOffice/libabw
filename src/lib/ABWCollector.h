@@ -64,7 +64,7 @@ struct ABWListElement
   int m_listLevel;
   double m_minLabelWidth;
   double m_spaceBefore;
-  WPXString m_parentId;
+  std::string m_parentId;
 };
 
 struct ABWOrderedListElement : public ABWListElement
