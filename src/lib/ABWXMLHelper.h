@@ -10,16 +10,16 @@
 #ifndef __ABWXMLHELPER_H__
 #define __ABWXMLHELPER_H__
 
-#include <librevenge-stream/librevenge-stream.h>
+#include <libwpd-stream/libwpd-stream.h>
 #include <libxml/xmlreader.h>
 
 namespace libabw
 {
 
-// create an xmlTextReader pointer from a librevenge::RVNGInputStream pointer
+// create an xmlTextReader pointer from a WPXInputStream pointer
 // needs to be freed using xmlTextReaderFree function.
 
-xmlTextReaderPtr xmlReaderForStream(librevenge::RVNGInputStream *input,
+xmlTextReaderPtr xmlReaderForStream(WPXInputStream *input,
                                     const char *URL,
                                     const char *encoding,
                                     int options);

@@ -9,7 +9,7 @@
 
 #include <boost/spirit/include/classic.hpp>
 #include <boost/algorithm/string.hpp>
-#include <librevenge/librevenge.h>
+#include <libwpd/libwpd.h>
 #include "ABWStylesCollector.h"
 #include "libabw_internal.h"
 
@@ -98,7 +98,7 @@ static int abw_unichar_to_utf8(uint32_t c, char *outbuf)
   return len;
 }
 
-static void appendUCS4(librevenge::RVNGString &str, uint32_t ucs4)
+static void appendUCS4(WPXString &str, uint32_t ucs4)
 {
   int charLength = abw_unichar_to_utf8(ucs4, 0);
   char *utf8 = new char[charLength+1];
@@ -137,7 +137,7 @@ libabw::ABWStylesParsingState::~ABWStylesParsingState() {}
 
 libabw::ABWStylesCollector::ABWStylesCollector(std::map<int, int> &tableSizes,
                                                std::map<std::string, ABWData> &data,
-                                               std::map<librevenge::RVNGString, ABWListElement *> &listElements) :
+                                               std::map<std::string, ABWListElement *> &listElements) :
   m_ps(new ABWStylesParsingState),
   m_tableSizes(tableSizes),
   m_data(data),
@@ -199,7 +199,7 @@ std::string libabw::ABWStylesCollector::_findCellProperty(const char *name)
   return std::string();
 }
 
-void libabw::ABWStylesCollector::collectData(const char *name, const char *mimeType, const librevenge::RVNGBinaryData &data)
+void libabw::ABWStylesCollector::collectData(const char *name, const char *mimeType, const WPXBinaryData &data)
 {
   if (!name)
     return;
@@ -290,7 +290,7 @@ void libabw::ABWStylesCollector::_processList(const char *id, const char *listDe
     if (listDelim)
     {
       std::string delim(listDelim);
-      std::vector<librevenge::RVNGString> strVec;
+      std::vector<WPXString> strVec;
 
       for (split_iterator<std::string::iterator> It =
              make_split_iterator(delim, first_finder("%L", is_iequal()));
@@ -331,7 +331,7 @@ void libabw::ABWStylesCollector::collectParagraphProperties(const char *level, c
 
   if (listid)
   {
-    std::map<librevenge::RVNGString, ABWListElement *>::iterator iter = m_listElements.find(listid);
+    std::map<std::string, ABWListElement *>::iterator iter = m_listElements.find(listid);
     if (iter == m_listElements.end() || !iter->second)
     {
       std::map<std::string, std::string>::const_iterator i = properties.find("list-style");

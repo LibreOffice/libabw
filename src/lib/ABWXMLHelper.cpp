@@ -10,7 +10,7 @@
 #include <string.h>
 #include <libxml/xmlIO.h>
 #include <libxml/xmlstring.h>
-#include <librevenge-stream/librevenge-stream.h>
+#include <libwpd-stream/libwpd-stream.h>
 #include "ABWXMLHelper.h"
 #include "libabw_internal.h"
 
@@ -26,12 +26,12 @@ extern "C" {
 
   static int abwxmlInputReadFunc(void *context, char *buffer, int len)
   {
-    librevenge::RVNGInputStream *input = (librevenge::RVNGInputStream *)context;
+    WPXInputStream *input = (WPXInputStream *)context;
 
     if ((!input) || (!buffer) || (len < 0))
       return -1;
 
-    if (input->isEnd())
+    if (input->atEOS())
       return 0;
 
     unsigned long tmpNumBytesRead = 0;
@@ -73,7 +73,7 @@ extern "C" {
 
 // xmlTextReader helper function
 
-xmlTextReaderPtr libabw::xmlReaderForStream(librevenge::RVNGInputStream *input, const char *URL, const char *encoding, int options)
+xmlTextReaderPtr libabw::xmlReaderForStream(WPXInputStream *input, const char *URL, const char *encoding, int options)
 {
   xmlTextReaderPtr reader = xmlReaderForIO(abwxmlInputReadFunc, abwxmlInputCloseFunc, (void *)input, URL, encoding, options);
   xmlTextReaderSetErrorHandler(reader, abwxmlReaderErrorFunc, 0);
