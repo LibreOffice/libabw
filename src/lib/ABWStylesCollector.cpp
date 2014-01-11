@@ -203,8 +203,7 @@ void libabw::ABWStylesCollector::collectData(const char *name, const char *mimeT
 {
   if (!name)
     return;
-  WPXString mimeString(mimeType ? mimeType : "");
-  m_data[name] = ABWData(mimeString, data);
+  m_data[name] = ABWData(mimeType ? mimeType : "", data);
 }
 
 void libabw::ABWStylesCollector::_processList(const char *id, const char *listDelim,
