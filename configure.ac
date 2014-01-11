@@ -240,7 +240,6 @@ AC_SUBST([LIBXML2_LIBS])
 # ==================
 AC_CHECK_HEADERS(
 	boost/algorithm/string.hpp \
-	boost/archive/iterators/base64_from_binary.hpp \
 	boost/archive/iterators/binary_from_base64.hpp \
 	boost/archive/iterators/remove_whitespace.hpp \
 	boost/archive/iterators/transform_width.hpp \

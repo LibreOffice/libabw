@@ -7,12 +7,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <vector>
+#include <string>
 #include <string.h>
 #include <libxml/xmlIO.h>
 #include <libxml/xmlstring.h>
 #include <libwpd-stream/libwpd-stream.h>
 #include <boost/archive/iterators/binary_from_base64.hpp>
-#include <boost/archive/iterators/base64_from_binary.hpp>
 #include <boost/archive/iterators/remove_whitespace.hpp>
 #include <boost/archive/iterators/transform_width.hpp>
 #include <boost/range/iterator_range.hpp>
@@ -69,26 +70,22 @@ static bool findBool(const std::string &str, bool &res)
                space_p).full;
 }
 
-void appendFromBase64(WPXBinaryData &data, const unsigned char *base64Data, size_t base64DataLength)
+void appendFromBase64(WPXBinaryData &data, const char *base64Data)
 {
-  std::string base64String((const char *)base64Data, base64DataLength);
-  unsigned numPadding = std::count(base64String.begin(), base64String.end(), '=');
-  std::replace(base64String.begin(),base64String.end(),'=','A'); // replace '=' by base64 encoding of '\0'
+  std::string base64String(base64Data);
+  boost::trim(base64String);
+
+  std::string::const_iterator paddingIter = std::find(base64String.begin(), base64String.end(), '=');
   typedef boost::archive::iterators::transform_width<
   boost::archive::iterators::binary_from_base64<
   boost::archive::iterators::remove_whitespace< std::string::const_iterator > >, 8, 6 > base64_decoder;
 
   std::vector<unsigned char> buffer;
-  std::copy(base64_decoder(base64String.begin()), base64_decoder(base64String.end()), std::back_inserter(buffer));
+  std::copy(base64_decoder(base64String.begin()), base64_decoder(paddingIter), std::back_inserter(buffer));
+
   if (!buffer.empty())
-  {
-    buffer.erase(buffer.end()-numPadding,buffer.end());  // erase padding '\0' characters
-    if (!buffer.empty())
-      data.append(&buffer[0], buffer.size());
-  }
+    data.append(&buffer[0], buffer.size());
 }
-
-
 
 } // anonymous namespace
 
@@ -520,7 +517,7 @@ void libabw::ABWParser::readD(xmlTextReaderPtr reader)
       {
         WPXBinaryData binaryData;
         if (base64)
-          appendFromBase64(binaryData, data, xmlStrlen(data));
+          appendFromBase64(binaryData, (const char *)data);
         else
           binaryData.append(data, xmlStrlen(data));
         if (m_collector)
