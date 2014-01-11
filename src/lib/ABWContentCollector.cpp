@@ -680,8 +680,29 @@ void libabw::ABWContentCollector::startDocument()
   {
 
     if (m_iface && !m_ps->m_isDocumentStarted)
+    {
       m_iface->startDocument();
-
+      for (std::map<std::string, ABWListElement *>::const_iterator iter = m_listElements.begin();
+           iter != m_listElements.end(); ++iter)
+      {
+        if (iter->second)
+        {
+          int intValue = 0;
+          if (!findInt(iter->first, intValue) || intValue < 1)
+            intValue = 0;
+          if (intValue)
+          {
+            WPXPropertyList propList;
+            propList.insert("libwpd:list-id", iter->first.c_str());
+            iter->second->writeOut(propList);
+            if (iter->second->getType() == ABW_UNORDERED)
+              m_iface->defineUnorderedListLevel(propList);
+            else
+              m_iface->defineOrderedListLevel(propList);
+          }
+        }
+      }
+    }
     m_ps->m_isDocumentStarted = true;
   }
 }
@@ -1544,18 +1565,21 @@ void libabw::ABWContentCollector::_handleListChange()
   }
 }
 
-void libabw::ABWContentCollector::_recurseListLevels(int oldLevel, int newLevel, const WPXString &newListId)
+void libabw::ABWContentCollector::_recurseListLevels(int oldLevel, int newLevel, const std::string &newListId)
 {
-  if (oldLevel >= newLevel || !newListId.len())
+  if (oldLevel >= newLevel || newListId.empty())
     return;
-  std::map<std::string, ABWListElement *>::const_iterator iter = m_listElements.find(newListId.cstr());
+  std::map<std::string, ABWListElement *>::const_iterator iter = m_listElements.find(newListId);
   if (iter != m_listElements.end() && iter->second)
   {
     _recurseListLevels(oldLevel, newLevel-1, iter->second->m_parentId);
     m_ps->m_listLevels.push(std::make_pair(newLevel, iter->second));
     WPXPropertyList propList;
-    iter->second->writeOut(propList);
-    propList.insert("libwpd:list-id", newListId);
+    int intValue = 0;
+    if (!findInt(newListId, intValue) || intValue < 1)
+      intValue = 0;
+    if (intValue)
+      propList.insert("libwpd:list-id", intValue);
     if (iter->second->getType() == ABW_UNORDERED)
       m_outputElements.addOpenUnorderedListLevel(propList);
     else
