@@ -58,7 +58,7 @@ static void separateTabsAndInsertText(ABWOutputElements &outputElements, const l
       }
       outputElements.addInsertTab();
     }
-    else if (*(i()) == '\n')
+    else if (*(i()) == '\n'|| *(i()) == (char)0x0a)
     {
       if (!tmpText.empty())
       {
@@ -921,8 +921,8 @@ void libabw::ABWContentCollector::_fillParagraphProperties(librevenge::RVNGPrope
   if (findDouble(_findParagraphProperty("margin-top"), value, unit) && unit == ABW_IN)
     propList.insert("fo:margin-top", value);
 
-  if (findDouble(_findParagraphProperty("margin-left"), value, unit) && unit == ABW_IN)
-    propList.insert("fo:margin-left", value);
+  if (findDouble(_findParagraphProperty("margin-bottom"), value, unit) && unit == ABW_IN)
+    propList.insert("fo:margin-bottom", value);
 
   if (findDouble(_findParagraphProperty("text-indent"), value, unit) && unit == ABW_IN)
     propList.insert("fo:text-indent", value);
