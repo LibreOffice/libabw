@@ -61,7 +61,6 @@ private:
   librevenge::RVNGInputStream *m_input;
   librevenge::RVNGTextInterface *m_iface;
   ABWCollector *m_collector;
-  bool m_inParagraph;
 };
 
 } // namespace libabw

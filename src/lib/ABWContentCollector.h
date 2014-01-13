@@ -71,6 +71,7 @@ struct ABWContentParsingState
   bool m_isSpanOpened;
   bool m_isParagraphOpened;
   bool m_isListElementOpened;
+  bool m_inParagraphOrListElement;
 
   std::map<std::string, std::string> m_currentSectionStyle;
   std::map<std::string, std::string> m_currentParagraphStyle;

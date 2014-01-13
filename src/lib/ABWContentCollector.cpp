@@ -289,6 +289,7 @@ libabw::ABWContentParsingState::ABWContentParsingState() :
   m_isSpanOpened(false),
   m_isParagraphOpened(false),
   m_isListElementOpened(false),
+  m_inParagraphOrListElement(false),
 
   m_currentSectionStyle(),
   m_currentParagraphStyle(),
@@ -334,6 +335,7 @@ libabw::ABWContentParsingState::ABWContentParsingState(const ABWContentParsingSt
   m_isSpanOpened(ps.m_isSpanOpened),
   m_isParagraphOpened(ps.m_isParagraphOpened),
   m_isListElementOpened(ps.m_isListElementOpened),
+  m_inParagraphOrListElement(ps.m_inParagraphOrListElement),
 
   m_currentSectionStyle(ps.m_currentSectionStyle),
   m_currentParagraphStyle(ps.m_currentParagraphStyle),
@@ -500,6 +502,7 @@ void libabw::ABWContentCollector::collectParagraphProperties(const char *level, 
     parsePropString(props, tmpProps);
   for (std::map<std::string, std::string>::const_iterator iter = tmpProps.begin(); iter != tmpProps.end(); ++iter)
     m_ps->m_currentParagraphStyle[iter->first] = iter->second;
+  m_ps->m_inParagraphOrListElement = true;
 }
 
 void libabw::ABWContentCollector::collectCharacterProperties(const char *style, const char *props)
@@ -733,6 +736,7 @@ void libabw::ABWContentCollector::closeParagraphOrListElement()
   _closeParagraph();
   _closeListElement();
   m_ps->m_currentParagraphStyle.clear();
+  m_ps->m_inParagraphOrListElement = false;
 }
 
 void libabw::ABWContentCollector::openLink(const char *href)
@@ -792,6 +796,8 @@ void libabw::ABWContentCollector::insertPageBreak()
 
 void libabw::ABWContentCollector::insertText(const librevenge::RVNGString &text)
 {
+  if (!m_ps->m_inParagraphOrListElement)
+    return;
   if (!m_ps->m_isSpanOpened)
     _openSpan();
 
