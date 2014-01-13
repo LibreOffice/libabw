@@ -1229,16 +1229,19 @@ void libabw::ABWContentCollector::_openTable()
   m_ps->m_deferredPageBreak = false;
   m_ps->m_deferredColumnBreak = false;
 
+  librevenge::RVNGPropertyListVector tmpColumns;
+  parseTableColumns(_findTableProperty("table-column-props"), tmpColumns);
+  unsigned numColumns = tmpColumns.count();
+  std::map<int, int>::const_iterator iter = m_tableSizes.find(m_ps->m_tableStates.top().m_currentTableId);
+  if (iter != m_tableSizes.end())
+    numColumns = iter->second;
   librevenge::RVNGPropertyListVector columns;
-  parseTableColumns(_findTableProperty("table-column-props"), columns);
-  if (!columns.count())
+  for (unsigned j = 0; j < numColumns; ++j)
   {
-    std::map<int, int>::const_iterator iter = m_tableSizes.find(m_ps->m_tableStates.top().m_currentTableId);
-    if (iter != m_tableSizes.end())
-    {
-      for (int j = 0; j < iter->second; ++j)
-        columns.append(librevenge::RVNGPropertyList());
-    }
+    if (j < tmpColumns.count())
+      columns.append(tmpColumns[j]);
+    else
+      columns.append(librevenge::RVNGPropertyList());
   }
   if (columns.count())
     propList.insert("librevenge:table-columns", columns);
