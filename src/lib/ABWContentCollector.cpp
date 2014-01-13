@@ -903,7 +903,7 @@ void libabw::ABWContentCollector::_openFooter()
   if (!m_ps->m_isFooterOpened && !m_ps->m_isNote && m_ps->m_tableStates.empty())
   {
     WPXPropertyList propList;
-    propList.insert("libwpd:occurrence", m_ps->m_currentHeaderFooterOccurrence);
+    propList.insert("libwpd:occurence", m_ps->m_currentHeaderFooterOccurrence);
 
     m_outputElements.addOpenFooter(propList, m_ps->m_currentHeaderFooterId);
   }
@@ -915,7 +915,7 @@ void libabw::ABWContentCollector::_openHeader()
   if (!m_ps->m_isHeaderOpened && !m_ps->m_isNote && m_ps->m_tableStates.empty())
   {
     WPXPropertyList propList;
-    propList.insert("libwpd:occurrence", m_ps->m_currentHeaderFooterOccurrence);
+    propList.insert("libwpd:occurence", m_ps->m_currentHeaderFooterOccurrence);
 
     m_outputElements.addOpenHeader(propList, m_ps->m_currentHeaderFooterId);
   }
@@ -1563,16 +1563,15 @@ void libabw::ABWContentCollector::_handleListChange()
 
 void libabw::ABWContentCollector::_writeOutDummyListLevels(int oldLevel, int newLevel)
 {
-  if (oldLevel < newLevel)
-  {
-    _writeOutDummyListLevels(oldLevel, newLevel-1);
-    m_dummyListElements.push_back(new ABWUnorderedListElement());
-    m_dummyListElements.back()->m_listLevel = newLevel;
-    m_ps->m_listLevels.push(std::make_pair(newLevel, m_dummyListElements.back()));
-    WPXPropertyList propList;
-    m_dummyListElements.back()->writeOut(propList);
-    m_outputElements.addOpenUnorderedListLevel(propList);
-  }
+  if (oldLevel >= newLevel)
+    return;
+  _writeOutDummyListLevels(oldLevel, newLevel-1);
+  m_dummyListElements.push_back(new ABWUnorderedListElement());
+  m_dummyListElements.back()->m_listLevel = newLevel;
+  m_ps->m_listLevels.push(std::make_pair(newLevel, m_dummyListElements.back()));
+  WPXPropertyList propList;
+  m_dummyListElements.back()->writeOut(propList);
+  m_outputElements.addOpenUnorderedListLevel(propList);
 }
 
 void libabw::ABWContentCollector::_recurseListLevels(int oldLevel, int newLevel, int newListId)
