@@ -317,7 +317,7 @@ libabw::ABWContentParsingState::ABWContentParsingState() :
 
   m_isNote(false),
   m_currentListLevel(0),
-  m_currentListId(),
+  m_currentListId(0),
 
   m_tableStates(),
   m_listLevels()
@@ -375,7 +375,7 @@ libabw::ABWContentParsingState::~ABWContentParsingState()
 
 libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes,
                                                  const std::map<std::string, ABWData> &data,
-                                                 const std::map<librevenge::RVNGString, ABWListElement *> &listElements) :
+                                                 const std::map<int, ABWListElement *> &listElements) :
   m_ps(new ABWContentParsingState),
   m_iface(iface),
   m_parsingStates(),
@@ -482,10 +482,8 @@ void libabw::ABWContentCollector::collectParagraphProperties(const char *level, 
   _closeListElement();
   if (!level || !findInt(level, m_ps->m_currentListLevel) || m_ps->m_currentListLevel < 1)
     m_ps->m_currentListLevel = 0;
-  if (listid)
-    m_ps->m_currentListId = listid;
-  else
-    m_ps->m_currentListId.clear();
+  if (!listid || !findInt(listid, m_ps->m_currentListId) || m_ps->m_currentListId < 0)
+    m_ps->m_currentListId = 0;
 
   m_ps->m_currentParagraphStyle.clear();
   if (style)
@@ -1549,14 +1547,15 @@ void libabw::ABWContentCollector::_handleListChange()
   }
 }
 
-void libabw::ABWContentCollector::_recurseListLevels(int oldLevel, int newLevel, const librevenge::RVNGString &newListId)
+void libabw::ABWContentCollector::_recurseListLevels(int oldLevel, int newLevel, int newListId)
 {
-  if (oldLevel >= newLevel || newListId.empty())
+  if (oldLevel >= newLevel)
     return;
-  std::map<librevenge::RVNGString, ABWListElement *>::const_iterator iter = m_listElements.find(newListId);
+  std::map<int, ABWListElement *>::const_iterator iter = m_listElements.find(newListId);
   if (iter != m_listElements.end() && iter->second)
   {
-    _recurseListLevels(oldLevel, newLevel-1, iter->second->m_parentId);
+    if (iter->second->m_parentId != newListId)
+      _recurseListLevels(oldLevel, newLevel-1, iter->second->m_parentId);
     m_ps->m_listLevels.push(std::make_pair(newLevel, iter->second));
     librevenge::RVNGPropertyList propList;
     iter->second->writeOut(propList);

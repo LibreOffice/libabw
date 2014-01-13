@@ -44,7 +44,7 @@ class ABWStylesCollector : public ABWCollector
 public:
   ABWStylesCollector(std::map<int, int> &tableSizes,
                      std::map<std::string, ABWData> &data,
-                     std::map<librevenge::RVNGString, ABWListElement *> &listElements);
+                     std::map<int, ABWListElement *> &listElements);
   virtual ~ABWStylesCollector();
 
   // collector functions
@@ -89,14 +89,13 @@ private:
   ABWStylesCollector &operator=(const ABWStylesCollector &);
 
   std::string _findCellProperty(const char *name);
-  void _processList(const char *id, const char *listDelim,
-                    const char *parentid, const char *startValue, int type);
+  void _processList(int id, const char *listDelim, int parentid, int startValue, int type);
 
   ABWStylesParsingState *m_ps;
   std::map<int, int> &m_tableSizes;
   std::map<std::string, ABWData> &m_data;
   int m_tableCounter;
-  std::map<librevenge::RVNGString, ABWListElement *> &m_listElements;
+  std::map<int, ABWListElement *> &m_listElements;
 };
 
 } // namespace libabw

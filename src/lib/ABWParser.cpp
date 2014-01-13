@@ -27,9 +27,9 @@ namespace libabw
 namespace
 {
 
-static void clearListElements(std::map<librevenge::RVNGString, ABWListElement *> &listElements)
+static void clearListElements(std::map<int, ABWListElement *> &listElements)
 {
-  for (std::map<librevenge::RVNGString, ABWListElement *>::iterator i = listElements.begin();
+  for (std::map<int, ABWListElement *>::iterator i = listElements.begin();
        i != listElements.end(); ++i)
   {
     if (i->second)
@@ -82,7 +82,7 @@ bool libabw::ABWParser::parse()
   if (!m_input)
     return false;
 
-  std::map<librevenge::RVNGString, ABWListElement *> listElements;
+  std::map<int, ABWListElement *> listElements;
   try
   {
     std::map<int, int> tableSizes;

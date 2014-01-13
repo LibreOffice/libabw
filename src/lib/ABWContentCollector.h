@@ -100,7 +100,7 @@ struct ABWContentParsingState
   bool m_isNote;
 
   int m_currentListLevel;
-  librevenge::RVNGString m_currentListId;
+  int m_currentListId;
 
   std::stack<ABWContentTableState> m_tableStates;
   std::stack<std::pair<int, ABWListElement *> > m_listLevels;
@@ -111,7 +111,7 @@ class ABWContentCollector : public ABWCollector
 public:
   ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes,
                       const std::map<std::string, ABWData> &data,
-                      const std::map<librevenge::RVNGString, ABWListElement *> &listElements);
+                      const std::map<int, ABWListElement *> &listElements);
   virtual ~ABWContentCollector();
 
   // collector functions
@@ -168,7 +168,7 @@ private:
 
   void _handleListChange();
   void _changeList();
-  void _recurseListLevels(int oldLevel, int newLevel, const librevenge::RVNGString &listId);
+  void _recurseListLevels(int oldLevel, int newLevel, int listId);
 
   void _openSpan();
   void _closeSpan();
@@ -204,7 +204,7 @@ private:
   const std::map<int, int> &m_tableSizes;
   int m_tableCounter;
   ABWOutputElements m_outputElements;
-  const std::map<librevenge::RVNGString, ABWListElement *> &m_listElements;
+  const std::map<int, ABWListElement *> &m_listElements;
 };
 
 } // namespace libabw

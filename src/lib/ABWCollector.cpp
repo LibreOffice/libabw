@@ -135,9 +135,7 @@ void libabw::ABWOrderedListElement::writeOut(librevenge::RVNGPropertyList &propL
 void libabw::ABWUnorderedListElement::writeOut(librevenge::RVNGPropertyList &propList) const
 {
   libabw::ABWListElement::writeOut(propList);
-  if (!m_bulletChar.empty())
-    propList.insert("text:bullet-char", m_bulletChar);
+  propList.insert("text:bullet-char", m_bulletChar);
 }
-
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */
