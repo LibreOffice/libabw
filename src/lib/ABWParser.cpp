@@ -92,7 +92,7 @@ void appendFromBase64(WPXBinaryData &data, const char *base64Data)
 } // namespace libabw
 
 libabw::ABWParser::ABWParser(WPXInputStream *input, WPXDocumentInterface *iface)
-  : m_input(input), m_iface(iface), m_collector(0), m_inParagraph(false)
+  : m_input(input), m_iface(iface), m_collector(0)
 {
 }
 
@@ -173,8 +173,7 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
   {
     WPXString text((const char *)xmlTextReaderConstValue(reader));
     ABW_DEBUG_MSG(("ABWParser::processXmlNode: text %s\n", text.cstr()));
-    if (m_inParagraph && m_collector)
-      m_collector->insertText(text);
+    m_collector->insertText(text);
   }
   switch (tokenId)
   {
@@ -219,16 +218,10 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
     break;
   case XML_P:
     if (XML_READER_TYPE_ELEMENT == tokenType)
-    {
       readP(reader);
-      m_inParagraph = true;
-    }
     if (XML_READER_TYPE_END_ELEMENT == tokenType || emptyToken > 0)
-    {
-      m_inParagraph = false;
       if (m_collector)
         m_collector->closeParagraphOrListElement();
-    }
     break;
   case XML_C:
     if (XML_READER_TYPE_ELEMENT == tokenType)

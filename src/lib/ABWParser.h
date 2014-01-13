@@ -61,7 +61,6 @@ private:
   WPXInputStream *m_input;
   WPXDocumentInterface *m_iface;
   ABWCollector *m_collector;
-  bool m_inParagraph;
 };
 
 } // namespace libabw
