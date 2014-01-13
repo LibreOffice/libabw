@@ -135,8 +135,7 @@ void libabw::ABWOrderedListElement::writeOut(WPXPropertyList &propList) const
 void libabw::ABWUnorderedListElement::writeOut(WPXPropertyList &propList) const
 {
   libabw::ABWListElement::writeOut(propList);
-  if (m_bulletChar.len())
-    propList.insert("text:bullet-char", m_bulletChar);
+  propList.insert("text:bullet-char", m_bulletChar);
 }
 
 

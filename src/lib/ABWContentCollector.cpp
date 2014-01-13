@@ -317,7 +317,7 @@ libabw::ABWContentParsingState::ABWContentParsingState() :
 
   m_isNote(false),
   m_currentListLevel(0),
-  m_currentListId(),
+  m_currentListId(0),
 
   m_tableStates(),
   m_listLevels()
@@ -375,7 +375,7 @@ libabw::ABWContentParsingState::~ABWContentParsingState()
 
 libabw::ABWContentCollector::ABWContentCollector(WPXDocumentInterface *iface, const std::map<int, int> &tableSizes,
                                                  const std::map<std::string, ABWData> &data,
-                                                 const std::map<std::string, ABWListElement *> &listElements) :
+                                                 const std::map<int, ABWListElement *> &listElements) :
   m_ps(new ABWContentParsingState),
   m_iface(iface),
   m_parsingStates(),
@@ -482,10 +482,8 @@ void libabw::ABWContentCollector::collectParagraphProperties(const char *level, 
   _closeListElement();
   if (!level || !findInt(level, m_ps->m_currentListLevel) || m_ps->m_currentListLevel < 1)
     m_ps->m_currentListLevel = 0;
-  if (listid)
-    m_ps->m_currentListId = listid;
-  else
-    m_ps->m_currentListId.clear();
+  if (!listid || !findInt(listid, m_ps->m_currentListId) || m_ps->m_currentListId < 0)
+    m_ps->m_currentListId = 0;
 
   m_ps->m_currentParagraphStyle.clear();
   if (style)
@@ -682,24 +680,18 @@ void libabw::ABWContentCollector::startDocument()
     if (m_iface && !m_ps->m_isDocumentStarted)
     {
       m_iface->startDocument();
-      for (std::map<std::string, ABWListElement *>::const_iterator iter = m_listElements.begin();
+      for (std::map<int, ABWListElement *>::const_iterator iter = m_listElements.begin();
            iter != m_listElements.end(); ++iter)
       {
         if (iter->second)
         {
-          int intValue = 0;
-          if (!findInt(iter->first, intValue) || intValue < 1)
-            intValue = 0;
-          if (intValue)
-          {
-            WPXPropertyList propList;
-            propList.insert("libwpd:list-id", iter->first.c_str());
-            iter->second->writeOut(propList);
-            if (iter->second->getType() == ABW_UNORDERED)
-              m_iface->defineUnorderedListLevel(propList);
-            else
-              m_iface->defineOrderedListLevel(propList);
-          }
+          WPXPropertyList propList;
+          propList.insert("libwpd:list-id", iter->first);
+          iter->second->writeOut(propList);
+          if (iter->second->getType() == ABW_UNORDERED)
+            m_iface->defineUnorderedListLevel(propList);
+          else
+            m_iface->defineOrderedListLevel(propList);
         }
       }
     }
@@ -1565,21 +1557,18 @@ void libabw::ABWContentCollector::_handleListChange()
   }
 }
 
-void libabw::ABWContentCollector::_recurseListLevels(int oldLevel, int newLevel, const std::string &newListId)
+void libabw::ABWContentCollector::_recurseListLevels(int oldLevel, int newLevel, int newListId)
 {
-  if (oldLevel >= newLevel || newListId.empty())
+  if (oldLevel >= newLevel)
     return;
-  std::map<std::string, ABWListElement *>::const_iterator iter = m_listElements.find(newListId);
+  std::map<int, ABWListElement *>::const_iterator iter = m_listElements.find(newListId);
   if (iter != m_listElements.end() && iter->second)
   {
-    _recurseListLevels(oldLevel, newLevel-1, iter->second->m_parentId);
+    if (iter->second->m_parentId != newListId)
+      _recurseListLevels(oldLevel, newLevel-1, iter->second->m_parentId);
     m_ps->m_listLevels.push(std::make_pair(newLevel, iter->second));
     WPXPropertyList propList;
-    int intValue = 0;
-    if (!findInt(newListId, intValue) || intValue < 1)
-      intValue = 0;
-    if (intValue)
-      propList.insert("libwpd:list-id", intValue);
+    propList.insert("libwpd:list-id", newListId);
     if (iter->second->getType() == ABW_UNORDERED)
       m_outputElements.addOpenUnorderedListLevel(propList);
     else

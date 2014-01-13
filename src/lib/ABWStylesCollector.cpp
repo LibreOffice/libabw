@@ -137,7 +137,7 @@ libabw::ABWStylesParsingState::~ABWStylesParsingState() {}
 
 libabw::ABWStylesCollector::ABWStylesCollector(std::map<int, int> &tableSizes,
                                                std::map<std::string, ABWData> &data,
-                                               std::map<std::string, ABWListElement *> &listElements) :
+                                               std::map<int, ABWListElement *> &listElements) :
   m_ps(new ABWStylesParsingState),
   m_tableSizes(tableSizes),
   m_data(data),
@@ -206,13 +206,12 @@ void libabw::ABWStylesCollector::collectData(const char *name, const char *mimeT
   m_data[name] = ABWData(mimeType ? mimeType : "", data);
 }
 
-void libabw::ABWStylesCollector::_processList(const char *id, const char *listDelim,
-                                              const char *parentid, const char *startValue, int type)
+void libabw::ABWStylesCollector::_processList(int id, const char *listDelim, int parentid, int startValue, int type)
 {
   using namespace boost;
   using namespace boost::algorithm;
 
-  if (type >= BULLETED_LIST && type < LAST_BULLETED_LIST)
+  if ((type >= BULLETED_LIST && type < LAST_BULLETED_LIST) || type == NOT_A_LIST)
   {
     ABWUnorderedListElement *tmpElement = new ABWUnorderedListElement();
     switch (type)
@@ -254,7 +253,7 @@ void libabw::ABWStylesCollector::_processList(const char *id, const char *listDe
       appendUCS4(tmpElement->m_bulletChar, 0x27A3);
       break;
     default:
-      tmpElement->m_bulletChar = "*"; // for the while
+      tmpElement->m_bulletChar = ""; // for the while
       break;
     }
     m_listElements[id] = tmpElement;
@@ -283,8 +282,7 @@ void libabw::ABWStylesCollector::_processList(const char *id, const char *listDe
       tmpElement->m_numFormat = "1";
       break;
     }
-    if (!startValue || !findInt(startValue, tmpElement->m_startValue))
-      tmpElement->m_startValue = 0;
+    tmpElement->m_startValue = startValue;
 
     // get prefix and suffix by splitting the listDelim
     if (listDelim)
@@ -313,14 +311,23 @@ void libabw::ABWStylesCollector::_processList(const char *id, const char *listDe
 void libabw::ABWStylesCollector::collectList(const char *id, const char *, const char *listDelim,
                                              const char *parentid, const char *startValue, const char *type)
 {
-  if (!id)
+  int intId(0);
+  if (!id || !findInt(id, intId) || intId < 0)
+    intId = 0;
+  if (!intId)
     return;
-  if (m_listElements[id])
-    delete m_listElements[id];
-  int intType;
-  if (!type || !findInt(type, intType))
+  if (m_listElements[intId])
+    delete m_listElements[intId];
+  int intType(0);
+  if (!type || !findInt(type, intType) || intType < 0)
     intType = 5;
-  _processList(id, listDelim, parentid, startValue, intType);
+  int intParentId(0);
+  if (!parentid || !findInt(parentid, intParentId) || intParentId < 0)
+    intParentId = 0;
+  int intStartValue(0);
+  if (!startValue || !findInt(startValue, intStartValue) || intStartValue < 0)
+    intStartValue = 0;
+  _processList(intId, listDelim, intParentId, intStartValue, intType);
 }
 
 void libabw::ABWStylesCollector::collectParagraphProperties(const char *level, const char *listid, const char *parentid, const char * /* style */, const char *props)
@@ -329,80 +336,89 @@ void libabw::ABWStylesCollector::collectParagraphProperties(const char *level, c
   if (props)
     parsePropString(props, properties);
 
-  if (listid)
+  int intParentId(0);
+  if (!parentid || !findInt(parentid, intParentId) || intParentId < 0)
+    intParentId = 0;
+  int intListId(0);
+  if (!listid || !findInt(listid, intListId) || intListId < 0)
+    intListId = 0;
+
+  std::map<int, ABWListElement *>::iterator iter = m_listElements.find(intListId);
+  if (iter == m_listElements.end() || !iter->second)
   {
-    std::map<std::string, ABWListElement *>::iterator iter = m_listElements.find(listid);
-    if (iter == m_listElements.end() || !iter->second)
+    std::map<std::string, std::string>::const_iterator i = properties.find("list-style");
+    int listStyle(NOT_A_LIST);
+    if (i != properties.end())
     {
-      std::map<std::string, std::string>::const_iterator i = properties.find("list-style");
-      int listStyle = BULLETED_LIST;
-      if (i != properties.end())
-      {
-        if (i->second == "Numbered List")
-          listStyle = NUMBERED_LIST;
-        else if (i->second == "Lower Case List")
-          listStyle = LOWERCASE_LIST;
-        else if (i->second == "Upper Case List")
-          listStyle = UPPERCASE_LIST;
-        else if (i->second == "Lower Roman List")
-          listStyle = LOWERROMAN_LIST;
-        else if (i->second == "Upper Roman List")
-          listStyle = UPPERROMAN_LIST;
-        else if (i->second == "Hebrew List")
-          listStyle = HEBREW_LIST;
-        else if (i->second == "Arabic List")
-          listStyle = ARABICNUMBERED_LIST;
-        else if (i->second == "Bullet List")
-          listStyle = BULLETED_LIST;
-        else if (i->second == "Dashed List")
-          listStyle = DASHED_LIST;
-        else if (i->second == "Square List")
-          listStyle = SQUARE_LIST;
-        else if (i->second == "Triangle List")
-          listStyle = TRIANGLE_LIST;
-        else if (i->second == "Diamond List")
-          listStyle = DIAMOND_LIST;
-        else if (i->second == "Star List")
-          listStyle = STAR_LIST;
-        else if (i->second == "Implies List")
-          listStyle = IMPLIES_LIST;
-        else if (i->second == "Tick List")
-          listStyle = TICK_LIST;
-        else if (i->second == "Box List")
-          listStyle = BOX_LIST;
-        else if (i->second == "Hand List")
-          listStyle = HAND_LIST;
-        else if (i->second == "Heart List")
-          listStyle = HEART_LIST;
-        else if (i->second == "Arrowhead List")
-          listStyle = ARROWHEAD_LIST;
-      }
-      i = properties.find("start-value");
-      std::string startValue;
-      if (i != properties.end())
-        startValue = i->second;
-      _processList(listid, "%L", parentid, startValue.empty() ? 0 : startValue.c_str(), listStyle);
-      iter = m_listElements.find(listid);
+      if (i->second == "Numbered List")
+        listStyle = NUMBERED_LIST;
+      else if (i->second == "Lower Case List")
+        listStyle = LOWERCASE_LIST;
+      else if (i->second == "Upper Case List")
+        listStyle = UPPERCASE_LIST;
+      else if (i->second == "Lower Roman List")
+        listStyle = LOWERROMAN_LIST;
+      else if (i->second == "Upper Roman List")
+        listStyle = UPPERROMAN_LIST;
+      else if (i->second == "Hebrew List")
+        listStyle = HEBREW_LIST;
+      else if (i->second == "Arabic List")
+        listStyle = ARABICNUMBERED_LIST;
+      else if (i->second == "Bullet List")
+        listStyle = BULLETED_LIST;
+      else if (i->second == "Dashed List")
+        listStyle = DASHED_LIST;
+      else if (i->second == "Square List")
+        listStyle = SQUARE_LIST;
+      else if (i->second == "Triangle List")
+        listStyle = TRIANGLE_LIST;
+      else if (i->second == "Diamond List")
+        listStyle = DIAMOND_LIST;
+      else if (i->second == "Star List")
+        listStyle = STAR_LIST;
+      else if (i->second == "Implies List")
+        listStyle = IMPLIES_LIST;
+      else if (i->second == "Tick List")
+        listStyle = TICK_LIST;
+      else if (i->second == "Box List")
+        listStyle = BOX_LIST;
+      else if (i->second == "Hand List")
+        listStyle = HAND_LIST;
+      else if (i->second == "Heart List")
+        listStyle = HEART_LIST;
+      else if (i->second == "Arrowhead List")
+        listStyle = ARROWHEAD_LIST;
+      else
+        listStyle = NOT_A_LIST;
     }
-    if (iter != m_listElements.end() && iter->second)
-    {
-      ABWListElement *listElement = iter->second;
+    i = properties.find("start-value");
+    std::string startValue;
+    if (i != properties.end())
+      startValue = i->second;
+    int intStartValue(0);
+    if (startValue.empty() || findInt(startValue, intStartValue) || intStartValue < 0)
+      intStartValue = 0;
+    _processList(intListId, "%L", intParentId, intStartValue, listStyle);
+    iter = m_listElements.find(intListId);
+  }
+  if (iter != m_listElements.end() && iter->second)
+  {
+    ABWListElement *listElement = iter->second;
 
-      if (!level || !findInt(level, listElement->m_listLevel))
-        listElement->m_listLevel = 0;
+    if (!level || !findInt(level, listElement->m_listLevel) || listElement->m_listLevel < 0)
+      listElement->m_listLevel = 0;
 
-      std::map<std::string, std::string>::const_iterator i = properties.find("margin-left");
-      ABWUnit unit(ABW_NONE);
-      double marginLeft(0.0);
-      if (i == properties.end() || !findDouble(i->second, marginLeft, unit) || unit != ABW_IN)
-        marginLeft = 0.0;
-      i = properties.find("text-indent");
-      double textIndent(0.0);
-      if (i == properties.end() || !findDouble(i->second, textIndent, unit) || unit != ABW_IN)
-        textIndent = 0.0;
-      listElement->m_minLabelWidth = -textIndent;
-      listElement->m_spaceBefore = marginLeft + textIndent;
-    }
+    std::map<std::string, std::string>::const_iterator i = properties.find("margin-left");
+    ABWUnit unit(ABW_NONE);
+    double marginLeft(0.0);
+    if (i == properties.end() || !findDouble(i->second, marginLeft, unit) || unit != ABW_IN)
+      marginLeft = 0.0;
+    i = properties.find("text-indent");
+    double textIndent(0.0);
+    if (i == properties.end() || !findDouble(i->second, textIndent, unit) || unit != ABW_IN)
+      textIndent = 0.0;
+    listElement->m_minLabelWidth = -textIndent;
+    listElement->m_spaceBefore = marginLeft + textIndent;
   }
 }
 
