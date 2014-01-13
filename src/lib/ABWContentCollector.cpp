@@ -1241,16 +1241,19 @@ void libabw::ABWContentCollector::_openTable()
   m_ps->m_deferredPageBreak = false;
   m_ps->m_deferredColumnBreak = false;
 
+  WPXPropertyListVector tmpColumns;
+  parseTableColumns(_findTableProperty("table-column-props"), tmpColumns);
+  unsigned numColumns = tmpColumns.count();
+  std::map<int, int>::const_iterator iter = m_tableSizes.find(m_ps->m_tableStates.top().m_currentTableId);
+  if (iter != m_tableSizes.end())
+    numColumns = iter->second;
   WPXPropertyListVector columns;
-  parseTableColumns(_findTableProperty("table-column-props"), columns);
-  if (!columns.count())
+  for (unsigned j = 0; j < numColumns; ++j)
   {
-    std::map<int, int>::const_iterator iter = m_tableSizes.find(m_ps->m_tableStates.top().m_currentTableId);
-    if (iter != m_tableSizes.end())
-    {
-      for (int j = 0; j < iter->second; ++j)
-        columns.append(WPXPropertyList());
-    }
+    if (j < tmpColumns.count())
+      columns.append(tmpColumns[j]);
+    else
+      columns.append(WPXPropertyList());
   }
 
   ABWUnit unit(ABW_NONE);
