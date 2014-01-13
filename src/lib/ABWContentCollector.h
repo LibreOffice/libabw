@@ -169,6 +169,7 @@ private:
   void _handleListChange();
   void _changeList();
   void _recurseListLevels(int oldLevel, int newLevel, int listId);
+  void _writeOutDummyListLevels(int oldLevel, int newLevel);
 
   void _openSpan();
   void _closeSpan();
@@ -205,6 +206,7 @@ private:
   int m_tableCounter;
   ABWOutputElements m_outputElements;
   const std::map<int, ABWListElement *> &m_listElements;
+  std::vector<ABWListElement *> m_dummyListElements;
 };
 
 } // namespace libabw
