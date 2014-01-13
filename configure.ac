@@ -229,11 +229,11 @@ AC_SUBST([WPD_LIBS])
 # ============
 # Find libxml2
 # ============
-PKG_CHECK_MODULES([LIBXML2],[
+PKG_CHECK_MODULES([LIBXML],[
 	libxml-2.0
 ])
-AC_SUBST([LIBXML2_CFLAGS])
-AC_SUBST([LIBXML2_LIBS])
+AC_SUBST([LIBXML_CFLAGS])
+AC_SUBST([LIBXML_LIBS])
 
 # ==================
 # Find boost headers

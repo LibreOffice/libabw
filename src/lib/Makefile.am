@@ -20,13 +20,13 @@ libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_include_HEADERS = \
 	$(top_srcdir)/inc/libabw/libabw.h \
 	$(top_srcdir)/inc/libabw/AbiDocument.h
 
-AM_CXXFLAGS = -I$(top_srcdir)/inc $(WPD_CFLAGS) $(LIBXML2_CFLAGS) $(DEBUG_CXXFLAGS) -DLIBABW_BUILD=1
+AM_CXXFLAGS = -I$(top_srcdir)/inc $(WPD_CFLAGS) $(LIBXML_CFLAGS) $(DEBUG_CXXFLAGS) -DLIBABW_BUILD=1
 
 generated_files = \
 	$(top_builddir)/src/lib/tokens.h \
 	$(top_builddir)/src/lib/tokenhash.h
 
-libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_LIBADD  = $(WPD_LIBS) $(LIBXML2_LIBS) @LIBABW_WIN32_RESOURCE@
+libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_LIBADD  = $(WPD_LIBS) $(LIBXML_LIBS) @LIBABW_WIN32_RESOURCE@
 libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_DEPENDENCIES = @LIBABW_WIN32_RESOURCE@
 libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_LDFLAGS = $(version_info) -export-dynamic $(no_undefined)
 libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_SOURCES = \
