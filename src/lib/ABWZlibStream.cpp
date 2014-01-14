@@ -87,15 +87,11 @@ ABWZlibStream::ABWZlibStream(librevenge::RVNGInputStream *input) :
   {
     if (input)
     {
-      printf("Fridrich 1\n");
       input->seek(0, librevenge::RVNG_SEEK_CUR);
       m_input = input;
     }
     else
-    {
-      printf("Fridrich 2\n");
       m_buffer.clear();
-    }
   }
 }
 
