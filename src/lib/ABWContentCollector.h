@@ -194,7 +194,7 @@ private:
   std::string _findCellProperty(const char *name);
   std::string _findSectionProperty(const char *name);
 
-  void _fillParagraphProperties(WPXPropertyList &propList, WPXPropertyListVector &tabStops);
+  void _fillParagraphProperties(WPXPropertyList &propList, WPXPropertyListVector &tabStops, bool isListElement);
 
   ABWContentParsingState *m_ps;
   WPXDocumentInterface *m_iface;
