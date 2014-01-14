@@ -10,6 +10,7 @@
 #include <libabw/libabw.h>
 #include "ABWXMLHelper.h"
 #include "ABWParser.h"
+#include "ABWZlibStream.h"
 #include "libabw_internal.h"
 
 /**
@@ -38,11 +39,13 @@ ABWAPI bool libabw::AbiDocument::isFileFormatSupported(librevenge::RVNGInputStre
   ABW_DEBUG_MSG(("AbiDocument::isFileFormatSupported\n"));
   if (!input)
     return false;
+  input->seek(0, librevenge::RVNG_SEEK_SET);
+  libabw::ABWZlibStream stream(input);
   xmlTextReaderPtr reader = 0;
   try
   {
-    input->seek(0, librevenge::RVNG_SEEK_SET);
-    reader = libabw::xmlReaderForStream(input, 0, 0, XML_PARSE_NOBLANKS|XML_PARSE_NOENT|XML_PARSE_NONET|XML_PARSE_RECOVER);
+    stream.seek(0, librevenge::RVNG_SEEK_SET);
+    reader = libabw::xmlReaderForStream(&stream, 0, 0, XML_PARSE_NOBLANKS|XML_PARSE_NOENT|XML_PARSE_NONET|XML_PARSE_RECOVER);
     if (!reader)
       return false;
     int ret = xmlTextReaderRead(reader);
@@ -110,8 +113,11 @@ was not, it indicates the reason of the error
 ABWAPI bool libabw::AbiDocument::parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *textInterface)
 {
   ABW_DEBUG_MSG(("AbiDocument::parse\n"));
+  if (!input)
+    return false;
   input->seek(0, librevenge::RVNG_SEEK_SET);
-  libabw::ABWParser parser(input, textInterface);
+  libabw::ABWZlibStream stream(input);
+  libabw::ABWParser parser(&stream, textInterface);
   if (parser.parse())
     return true;
   return false;
