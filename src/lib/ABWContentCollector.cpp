@@ -914,7 +914,8 @@ void libabw::ABWContentCollector::_openHeader()
   m_ps->m_isHeaderOpened = true;
 }
 
-void libabw::ABWContentCollector::_fillParagraphProperties(librevenge::RVNGPropertyList &propList)
+void libabw::ABWContentCollector::_fillParagraphProperties(librevenge::RVNGPropertyList &propList,
+                                                           bool isListElement)
 {
   ABWUnit unit(ABW_NONE);
   double value(0.0);
@@ -923,17 +924,20 @@ void libabw::ABWContentCollector::_fillParagraphProperties(librevenge::RVNGPrope
   if (findDouble(_findParagraphProperty("margin-right"), value, unit) && unit == ABW_IN)
     propList.insert("fo:margin-right", value);
 
-  if (findDouble(_findParagraphProperty("margin-left"), value, unit) && unit == ABW_IN)
-    propList.insert("fo:margin-left", value);
-
   if (findDouble(_findParagraphProperty("margin-top"), value, unit) && unit == ABW_IN)
     propList.insert("fo:margin-top", value);
 
   if (findDouble(_findParagraphProperty("margin-bottom"), value, unit) && unit == ABW_IN)
     propList.insert("fo:margin-bottom", value);
 
-  if (findDouble(_findParagraphProperty("text-indent"), value, unit) && unit == ABW_IN)
-    propList.insert("fo:text-indent", value);
+  if (!isListElement)
+  {
+    if (findDouble(_findParagraphProperty("margin-left"), value, unit) && unit == ABW_IN)
+      propList.insert("fo:margin-left", value);
+
+    if (findDouble(_findParagraphProperty("text-indent"), value, unit) && unit == ABW_IN)
+      propList.insert("fo:text-indent", value);
+  }
 
   std::string sValue = _findParagraphProperty("text-align");
   if (!sValue.empty())
@@ -1018,7 +1022,7 @@ void libabw::ABWContentCollector::_openParagraph()
     _changeList();
 
     librevenge::RVNGPropertyList propList;
-    _fillParagraphProperties(propList);
+    _fillParagraphProperties(propList, false);
 
     m_ps->m_deferredPageBreak = false;
     m_ps->m_deferredColumnBreak = false;
@@ -1058,7 +1062,7 @@ void libabw::ABWContentCollector::_openListElement()
     _changeList();
 
     librevenge::RVNGPropertyList propList;
-    _fillParagraphProperties(propList);
+    _fillParagraphProperties(propList, true);
 
     m_outputElements.addOpenListElement(propList);
 

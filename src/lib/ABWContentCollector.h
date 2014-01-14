@@ -194,7 +194,7 @@ private:
   std::string _findCellProperty(const char *name);
   std::string _findSectionProperty(const char *name);
 
-  void _fillParagraphProperties(librevenge::RVNGPropertyList &propList);
+  void _fillParagraphProperties(librevenge::RVNGPropertyList &propList, bool isListElement);
 
   ABWContentParsingState *m_ps;
   librevenge::RVNGTextInterface *m_iface;
