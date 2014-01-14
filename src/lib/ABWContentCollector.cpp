@@ -1537,7 +1537,7 @@ void libabw::ABWContentCollector::insertImage(const char *dataid, const char *pr
       m_outputElements.addOpenFrame(propList);
 
       propList.clear();
-      propList.insert("libwpd:mime-type", iter->second.m_mimeType);
+      propList.insert("libwpd:mimetype", iter->second.m_mimeType);
 
       m_outputElements.addInsertBinaryObject(propList, iter->second.m_binaryData);
 
