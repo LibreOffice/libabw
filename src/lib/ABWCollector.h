@@ -128,7 +128,7 @@ public:
   virtual void insertLineBreak() = 0;
   virtual void insertColumnBreak() = 0;
   virtual void insertPageBreak() = 0;
-  virtual void insertText(const librevenge::RVNGString &text) = 0;
+  virtual void insertText(const char *text) = 0;
   virtual void insertImage(const char *dataid, const char *props) = 0;
   virtual void collectList(const char *id, const char *listDecimal, const char *listDelim,
                            const char *parentid, const char *startValue, const char *type) = 0;

@@ -148,8 +148,8 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
   int emptyToken = xmlTextReaderIsEmptyElement(reader);
   if (XML_READER_TYPE_TEXT == tokenType)
   {
-    librevenge::RVNGString text((const char *)xmlTextReaderConstValue(reader));
-    ABW_DEBUG_MSG(("ABWParser::processXmlNode: text %s\n", text.cstr()));
+    const char *text = (const char *)xmlTextReaderConstValue(reader);
+    ABW_DEBUG_MSG(("ABWParser::processXmlNode: text %s\n", text));
     m_collector->insertText(text);
   }
   switch (tokenId)

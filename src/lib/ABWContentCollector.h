@@ -102,6 +102,7 @@ struct ABWContentParsingState
 
   int m_currentListLevel;
   int m_currentListId;
+  bool m_isFirstTextInListElement;
 
   std::stack<ABWContentTableState> m_tableStates;
   std::stack<std::pair<int, ABWListElement *> > m_listLevels;
@@ -138,7 +139,7 @@ public:
   void insertLineBreak();
   void insertColumnBreak();
   void insertPageBreak();
-  void insertText(const librevenge::RVNGString &text);
+  void insertText(const char *text);
   void insertImage(const char *dataid, const char *props);
   void collectList(const char *, const char *, const char *, const char *, const char *, const char *) {}
 
