@@ -1,0 +1,10 @@
+0.0.0
+ - Initial non-release of the library
+   * Support tables, lists, headers/footers
+   * Support embedded images
+
+0.0.0 -> 0.0.1
+ - Support gzip compressed AbiWord files - ZABW
+ - Fix silly with paragraphs after foot-/endnote
+ - Fix conversion of embedded images
+ - Fix shapes of lists.
