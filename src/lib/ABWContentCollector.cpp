@@ -319,6 +319,7 @@ libabw::ABWContentParsingState::ABWContentParsingState() :
   m_isNote(false),
   m_currentListLevel(0),
   m_currentListId(0),
+  m_isFirstTextInListElement(false),
 
   m_tableStates(),
   m_listLevels()
@@ -365,6 +366,7 @@ libabw::ABWContentParsingState::ABWContentParsingState(const ABWContentParsingSt
   m_isNote(ps.m_isNote),
   m_currentListLevel(ps.m_currentListLevel),
   m_currentListId(ps.m_currentListId),
+  m_isFirstTextInListElement(ps.m_isFirstTextInListElement),
 
   m_tableStates(ps.m_tableStates),
   m_listLevels(ps.m_listLevels)
@@ -809,14 +811,19 @@ void libabw::ABWContentCollector::insertPageBreak()
   m_ps->m_deferredPageBreak = true;
 }
 
-void libabw::ABWContentCollector::insertText(const WPXString &text)
+void libabw::ABWContentCollector::insertText(const char *text)
 {
   if (!m_ps->m_inParagraphOrListElement)
     return;
   if (!m_ps->m_isSpanOpened)
     _openSpan();
-
-  separateSpacesAndInsertText(m_outputElements, text);
+  if (!text)
+    return;
+  if (m_ps->m_isFirstTextInListElement && text[0] == '\t')
+    separateSpacesAndInsertText(m_outputElements, text+1);
+  else
+    separateSpacesAndInsertText(m_outputElements, text);
+  m_ps->m_isFirstTextInListElement = false;
 }
 
 void libabw::ABWContentCollector::_openPageSpan()
@@ -1081,6 +1088,7 @@ void libabw::ABWContentCollector::_openListElement()
     m_ps->m_isListElementOpened = true;
     if (!m_ps->m_tableStates.empty())
       m_ps->m_tableStates.top().m_isCellWithoutParagraph = false;
+    m_ps->m_isFirstTextInListElement = true;
   }
 }
 
@@ -1625,6 +1633,7 @@ void libabw::ABWContentCollector::_closeListElement()
     m_outputElements.addCloseListElement();
   }
   m_ps->m_isListElementOpened = false;
+  m_ps->m_isFirstTextInListElement = false;
 }
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

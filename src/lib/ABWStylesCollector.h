@@ -71,7 +71,7 @@ public:
   void insertLineBreak() {}
   void insertColumnBreak() {}
   void insertPageBreak() {}
-  void insertText(const WPXString &) {}
+  void insertText(const char *) {}
   void insertImage(const char *, const char *) {}
 
   void collectData(const char *name, const char *mimeType, const WPXBinaryData &data);
