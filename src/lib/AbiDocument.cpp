@@ -39,11 +39,11 @@ ABWAPI bool libabw::AbiDocument::isFileFormatSupported(WPXInputStream *input)
   ABW_DEBUG_MSG(("AbiDocument::isFileFormatSupported\n"));
   if (!input)
     return false;
-  input->seek(0, WPX_SEEK_SET);
-  libabw::ABWZlibStream stream(input);
   xmlTextReaderPtr reader = 0;
   try
   {
+    input->seek(0, WPX_SEEK_SET);
+    libabw::ABWZlibStream stream(input);
     stream.seek(0, WPX_SEEK_SET);
     reader = libabw::xmlReaderForStream(&stream);
     if (!reader)
