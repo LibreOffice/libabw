@@ -73,9 +73,10 @@ extern "C" {
 
 // xmlTextReader helper function
 
-xmlTextReaderPtr libabw::xmlReaderForStream(librevenge::RVNGInputStream *input, const char *URL, const char *encoding, int options)
+xmlTextReaderPtr libabw::xmlReaderForStream(librevenge::RVNGInputStream *input)
 {
-  xmlTextReaderPtr reader = xmlReaderForIO(abwxmlInputReadFunc, abwxmlInputCloseFunc, (void *)input, URL, encoding, options);
+  xmlTextReaderPtr reader = xmlReaderForIO(abwxmlInputReadFunc, abwxmlInputCloseFunc, (void *)input, 0, 0,
+                                           XML_PARSE_NOBLANKS|XML_PARSE_NOENT|XML_PARSE_NONET|XML_PARSE_RECOVER);
   xmlTextReaderSetErrorHandler(reader, abwxmlReaderErrorFunc, 0);
   return reader;
 }
