@@ -45,7 +45,7 @@ ABWAPI bool libabw::AbiDocument::isFileFormatSupported(WPXInputStream *input)
   try
   {
     stream.seek(0, WPX_SEEK_SET);
-    reader = libabw::xmlReaderForStream(&stream, 0, 0, XML_PARSE_NOBLANKS|XML_PARSE_NOENT|XML_PARSE_NONET|XML_PARSE_RECOVER);
+    reader = libabw::xmlReaderForStream(&stream);
     if (!reader)
       return false;
     int ret = xmlTextReaderRead(reader);

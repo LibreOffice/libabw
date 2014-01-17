@@ -143,7 +143,7 @@ bool libabw::ABWParser::processXmlDocument(WPXInputStream *input)
   if (!input)
     return false;
 
-  xmlTextReaderPtr reader = xmlReaderForStream(input, 0, 0, XML_PARSE_NOBLANKS|XML_PARSE_NOENT|XML_PARSE_NONET|XML_PARSE_RECOVER);
+  xmlTextReaderPtr reader = xmlReaderForStream(input);
   if (!reader)
     return false;
   int ret = xmlTextReaderRead(reader);

@@ -19,10 +19,7 @@ namespace libabw
 // create an xmlTextReader pointer from a WPXInputStream pointer
 // needs to be freed using xmlTextReaderFree function.
 
-xmlTextReaderPtr xmlReaderForStream(WPXInputStream *input,
-                                    const char *URL,
-                                    const char *encoding,
-                                    int options);
+xmlTextReaderPtr xmlReaderForStream(WPXInputStream *input);
 
 } // namespace libabw
 
