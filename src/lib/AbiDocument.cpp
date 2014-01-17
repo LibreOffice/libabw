@@ -39,11 +39,11 @@ ABWAPI bool libabw::AbiDocument::isFileFormatSupported(librevenge::RVNGInputStre
   ABW_DEBUG_MSG(("AbiDocument::isFileFormatSupported\n"));
   if (!input)
     return false;
-  input->seek(0, librevenge::RVNG_SEEK_SET);
-  libabw::ABWZlibStream stream(input);
   xmlTextReaderPtr reader = 0;
   try
   {
+    input->seek(0, librevenge::RVNG_SEEK_SET);
+    libabw::ABWZlibStream stream(input);
     stream.seek(0, librevenge::RVNG_SEEK_SET);
     reader = libabw::xmlReaderForStream(&stream);
     if (!reader)
