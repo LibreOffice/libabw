@@ -1482,26 +1482,32 @@ void libabw::ABWContentCollector::closeTable()
 
 void libabw::ABWContentCollector::openCell(const char *props)
 {
-  if (props)
-    parsePropString(props, m_ps->m_tableStates.top().m_currentCellProperties);
-  int currentRow(0);
-  if (!findInt(_findCellProperty("top-attach"), currentRow))
-    currentRow = m_ps->m_tableStates.top().m_currentTableRow + 1;
-  while (m_ps->m_tableStates.top().m_currentTableRow < currentRow)
+  if (!m_ps->m_tableStates.empty())
   {
-    if (m_ps->m_tableStates.top().m_currentTableRow >= 0)
-      _closeTableRow();
-    _openTableRow();
-  }
+    if (props)
+      parsePropString(props, m_ps->m_tableStates.top().m_currentCellProperties);
+    int currentRow(0);
+    if (!findInt(_findCellProperty("top-attach"), currentRow))
+      currentRow = m_ps->m_tableStates.top().m_currentTableRow + 1;
+    while (m_ps->m_tableStates.top().m_currentTableRow < currentRow)
+    {
+      if (m_ps->m_tableStates.top().m_currentTableRow >= 0)
+        _closeTableRow();
+      _openTableRow();
+    }
 
-  if (!findInt(_findCellProperty("left-attach"), m_ps->m_tableStates.top().m_currentTableCol))
-    m_ps->m_tableStates.top().m_currentTableCol++;
+    if (!findInt(_findCellProperty("left-attach"), m_ps->m_tableStates.top().m_currentTableCol))
+      m_ps->m_tableStates.top().m_currentTableCol++;
+  }
 }
 
 void libabw::ABWContentCollector::closeCell()
 {
-  _closeTableCell();
-  m_ps->m_tableStates.top().m_currentCellProperties.clear();
+  if (!m_ps->m_tableStates.empty())
+  {
+    _closeTableCell();
+    m_ps->m_tableStates.top().m_currentCellProperties.clear();
+  }
 }
 
 void libabw::ABWContentCollector::collectData(const char *, const char *, const librevenge::RVNGBinaryData &)
