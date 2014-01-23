@@ -167,28 +167,32 @@ void libabw::ABWStylesCollector::closeTable()
 
 void libabw::ABWStylesCollector::openCell(const char *props)
 {
-  if (props)
-    parsePropString(props, m_ps->m_tableStates.top().m_currentCellProperties);
-  int currentRow(0);
-  if (!findInt(_findCellProperty("top-attach"), currentRow))
-    currentRow = m_ps->m_tableStates.top().m_currentTableRow + 1;
-  while (m_ps->m_tableStates.top().m_currentTableRow < currentRow)
-    m_ps->m_tableStates.top().m_currentTableRow++;
-
-  if (!m_ps->m_tableStates.empty() && 0 == m_ps->m_tableStates.top().m_currentTableRow)
+  if (!m_ps->m_tableStates.empty())
   {
-    int leftAttach(0);
-    int rightAttach(0);
-    if (findInt(_findCellProperty("left-attach"), leftAttach) && findInt(_findCellProperty("right-attach"), rightAttach))
-      m_ps->m_tableStates.top().m_currentTableWidth += rightAttach - leftAttach;
-    else
-      m_ps->m_tableStates.top().m_currentTableWidth++;
+    if (props)
+      parsePropString(props, m_ps->m_tableStates.top().m_currentCellProperties);
+    int currentRow(0);
+    if (!findInt(_findCellProperty("top-attach"), currentRow))
+      currentRow = m_ps->m_tableStates.top().m_currentTableRow + 1;
+    while (m_ps->m_tableStates.top().m_currentTableRow < currentRow)
+      m_ps->m_tableStates.top().m_currentTableRow++;
+
+    if (0 == m_ps->m_tableStates.top().m_currentTableRow)
+    {
+      int leftAttach(0);
+      int rightAttach(0);
+      if (findInt(_findCellProperty("left-attach"), leftAttach) && findInt(_findCellProperty("right-attach"), rightAttach))
+        m_ps->m_tableStates.top().m_currentTableWidth += rightAttach - leftAttach;
+      else
+        m_ps->m_tableStates.top().m_currentTableWidth++;
+    }
   }
 }
 
 void libabw::ABWStylesCollector::closeCell()
 {
-  m_ps->m_tableStates.top().m_currentCellProperties.clear();
+  if (!m_ps->m_tableStates.empty())
+    m_ps->m_tableStates.top().m_currentCellProperties.clear();
 }
 
 std::string libabw::ABWStylesCollector::_findCellProperty(const char *name)
