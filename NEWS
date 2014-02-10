@@ -1,3 +1,9 @@
+0.0.1 -> 0.1.0
+ - Switch to librevenge
+ - Do not add extra tab for list indentation
+ - Avoid possible crash on file format detection
+ - Ignore cells that are not inside a table
+
 0.0.0 -> 0.0.1
  - Support gzip compressed AbiWord files - ZABW
  - Fix silly with paragraphs after foot-/endnote
