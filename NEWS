@@ -8,3 +8,8 @@
  - Fix silly with paragraphs after foot-/endnote
  - Fix conversion of embedded images
  - Fix shapes of lists.
+
+0.0.1 -> 0.0.2
+ - Do not add extra tab for list indentation
+ - Avoid possible crash on file format detection
+ - Ignore cells that are not inside a table
