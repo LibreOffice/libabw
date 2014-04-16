@@ -6,6 +6,6 @@ includedir=@includedir@
 Name: libabw-@ABW_MAJOR_VERSION@.@ABW_MINOR_VERSION@
 Description: A library for reading and writing AbiWord(tm) documents
 Version: @VERSION@
-Requires: librevenge-0.0
+Requires: librevenge-0.0 librevenge-stream-0.0
 Libs: -L${libdir} -labw-@ABW_MAJOR_VERSION@.@ABW_MINOR_VERSION@
 Cflags: -I${includedir}/libabw-@ABW_MAJOR_VERSION@.@ABW_MINOR_VERSION@
