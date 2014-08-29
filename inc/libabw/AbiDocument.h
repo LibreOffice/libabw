@@ -18,8 +18,12 @@
 #else
 #define ABWAPI __declspec(dllimport)
 #endif
+#else // !DLL_EXPORT
+#ifdef LIBABW_VISIBILITY
+#define ABWAPI __attribute__((visibility("default")))
 #else
 #define ABWAPI
+#endif
 #endif
 
 namespace libabw
