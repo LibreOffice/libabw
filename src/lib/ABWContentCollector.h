@@ -73,7 +73,6 @@ struct ABWContentParsingState
   bool m_isListElementOpened;
   bool m_inParagraphOrListElement;
 
-  ABWPropertyMap m_documentStyle;
   ABWPropertyMap m_currentSectionStyle;
   ABWPropertyMap m_currentParagraphStyle;
   ABWPropertyMap m_currentCharacterStyle;
@@ -210,6 +209,7 @@ private:
   std::set<std::string> m_dontLoop;
   std::map<std::string, ABWStyle> m_textStyles;
 
+  ABWPropertyMap m_documentStyle;
   ABWPropertyMap m_metadata;
 
   const std::map<std::string, ABWData> &m_data;

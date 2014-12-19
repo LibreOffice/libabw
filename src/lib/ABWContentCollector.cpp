@@ -332,7 +332,6 @@ libabw::ABWContentParsingState::ABWContentParsingState() :
   m_isListElementOpened(false),
   m_inParagraphOrListElement(false),
 
-  m_documentStyle(),
   m_currentSectionStyle(),
   m_currentParagraphStyle(),
   m_currentCharacterStyle(),
@@ -380,7 +379,6 @@ libabw::ABWContentParsingState::ABWContentParsingState(const ABWContentParsingSt
   m_isListElementOpened(ps.m_isListElementOpened),
   m_inParagraphOrListElement(ps.m_inParagraphOrListElement),
 
-  m_documentStyle(ps.m_documentStyle),
   m_currentSectionStyle(ps.m_currentSectionStyle),
   m_currentParagraphStyle(ps.m_currentParagraphStyle),
   m_currentCharacterStyle(ps.m_currentCharacterStyle),
@@ -428,6 +426,7 @@ libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *
   m_parsingStates(),
   m_dontLoop(),
   m_textStyles(),
+  m_documentStyle(),
   m_metadata(),
   m_data(data),
   m_tableSizes(tableSizes),
@@ -477,7 +476,7 @@ void libabw::ABWContentCollector::_recurseTextProperties(const char *name, ABWPr
 
 std::string libabw::ABWContentCollector::_findDocumentProperty(const char *const name)
 {
-  return findProperty(m_ps->m_documentStyle, name);
+  return findProperty(m_documentStyle, name);
 }
 
 std::string libabw::ABWContentCollector::_findParagraphProperty(const char *name)
@@ -518,7 +517,7 @@ std::string libabw::ABWContentCollector::_findMetadataEntry(const char *const na
 void libabw::ABWContentCollector::collectDocumentProperties(const char *const props)
 {
   if (props)
-    parsePropString(props, m_ps->m_documentStyle);
+    parsePropString(props, m_documentStyle);
 }
 
 void libabw::ABWContentCollector::collectParagraphProperties(const char *level, const char *listid, const char * /*parentid*/, const char *style, const char *props)
