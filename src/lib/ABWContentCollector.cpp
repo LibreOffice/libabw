@@ -469,6 +469,19 @@ void libabw::ABWContentCollector::_recurseTextProperties(const char *name, ABWPr
       for (ABWPropertyMap::const_iterator i = iter->second.properties.begin(); i != iter->second.properties.end(); ++i)
         styleProps[i->first] = i->second;
     }
+
+    // Styles based on "Heading X" style are recognized as headings.
+    if (boost::starts_with(name, "Heading "))
+    {
+      int level = 0;
+      const std::string levelStr = std::string(name).substr(8);
+      if (findInt(levelStr, level))
+      {
+        // Abiword only has 4 levels of headings, but allow some more
+        if ((0 < level) && (10 > level))
+          styleProps["libabw:outline-level"] = levelStr;
+      }
+    }
   }
   if (!m_dontLoop.empty())
     m_dontLoop.clear();
@@ -999,6 +1012,7 @@ void libabw::ABWContentCollector::_fillParagraphProperties(librevenge::RVNGPrope
   ABWUnit unit(ABW_NONE);
   double value(0.0);
   int intValue(0);
+  std::string sValue;
 
   if (findDouble(_findParagraphProperty("margin-right"), value, unit) && unit == ABW_IN)
     propList.insert("fo:margin-right", value);
@@ -1016,9 +1030,15 @@ void libabw::ABWContentCollector::_fillParagraphProperties(librevenge::RVNGPrope
 
     if (findDouble(_findParagraphProperty("text-indent"), value, unit) && unit == ABW_IN)
       propList.insert("fo:text-indent", value);
+
+    // TODO: Numbered headings should probably not be handled as lists.
+    // Just do not make them headings for now.
+    sValue = _findParagraphProperty("libabw:outline-level");
+    if (!sValue.empty())
+      propList.insert("text:outline-level", sValue.c_str());
   }
 
-  std::string sValue = _findParagraphProperty("text-align");
+  sValue = _findParagraphProperty("text-align");
   if (!sValue.empty())
   {
     if (sValue == "left")
