@@ -197,7 +197,7 @@ void libabw::ABWStylesCollector::closeCell()
 
 std::string libabw::ABWStylesCollector::_findCellProperty(const char *name)
 {
-  std::map<std::string, std::string>::const_iterator iter = m_ps->m_tableStates.top().m_currentCellProperties.find(name);
+  ABWPropertyMap::const_iterator iter = m_ps->m_tableStates.top().m_currentCellProperties.find(name);
   if (iter != m_ps->m_tableStates.top().m_currentCellProperties.end())
     return iter->second;
   return std::string();
@@ -336,7 +336,7 @@ void libabw::ABWStylesCollector::collectList(const char *id, const char *, const
 
 void libabw::ABWStylesCollector::collectParagraphProperties(const char *level, const char *listid, const char *parentid, const char * /* style */, const char *props)
 {
-  std::map<std::string, std::string> properties;
+  ABWPropertyMap properties;
   if (props)
     parsePropString(props, properties);
 
@@ -350,7 +350,7 @@ void libabw::ABWStylesCollector::collectParagraphProperties(const char *level, c
   std::map<int, ABWListElement *>::iterator iter = m_listElements.find(intListId);
   if (iter == m_listElements.end() || !iter->second)
   {
-    std::map<std::string, std::string>::const_iterator i = properties.find("list-style");
+    ABWPropertyMap::const_iterator i = properties.find("list-style");
     int listStyle(NOT_A_LIST);
     if (i != properties.end())
     {
@@ -412,7 +412,7 @@ void libabw::ABWStylesCollector::collectParagraphProperties(const char *level, c
     if (!level || !findInt(level, listElement->m_listLevel) || listElement->m_listLevel < 0)
       listElement->m_listLevel = 0;
 
-    std::map<std::string, std::string>::const_iterator i = properties.find("margin-left");
+    ABWPropertyMap::const_iterator i = properties.find("margin-left");
     ABWUnit unit(ABW_NONE);
     double marginLeft(0.0);
     if (i == properties.end() || !findDouble(i->second, marginLeft, unit) || unit != ABW_IN)

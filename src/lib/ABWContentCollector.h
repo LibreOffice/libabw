@@ -33,7 +33,7 @@ struct ABWStyle
   ~ABWStyle() {}
   std::string basedon;
   std::string followedby;
-  std::map<std::string, std::string> properties;
+  ABWPropertyMap properties;
 };
 
 struct ABWContentTableState
@@ -42,8 +42,8 @@ struct ABWContentTableState
   ABWContentTableState(const ABWContentTableState &ts);
   ~ABWContentTableState();
 
-  std::map<std::string, std::string> m_currentTableProperties;
-  std::map<std::string, std::string> m_currentCellProperties;
+  ABWPropertyMap m_currentTableProperties;
+  ABWPropertyMap m_currentCellProperties;
 
   int m_currentTableCol;
   int m_currentTableRow;
@@ -73,10 +73,10 @@ struct ABWContentParsingState
   bool m_isListElementOpened;
   bool m_inParagraphOrListElement;
 
-  std::map<std::string, std::string> m_documentStyle;
-  std::map<std::string, std::string> m_currentSectionStyle;
-  std::map<std::string, std::string> m_currentParagraphStyle;
-  std::map<std::string, std::string> m_currentCharacterStyle;
+  ABWPropertyMap m_documentStyle;
+  ABWPropertyMap m_currentSectionStyle;
+  ABWPropertyMap m_currentParagraphStyle;
+  ABWPropertyMap m_currentCharacterStyle;
 
   double m_pageWidth;
   double m_pageHeight;
@@ -190,7 +190,7 @@ private:
   void _openFooter();
   void _closeFooter();
 
-  void _recurseTextProperties(const char *name, std::map<std::string, std::string> &styleProps);
+  void _recurseTextProperties(const char *name, ABWPropertyMap &styleProps);
   std::string _findDocumentProperty(const char *name);
   std::string _findParagraphProperty(const char *name);
   std::string _findCharacterProperty(const char *name);

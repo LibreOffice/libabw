@@ -23,7 +23,7 @@ struct ABWStylesTableState
   ABWStylesTableState(const ABWStylesTableState &ts);
   ~ABWStylesTableState();
 
-  std::map<std::string, std::string> m_currentCellProperties;
+  ABWPropertyMap m_currentCellProperties;
 
   int m_currentTableWidth;
   int m_currentTableRow;

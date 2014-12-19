@@ -27,7 +27,7 @@ bool libabw::findInt(const std::string &str, int &res)
                space_p).full;
 }
 
-void libabw::parsePropString(const std::string &str, std::map<std::string, std::string> &props)
+void libabw::parsePropString(const std::string &str, ABWPropertyMap &props)
 {
   if (str.empty())
     return;

@@ -35,9 +35,11 @@ enum ABWListType
   ABW_UNORDERED
 };
 
+typedef std::map<std::string, std::string> ABWPropertyMap;
+
 bool findInt(const std::string &str, int &res);
 bool findDouble(const std::string &str, double &res, ABWUnit &unit);
-void parsePropString(const std::string &str, std::map<std::string, std::string> &props);
+void parsePropString(const std::string &str, ABWPropertyMap &props);
 
 struct ABWData
 {

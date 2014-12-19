@@ -444,7 +444,7 @@ void libabw::ABWContentCollector::collectTextStyle(const char *name, const char 
     m_textStyles[name] = style;
 }
 
-void libabw::ABWContentCollector::_recurseTextProperties(const char *name, std::map<std::string, std::string> &styleProps)
+void libabw::ABWContentCollector::_recurseTextProperties(const char *name, ABWPropertyMap &styleProps)
 {
   if (name)
   {
@@ -454,7 +454,7 @@ void libabw::ABWContentCollector::_recurseTextProperties(const char *name, std::
       _recurseTextProperties(iter->second.basedon.c_str(), styleProps);
     if (iter != m_textStyles.end())
     {
-      for (std::map<std::string, std::string>::const_iterator i = iter->second.properties.begin(); i != iter->second.properties.end(); ++i)
+      for (ABWPropertyMap::const_iterator i = iter->second.properties.begin(); i != iter->second.properties.end(); ++i)
         styleProps[i->first] = i->second;
     }
   }
@@ -466,7 +466,7 @@ std::string libabw::ABWContentCollector::_findDocumentProperty(const char *const
 {
   if (!name)
     return std::string();
-  std::map<std::string, std::string>::const_iterator iter = m_ps->m_documentStyle.find(name);
+  ABWPropertyMap::const_iterator iter = m_ps->m_documentStyle.find(name);
   if (iter != m_ps->m_documentStyle.end())
     return iter->second;
   return std::string();
@@ -476,7 +476,7 @@ std::string libabw::ABWContentCollector::_findParagraphProperty(const char *name
 {
   if (!name)
     return std::string();
-  std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentParagraphStyle.find(name);
+  ABWPropertyMap::const_iterator iter = m_ps->m_currentParagraphStyle.find(name);
   if (iter != m_ps->m_currentParagraphStyle.end())
     return iter->second;
   return std::string();
@@ -486,7 +486,7 @@ std::string libabw::ABWContentCollector::_findTableProperty(const char *name)
 {
   if (!name)
     return std::string();
-  std::map<std::string, std::string>::const_iterator iter = m_ps->m_tableStates.top().m_currentTableProperties.find(name);
+  ABWPropertyMap::const_iterator iter = m_ps->m_tableStates.top().m_currentTableProperties.find(name);
   if (iter != m_ps->m_tableStates.top().m_currentTableProperties.end())
     return iter->second;
   return std::string();
@@ -496,7 +496,7 @@ std::string libabw::ABWContentCollector::_findCellProperty(const char *name)
 {
   if (!name)
     return std::string();
-  std::map<std::string, std::string>::const_iterator iter = m_ps->m_tableStates.top().m_currentCellProperties.find(name);
+  ABWPropertyMap::const_iterator iter = m_ps->m_tableStates.top().m_currentCellProperties.find(name);
   if (iter != m_ps->m_tableStates.top().m_currentCellProperties.end())
     return iter->second;
   return std::string();
@@ -506,7 +506,7 @@ std::string libabw::ABWContentCollector::_findSectionProperty(const char *name)
 {
   if (!name)
     return std::string();
-  std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentSectionStyle.find(name);
+  ABWPropertyMap::const_iterator iter = m_ps->m_currentSectionStyle.find(name);
   if (iter != m_ps->m_currentSectionStyle.end())
     return iter->second;
   return std::string();
@@ -516,7 +516,7 @@ std::string libabw::ABWContentCollector::_findCharacterProperty(const char *name
 {
   if (!name)
     return std::string();
-  std::map<std::string, std::string>::const_iterator iter = m_ps->m_currentCharacterStyle.find(name);
+  ABWPropertyMap::const_iterator iter = m_ps->m_currentCharacterStyle.find(name);
   if (iter != m_ps->m_currentCharacterStyle.end())
     return iter->second;
   iter = m_ps->m_currentParagraphStyle.find(name);
@@ -546,10 +546,10 @@ void libabw::ABWContentCollector::collectParagraphProperties(const char *level, 
   else
     _recurseTextProperties("Normal", m_ps->m_currentParagraphStyle);
 
-  std::map<std::string, std::string> tmpProps;
+  ABWPropertyMap tmpProps;
   if (props)
     parsePropString(props, tmpProps);
-  for (std::map<std::string, std::string>::const_iterator iter = tmpProps.begin(); iter != tmpProps.end(); ++iter)
+  for (ABWPropertyMap::const_iterator iter = tmpProps.begin(); iter != tmpProps.end(); ++iter)
     m_ps->m_currentParagraphStyle[iter->first] = iter->second;
   m_ps->m_inParagraphOrListElement = true;
 }
@@ -560,10 +560,10 @@ void libabw::ABWContentCollector::collectCharacterProperties(const char *style, 
   if (style)
     _recurseTextProperties(style, m_ps->m_currentCharacterStyle);
 
-  std::map<std::string, std::string> tmpProps;
+  ABWPropertyMap tmpProps;
   if (props)
     parsePropString(props, tmpProps);
-  for (std::map<std::string, std::string>::const_iterator iter = tmpProps.begin(); iter != tmpProps.end(); ++iter)
+  for (ABWPropertyMap::const_iterator iter = tmpProps.begin(); iter != tmpProps.end(); ++iter)
     m_ps->m_currentCharacterStyle[iter->first] = iter->second;
 }
 
@@ -588,13 +588,13 @@ void libabw::ABWContentCollector::collectSectionProperties(const char *footer, c
   int footerLastId = m_ps->m_footerLastId;
 
   m_ps->m_currentSectionStyle.clear();
-  std::map<std::string, std::string> tmpProps;
+  ABWPropertyMap tmpProps;
   if (props)
     parsePropString(props, tmpProps);
 
   ABWUnit unit(ABW_NONE);
   double value(0.0);
-  for (std::map<std::string, std::string>::const_iterator iter = tmpProps.begin(); iter != tmpProps.end(); ++iter)
+  for (ABWPropertyMap::const_iterator iter = tmpProps.begin(); iter != tmpProps.end(); ++iter)
   {
     if (iter->first == "page-margin-right" && !iter->second.empty() && fabs(m_ps->m_pageMarginRight) < ABW_EPSILON)
     {
@@ -1586,7 +1586,7 @@ void libabw::ABWContentCollector::insertImage(const char *dataid, const char *pr
   if (!m_ps->m_isSpanOpened)
     _openSpan();
 
-  std::map<std::string, std::string> properties;
+  ABWPropertyMap properties;
   if (props)
     parsePropString(props, properties);
   if (dataid)
@@ -1597,7 +1597,7 @@ void libabw::ABWContentCollector::insertImage(const char *dataid, const char *pr
       librevenge::RVNGPropertyList propList;
       ABWUnit unit(ABW_NONE);
       double value(0.0);
-      std::map<std::string, std::string>::const_iterator i = properties.find("height");
+      ABWPropertyMap::const_iterator i = properties.find("height");
       if (i != properties.end() && findDouble(i->second, value, unit) && ABW_IN == unit)
         propList.insert("svg:height", value);
       i = properties.find("width");
