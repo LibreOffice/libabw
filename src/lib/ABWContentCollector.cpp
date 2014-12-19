@@ -7,6 +7,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <cassert>
+
 #include <boost/spirit/include/classic.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
@@ -268,6 +270,16 @@ static std::string decodeUrl(const std::string &str)
   return str;
 }
 
+std::string findProperty(const ABWPropertyMap &propMap, const char *const name)
+{
+  if (!name)
+    return std::string();
+  ABWPropertyMap::const_iterator iter = propMap.find(name);
+  if (iter != propMap.end())
+    return iter->second;
+  return std::string();
+}
+
 } // anonymous namespace
 
 } // namespace libabw
@@ -464,65 +476,37 @@ void libabw::ABWContentCollector::_recurseTextProperties(const char *name, ABWPr
 
 std::string libabw::ABWContentCollector::_findDocumentProperty(const char *const name)
 {
-  if (!name)
-    return std::string();
-  ABWPropertyMap::const_iterator iter = m_ps->m_documentStyle.find(name);
-  if (iter != m_ps->m_documentStyle.end())
-    return iter->second;
-  return std::string();
+  return findProperty(m_ps->m_documentStyle, name);
 }
 
 std::string libabw::ABWContentCollector::_findParagraphProperty(const char *name)
 {
-  if (!name)
-    return std::string();
-  ABWPropertyMap::const_iterator iter = m_ps->m_currentParagraphStyle.find(name);
-  if (iter != m_ps->m_currentParagraphStyle.end())
-    return iter->second;
-  return std::string();
+  return findProperty(m_ps->m_currentParagraphStyle, name);
 }
 
 std::string libabw::ABWContentCollector::_findTableProperty(const char *name)
 {
-  if (!name)
-    return std::string();
-  ABWPropertyMap::const_iterator iter = m_ps->m_tableStates.top().m_currentTableProperties.find(name);
-  if (iter != m_ps->m_tableStates.top().m_currentTableProperties.end())
-    return iter->second;
-  return std::string();
+  assert(!m_ps->m_tableStates.empty());
+  return findProperty(m_ps->m_tableStates.top().m_currentTableProperties, name);
 }
 
 std::string libabw::ABWContentCollector::_findCellProperty(const char *name)
 {
-  if (!name)
-    return std::string();
-  ABWPropertyMap::const_iterator iter = m_ps->m_tableStates.top().m_currentCellProperties.find(name);
-  if (iter != m_ps->m_tableStates.top().m_currentCellProperties.end())
-    return iter->second;
-  return std::string();
+  assert(!m_ps->m_tableStates.empty());
+  return findProperty(m_ps->m_tableStates.top().m_currentCellProperties, name);
 }
 
 std::string libabw::ABWContentCollector::_findSectionProperty(const char *name)
 {
-  if (!name)
-    return std::string();
-  ABWPropertyMap::const_iterator iter = m_ps->m_currentSectionStyle.find(name);
-  if (iter != m_ps->m_currentSectionStyle.end())
-    return iter->second;
-  return std::string();
+  return findProperty(m_ps->m_currentSectionStyle, name);
 }
 
 std::string libabw::ABWContentCollector::_findCharacterProperty(const char *name)
 {
-  if (!name)
-    return std::string();
-  ABWPropertyMap::const_iterator iter = m_ps->m_currentCharacterStyle.find(name);
-  if (iter != m_ps->m_currentCharacterStyle.end())
-    return iter->second;
-  iter = m_ps->m_currentParagraphStyle.find(name);
-  if (iter != m_ps->m_currentParagraphStyle.end())
-    return iter->second;
-  return std::string();
+  std::string prop = findProperty(m_ps->m_currentCharacterStyle, name);
+  if (prop.empty())
+    prop = findProperty(m_ps->m_currentParagraphStyle, name);
+  return prop;
 }
 
 void libabw::ABWContentCollector::collectDocumentProperties(const char *const props)
