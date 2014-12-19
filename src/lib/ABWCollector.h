@@ -143,6 +143,8 @@ public:
   virtual void closeTable() = 0;
   virtual void openCell(const char *props) = 0;
   virtual void closeCell() = 0;
+
+  virtual void addMetadataEntry(const char *name, const char *value) = 0;
 };
 
 } // namespace libabw

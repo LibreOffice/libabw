@@ -153,10 +153,13 @@ public:
   void openCell(const char *props);
   void closeCell();
 
+  void addMetadataEntry(const char *name, const char *value);
 
 private:
   ABWContentCollector(const ABWContentCollector &);
   ABWContentCollector &operator=(const ABWContentCollector &);
+
+  void _setMetadata();
 
   void _openPageSpan();
   void _closePageSpan();
@@ -197,6 +200,7 @@ private:
   std::string _findTableProperty(const char *name);
   std::string _findCellProperty(const char *name);
   std::string _findSectionProperty(const char *name);
+  std::string _findMetadataEntry(const char *name);
 
   void _fillParagraphProperties(librevenge::RVNGPropertyList &propList, bool isListElement);
 
@@ -205,6 +209,8 @@ private:
   std::stack<ABWContentParsingState *> m_parsingStates;
   std::set<std::string> m_dontLoop;
   std::map<std::string, ABWStyle> m_textStyles;
+
+  ABWPropertyMap m_metadata;
 
   const std::map<std::string, ABWData> &m_data;
   const std::map<int, int> &m_tableSizes;

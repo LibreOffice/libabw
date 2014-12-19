@@ -428,6 +428,7 @@ libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *
   m_parsingStates(),
   m_dontLoop(),
   m_textStyles(),
+  m_metadata(),
   m_data(data),
   m_tableSizes(tableSizes),
   m_tableCounter(0),
@@ -507,6 +508,11 @@ std::string libabw::ABWContentCollector::_findCharacterProperty(const char *name
   if (prop.empty())
     prop = findProperty(m_ps->m_currentParagraphStyle, name);
   return prop;
+}
+
+std::string libabw::ABWContentCollector::_findMetadataEntry(const char *const name)
+{
+  return findProperty(m_metadata, name);
 }
 
 void libabw::ABWContentCollector::collectDocumentProperties(const char *const props)
@@ -718,7 +724,10 @@ void libabw::ABWContentCollector::startDocument()
   {
 
     if (m_iface && !m_ps->m_isDocumentStarted)
+    {
       m_iface->startDocument(librevenge::RVNGPropertyList());
+      _setMetadata();
+    }
 
     m_ps->m_isDocumentStarted = true;
   }
@@ -750,6 +759,37 @@ void libabw::ABWContentCollector::endDocument()
       m_iface->endDocument();
     }
   }
+}
+
+void libabw::ABWContentCollector::_setMetadata()
+{
+  librevenge::RVNGPropertyList propList;
+
+  const std::string dcKeys[] = { "creator", "language", "publisher", "source", "subject", "type" };
+
+  for (std::size_t i = 0; i != ABW_NUM_ELEMENTS(dcKeys); ++i)
+  {
+    const std::string abwKey = "dc." + dcKeys[i];
+    const std::string rvngKey = "dc:" + dcKeys[i];
+    const std::string prop = _findMetadataEntry(abwKey.c_str());
+    if (!prop.empty())
+      propList.insert(rvngKey.c_str(), prop.c_str());
+  }
+
+  std::string prop = _findMetadataEntry("dc.title");
+  if (!prop.empty())
+    propList.insert("librevenge:descriptive-name", prop.c_str());
+
+  prop = _findMetadataEntry("abiword.keywords");
+  if (!prop.empty())
+    propList.insert("meta:keyword", prop.c_str());
+
+  prop = _findMetadataEntry("meta:initial-creator");
+  if (!prop.empty())
+    propList.insert("meta:initial-creator", prop.c_str());
+
+  if (m_iface)
+    m_iface->setDocumentMetaData(propList);
 }
 
 void libabw::ABWContentCollector::endSection()
@@ -1685,6 +1725,14 @@ void libabw::ABWContentCollector::_closeListElement()
   }
   m_ps->m_isListElementOpened = false;
   m_ps->m_isFirstTextInListElement = false;
+}
+
+void libabw::ABWContentCollector::addMetadataEntry(const char *const key, const char *const value)
+{
+  assert(key);
+  assert(value);
+
+  m_metadata[key] = value;
 }
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */

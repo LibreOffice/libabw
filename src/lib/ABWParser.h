@@ -10,6 +10,8 @@
 #ifndef __ABWPARSER_H__
 #define __ABWPARSER_H__
 
+#include <boost/scoped_ptr.hpp>
+
 #include <librevenge/librevenge.h>
 #include "ABWXMLHelper.h"
 
@@ -17,6 +19,7 @@ namespace libabw
 {
 
 class ABWCollector;
+struct ABWParserState;
 
 class ABWParser
 {
@@ -40,7 +43,7 @@ private:
   void processXmlNode(xmlTextReaderPtr reader);
 
   void readAbiword(xmlTextReaderPtr reader);
-  void readMetadata(xmlTextReaderPtr reader);
+  void readM(xmlTextReaderPtr reader);
   void readHistory(xmlTextReaderPtr reader);
   void readRevisions(xmlTextReaderPtr reader);
   void readIgnoredWords(xmlTextReaderPtr reader);
@@ -62,6 +65,7 @@ private:
   librevenge::RVNGInputStream *m_input;
   librevenge::RVNGTextInterface *m_iface;
   ABWCollector *m_collector;
+  boost::scoped_ptr<ABWParserState> m_state;
 };
 
 } // namespace libabw

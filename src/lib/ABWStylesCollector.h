@@ -85,6 +85,8 @@ public:
   void openCell(const char *props);
   void closeCell();
 
+  void addMetadataEntry(const char *, const char *) {}
+
 private:
   ABWStylesCollector(const ABWStylesCollector &);
   ABWStylesCollector &operator=(const ABWStylesCollector &);

@@ -66,10 +66,24 @@ static bool findBool(const std::string &str, bool &res)
 
 } // anonymous namespace
 
+struct ABWParserState
+{
+  ABWParserState();
+
+  bool m_inMetadata;
+  std::string m_currentMetadataKey;
+};
+
+ABWParserState::ABWParserState()
+  : m_inMetadata(false)
+  , m_currentMetadataKey()
+{
+}
+
 } // namespace libabw
 
 libabw::ABWParser::ABWParser(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *iface)
-  : m_input(input), m_iface(iface), m_collector(0)
+  : m_input(input), m_iface(iface), m_collector(0), m_state(new ABWParserState())
 {
 }
 
@@ -150,7 +164,22 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
   {
     const char *text = (const char *)xmlTextReaderConstValue(reader);
     ABW_DEBUG_MSG(("ABWParser::processXmlNode: text %s\n", text));
-    m_collector->insertText(text);
+    if (m_state->m_inMetadata)
+    {
+      if (m_state->m_currentMetadataKey.empty())
+      {
+        ABW_DEBUG_MSG(("there is no key for metadata entry '%s'\n", text));
+      }
+      else
+      {
+        m_collector->addMetadataEntry(m_state->m_currentMetadataKey.c_str(), text);
+        m_state->m_currentMetadataKey.clear();
+      }
+    }
+    else
+    {
+      m_collector->insertText(text);
+    }
   }
   switch (tokenId)
   {
@@ -160,7 +189,13 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
     break;
   case XML_METADATA:
     if (XML_READER_TYPE_ELEMENT == tokenType)
-      readMetadata(reader);
+      m_state->m_inMetadata = true;
+    else if (XML_READER_TYPE_END_ELEMENT == tokenType)
+      m_state->m_inMetadata = false;
+    break;
+  case XML_M:
+    if (XML_READER_TYPE_ELEMENT == tokenType)
+      readM(reader);
     break;
   case XML_HISTORY:
     if (XML_READER_TYPE_ELEMENT == tokenType)
@@ -300,27 +335,12 @@ void libabw::ABWParser::readAbiword(xmlTextReaderPtr reader)
     xmlFree(props);
 }
 
-void libabw::ABWParser::readMetadata(xmlTextReaderPtr reader)
+void libabw::ABWParser::readM(xmlTextReaderPtr reader)
 {
-  int ret = 1;
-  int tokenId = XML_TOKEN_INVALID;
-  int tokenType = -1;
-  do
-  {
-    ret = xmlTextReaderRead(reader);
-    tokenId = getElementToken(reader);
-    if (XML_TOKEN_INVALID == tokenId)
-    {
-      ABW_DEBUG_MSG(("ABWParser::readMetadata: unknown token %s\n", xmlTextReaderConstName(reader)));
-    }
-    tokenType = xmlTextReaderNodeType(reader);
-    switch (tokenId)
-    {
-    default:
-      break;
-    }
-  }
-  while ((XML_METADATA != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
+  xmlChar *const key = xmlTextReaderGetAttribute(reader, BAD_CAST("key"));
+  m_state->m_currentMetadataKey = reinterpret_cast<const char *>(key);
+  if (key)
+    xmlFree(key);
 }
 
 void libabw::ABWParser::readHistory(xmlTextReaderPtr reader)
