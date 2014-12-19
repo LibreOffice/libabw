@@ -902,6 +902,8 @@ void libabw::ABWContentCollector::_openSection()
       propList.insert("librevenge:margin-bottom", value);
 
     std::string sValue = _findSectionProperty("dom-dir");
+    if (sValue.empty()) // try document default
+      sValue = _findDocumentProperty("dom-dir");
     if (sValue == "ltr")
       propList.insert("style:writing-mode", "lr-tb");
     else if (sValue == "rtl")
