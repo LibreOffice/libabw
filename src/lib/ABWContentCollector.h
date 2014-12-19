@@ -73,6 +73,7 @@ struct ABWContentParsingState
   bool m_isListElementOpened;
   bool m_inParagraphOrListElement;
 
+  std::map<std::string, std::string> m_documentStyle;
   std::map<std::string, std::string> m_currentSectionStyle;
   std::map<std::string, std::string> m_currentParagraphStyle;
   std::map<std::string, std::string> m_currentCharacterStyle;
@@ -119,6 +120,7 @@ public:
   // collector functions
 
   void collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props);
+  void collectDocumentProperties(const char *props);
   void collectParagraphProperties(const char *level, const char *listid, const char *parentid, const char *style, const char *props);
   void collectSectionProperties(const char *footer, const char *footerLeft, const char *footerFirst, const char *footerLast,
                                 const char *header, const char *headerLeft, const char *headerFirst, const char *headerLast,
@@ -189,6 +191,7 @@ private:
   void _closeFooter();
 
   void _recurseTextProperties(const char *name, std::map<std::string, std::string> &styleProps);
+  std::string _findDocumentProperty(const char *name);
   std::string _findParagraphProperty(const char *name);
   std::string _findCharacterProperty(const char *name);
   std::string _findTableProperty(const char *name);

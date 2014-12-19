@@ -154,6 +154,10 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
   }
   switch (tokenId)
   {
+  case XML_ABIWORD:
+    if (XML_READER_TYPE_ELEMENT == tokenType)
+      readAbiword(reader);
+    break;
   case XML_METADATA:
     if (XML_READER_TYPE_ELEMENT == tokenType)
       readMetadata(reader);
@@ -287,6 +291,14 @@ int libabw::ABWParser::getElementToken(xmlTextReaderPtr reader)
   return ABWXMLTokenMap::getTokenId(xmlTextReaderConstName(reader));
 }
 
+void libabw::ABWParser::readAbiword(xmlTextReaderPtr reader)
+{
+  xmlChar *const props = xmlTextReaderGetAttribute(reader, BAD_CAST("props"));
+  if (m_collector)
+    m_collector->collectDocumentProperties(reinterpret_cast<const char *>(props));
+  if (props)
+    xmlFree(props);
+}
 
 void libabw::ABWParser::readMetadata(xmlTextReaderPtr reader)
 {

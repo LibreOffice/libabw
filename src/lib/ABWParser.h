@@ -39,6 +39,7 @@ private:
   bool processXmlDocument(librevenge::RVNGInputStream *input);
   void processXmlNode(xmlTextReaderPtr reader);
 
+  void readAbiword(xmlTextReaderPtr reader);
   void readMetadata(xmlTextReaderPtr reader);
   void readHistory(xmlTextReaderPtr reader);
   void readRevisions(xmlTextReaderPtr reader);

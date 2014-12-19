@@ -50,6 +50,7 @@ public:
   // collector functions
 
   void collectTextStyle(const char *, const char *, const char *, const char *) {}
+  void collectDocumentProperties(const char *) {}
   void collectParagraphProperties(const char *level, const char *listid, const char *parentid,
                                   const char *style, const char *props);
   void collectSectionProperties(const char *, const char *, const char *, const char *,

@@ -9,11 +9,14 @@
 
 #include <boost/spirit/include/classic.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/optional.hpp>
 #include <librevenge/librevenge.h>
 #include "ABWContentCollector.h"
 #include "libabw_internal.h"
 
 #define ABW_EPSILON 1.0E-06
+
+using boost::optional;
 
 namespace libabw
 {
@@ -207,6 +210,32 @@ void parseTabStops(const std::string &str, librevenge::RVNGPropertyListVector &t
   }
 }
 
+void parseLang(const std::string &langStr, optional<std::string> &lang, optional<std::string> &country, optional<std::string> &script)
+{
+  std::vector<std::string> tags;
+  tags.reserve(3);
+  boost::split(tags, langStr, boost::is_any_of("-_"), boost::token_compress_off);
+
+  if ((tags.size() > 0) && boost::all(tags[0], boost::is_lower()) && (2 <= tags[0].size()) && (3 >= tags[0].size()))
+  {
+    lang = tags[0];
+
+    if (tags.size() > 1)
+    {
+      if (boost::all(tags[1], boost::is_upper()) && (2 == tags[1].size()))
+        country = tags[1];
+      else
+        script = tags[1];
+    }
+
+    if ((tags.size() > 2) && bool(script))
+    {
+      if (boost::all(tags[2], boost::is_upper()) && (2 == tags[2].size()))
+        country = tags[2];
+    }
+  }
+}
+
 static std::string decodeUrl(const std::string &str)
 {
   using namespace ::boost::spirit::classic;
@@ -291,6 +320,7 @@ libabw::ABWContentParsingState::ABWContentParsingState() :
   m_isListElementOpened(false),
   m_inParagraphOrListElement(false),
 
+  m_documentStyle(),
   m_currentSectionStyle(),
   m_currentParagraphStyle(),
   m_currentCharacterStyle(),
@@ -338,6 +368,7 @@ libabw::ABWContentParsingState::ABWContentParsingState(const ABWContentParsingSt
   m_isListElementOpened(ps.m_isListElementOpened),
   m_inParagraphOrListElement(ps.m_inParagraphOrListElement),
 
+  m_documentStyle(ps.m_documentStyle),
   m_currentSectionStyle(ps.m_currentSectionStyle),
   m_currentParagraphStyle(ps.m_currentParagraphStyle),
   m_currentCharacterStyle(ps.m_currentCharacterStyle),
@@ -431,6 +462,16 @@ void libabw::ABWContentCollector::_recurseTextProperties(const char *name, std::
     m_dontLoop.clear();
 }
 
+std::string libabw::ABWContentCollector::_findDocumentProperty(const char *const name)
+{
+  if (!name)
+    return std::string();
+  std::map<std::string, std::string>::const_iterator iter = m_ps->m_documentStyle.find(name);
+  if (iter != m_ps->m_documentStyle.end())
+    return iter->second;
+  return std::string();
+}
+
 std::string libabw::ABWContentCollector::_findParagraphProperty(const char *name)
 {
   if (!name)
@@ -482,6 +523,12 @@ std::string libabw::ABWContentCollector::_findCharacterProperty(const char *name
   if (iter != m_ps->m_currentParagraphStyle.end())
     return iter->second;
   return std::string();
+}
+
+void libabw::ABWContentCollector::collectDocumentProperties(const char *const props)
+{
+  if (props)
+    parsePropString(props, m_ps->m_documentStyle);
 }
 
 void libabw::ABWContentCollector::collectParagraphProperties(const char *level, const char *listid, const char * /*parentid*/, const char *style, const char *props)
@@ -1136,6 +1183,26 @@ void libabw::ABWContentCollector::_openSpan()
       propList.insert("style:text-position", "sub");
     else if (sValue == "superscript")
       propList.insert("style:text-position", "super");
+
+    sValue = _findCharacterProperty("lang");
+    if (sValue.empty()) // try document default
+      sValue = _findDocumentProperty("lang");
+
+    if (!sValue.empty())
+    {
+      optional<std::string> lang;
+      optional<std::string> country;
+      optional<std::string> script;
+
+      parseLang(sValue, lang, country, script);
+
+      if (bool(lang))
+        propList.insert("fo:language", get(lang).c_str());
+      if (bool(country))
+        propList.insert("fo:country", get(country).c_str());
+      if (bool(script))
+        propList.insert("fo:script", get(script).c_str());
+    }
 
     m_outputElements.addOpenSpan(propList);
   }
