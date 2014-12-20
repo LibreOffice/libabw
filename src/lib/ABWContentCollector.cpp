@@ -755,7 +755,7 @@ void libabw::ABWContentCollector::endDocument()
   if (!m_ps->m_isNote)
   {
     if (!m_ps->m_isPageSpanOpened)
-      _openSpan();
+      _openPageSpan();
 
     _closeParagraph();
     _closeListElement();
