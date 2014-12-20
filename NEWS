@@ -1,3 +1,15 @@
+libabw 0.1.1
+
+- Use symbol visibility on Linux. The library only exports the two public
+  functions now.
+- Handle text language.
+- Honor global setting of writing mode.
+- Handle basic document metadata.
+- Handle headings.
+- Fix the loss of text formatting attributes that would happen in certain
+  cases.
+- Several other smaller changes and improvements.
+
 0.0.1 -> 0.1.0
  - Switch to librevenge
  - Do not add extra tab for list indentation
