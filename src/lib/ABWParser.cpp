@@ -338,9 +338,11 @@ void libabw::ABWParser::readAbiword(xmlTextReaderPtr reader)
 void libabw::ABWParser::readM(xmlTextReaderPtr reader)
 {
   xmlChar *const key = xmlTextReaderGetAttribute(reader, BAD_CAST("key"));
-  m_state->m_currentMetadataKey = reinterpret_cast<const char *>(key);
   if (key)
+  {
+    m_state->m_currentMetadataKey = reinterpret_cast<const char *>(key);
     xmlFree(key);
+  }
 }
 
 void libabw::ABWParser::readHistory(xmlTextReaderPtr reader)
