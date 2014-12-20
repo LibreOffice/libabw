@@ -110,7 +110,7 @@ is not protected
 \return A value that indicates whether the conversion was successful and in case it
 was not, it indicates the reason of the error
 */
-ABWAPI bool libabw::AbiDocument::parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *textInterface)
+ABWAPI bool libabw::AbiDocument::parse(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *textInterface) try
 {
   ABW_DEBUG_MSG(("AbiDocument::parse\n"));
   if (!input)
@@ -122,4 +122,9 @@ ABWAPI bool libabw::AbiDocument::parse(librevenge::RVNGInputStream *input, libre
     return true;
   return false;
 }
+catch (...)
+{
+  return false;
+}
+
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */
