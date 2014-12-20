@@ -190,7 +190,7 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
   case XML_METADATA:
     if (XML_READER_TYPE_ELEMENT == tokenType)
       m_state->m_inMetadata = true;
-    else if (XML_READER_TYPE_END_ELEMENT == tokenType)
+    if ((XML_READER_TYPE_END_ELEMENT == tokenType) || (emptyToken > 0))
       m_state->m_inMetadata = false;
     break;
   case XML_M:
