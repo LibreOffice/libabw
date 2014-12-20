@@ -558,6 +558,11 @@ void libabw::ABWContentCollector::collectParagraphProperties(const char *level, 
 
 void libabw::ABWContentCollector::collectCharacterProperties(const char *style, const char *props)
 {
+  // We started a new span without closing the last one. That can actually happen, because <p>
+  // allows mixed content, so there can be text spans not enclosed in <c>.
+  if (m_ps->m_isSpanOpened)
+    _closeSpan();
+
   m_ps->m_currentCharacterStyle.clear();
   if (style)
     _recurseTextProperties(style, m_ps->m_currentCharacterStyle);
