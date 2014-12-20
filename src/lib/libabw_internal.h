@@ -10,14 +10,17 @@
 #ifndef __LIBABW_INTERNAL_H__
 #define __LIBABW_INTERNAL_H__
 
-#include <stdio.h>
-
 /* Various functions/defines that need not/should not be exported externally */
 
 #define DELETEP(m) if (m) { delete m; m = 0; }
 
+namespace libabw
+{
+void debugPrint(const char *format, ...);
+}
+
 #ifdef DEBUG
-#define ABW_DEBUG_MSG(M) printf M
+#define ABW_DEBUG_MSG(M) libabw::debugPrint M
 #else
 #define ABW_DEBUG_MSG(M)
 #endif

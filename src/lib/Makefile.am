@@ -39,6 +39,7 @@ libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_SOURCES = \
 	ABWXMLTokenMap.cpp \
 	ABWZlibStream.cpp \
 	AbiDocument.cpp \
+	libabw_internal.cpp \
 	\
 	ABWCollector.h \
 	ABWContentCollector.h \
