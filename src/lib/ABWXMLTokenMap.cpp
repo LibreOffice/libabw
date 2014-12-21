@@ -19,7 +19,7 @@ namespace
 
 int libabw::ABWXMLTokenMap::getTokenId(const xmlChar *name)
 {
-  const xmltoken *token = Perfect_Hash::in_word_set((const char *)name, xmlStrlen(name));
+  const xmltoken *token = Perfect_Hash::in_word_set((const char *)name, (unsigned int)xmlStrlen(name));
   if (token)
     return token->tokenId;
   else

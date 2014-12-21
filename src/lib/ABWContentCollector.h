@@ -160,6 +160,8 @@ private:
 
   void _setMetadata();
 
+  void _addBorderProperties(const std::map<std::string, std::string> &map, librevenge::RVNGPropertyList &propList, const std::string &defaultUndefBorderProp="");
+
   void _openPageSpan();
   void _closePageSpan();
 

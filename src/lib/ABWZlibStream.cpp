@@ -40,7 +40,7 @@ static bool getInflatedBuffer(librevenge::RVNGInputStream *input, std::vector<un
   {
     unsigned long numBytesRead(0);
     const unsigned char *p = input->read(BLOCK_SIZE, numBytesRead);
-    strm.avail_in = numBytesRead;
+    strm.avail_in = uInt(numBytesRead);
     if (!strm.avail_in)
       break;
     memcpy(in, p, strm.avail_in);
@@ -59,6 +59,8 @@ static bool getInflatedBuffer(librevenge::RVNGInputStream *input, std::vector<un
       case Z_STREAM_ERROR:
         (void)inflateEnd(&strm);
         return false;
+      default:
+        break;
       }
       for (unsigned i = 0; i < BLOCK_SIZE - strm.avail_out; ++i)
         buffer.push_back(out[i]);
@@ -104,12 +106,12 @@ const unsigned char *ABWZlibStream::read(unsigned long numBytes, unsigned long &
   if (numBytes == 0)
     return 0;
 
-  unsigned numBytesToRead;
+  unsigned long numBytesToRead;
 
-  if ((m_offset+numBytes) < m_buffer.size())
+  if (((unsigned long)m_offset+numBytes) < m_buffer.size())
     numBytesToRead = numBytes;
   else
-    numBytesToRead = m_buffer.size() - m_offset;
+    numBytesToRead = m_buffer.size() - (unsigned long)m_offset;
 
   numBytesRead = numBytesToRead; // about as paranoid as we can be..
 
@@ -119,7 +121,7 @@ const unsigned char *ABWZlibStream::read(unsigned long numBytes, unsigned long &
   long oldOffset = m_offset;
   m_offset += numBytesToRead;
 
-  return &m_buffer[oldOffset];
+  return &m_buffer[size_t(oldOffset)];
 }
 
 int ABWZlibStream::seek(long offset, librevenge::RVNG_SEEK_TYPE seekType)
@@ -139,7 +141,7 @@ int ABWZlibStream::seek(long offset, librevenge::RVNG_SEEK_TYPE seekType)
   }
   if ((long)m_offset > (long)m_buffer.size())
   {
-    m_offset = m_buffer.size();
+    m_offset = (long) m_buffer.size();
     return 1;
   }
 

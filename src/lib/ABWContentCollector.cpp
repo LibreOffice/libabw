@@ -8,6 +8,8 @@
  */
 
 #include <cassert>
+#include <locale>
+#include <sstream>
 
 #include <boost/spirit/include/classic.hpp>
 #include <boost/algorithm/string.hpp>
@@ -111,6 +113,33 @@ static void separateSpacesAndInsertText(ABWOutputElements &outputElements, const
       tmpText.append(i());
   }
   separateTabsAndInsertText(outputElements, tmpText);
+}
+
+static void separateSpacesAndReturnsListOfArgs(std::string const &attrib, std::vector<std::string> &listArg)
+{
+  listArg.resize(0);
+  if (attrib.empty())
+    return;
+  std::string tmpArg("");
+  for (size_t i=0; i<attrib.length(); ++i)
+  {
+    char c=attrib[i];
+    if (c == ' ')
+    {
+      if (!tmpArg.empty())
+      {
+        listArg.push_back(tmpArg);
+        tmpArg.clear();
+      }
+      continue;
+    }
+    tmpArg.push_back(c);
+  }
+  if (!tmpArg.empty())
+  {
+    listArg.push_back(tmpArg);
+    tmpArg.clear();
+  }
 }
 
 void parseTableColumns(const std::string &str, librevenge::RVNGPropertyListVector &columns)
@@ -531,6 +560,53 @@ void libabw::ABWContentCollector::collectDocumentProperties(const char *const pr
 {
   if (props)
     parsePropString(props, m_documentStyle);
+}
+
+void libabw::ABWContentCollector::_addBorderProperties(const std::map<std::string, std::string> &map, librevenge::RVNGPropertyList &propList, const std::string &defaultUndefBorderProp)
+{
+  int setBorders=0;
+  static char const *odtWh[4]= {"fo:border-left", "fo:border-right", "fo:border-top", "fo:border-bottom"};
+  for (int i=0, depl=1; i<4; ++i, depl*=2)
+  {
+    static char const *wh[4]= {"left", "right", "top", "bot"};
+    std::string whString(wh[i]);
+    std::string tmp=whString+"-color";
+    if (map.find(tmp)==map.end()) continue;
+    std::string color=getColor(map.find(tmp)->second);
+    if (color.empty())
+      continue;
+    int style;
+    tmp=whString+"-style";
+    if (map.find(tmp)==map.end() || !findInt(map.find(tmp)->second, style))
+      style=1;
+    else if (style<=0 || style>=4)
+    {
+      if (style==0) setBorders |= depl;
+      continue;
+    }
+    ABWUnit unit(ABW_NONE);
+    double width(0.0);
+    tmp=whString+"-thickness";
+    if (map.find(tmp)==map.end() || !findDouble(map.find(tmp)->second, width, unit))
+      width=0.01;
+    else if (width<=0 || unit != ABW_IN)
+      continue;
+    std::stringstream s;
+    s.imbue(std::locale("C")); // be sure that we use standart double
+    s << width << "in ";
+    if (style==2) s << "dotted ";
+    else if (style==3) s << "dashed ";
+    else s << "solid ";
+    s << color;
+    propList.insert(odtWh[i], s.str().c_str());
+    setBorders|=depl;
+  }
+  if (defaultUndefBorderProp.empty()) return;
+  for (int i=0, depl=1; i<4; ++i, depl*=2)
+  {
+    if (setBorders&depl) continue;
+    propList.insert(odtWh[i], defaultUndefBorderProp.c_str());
+  }
 }
 
 void libabw::ABWContentCollector::collectParagraphProperties(const char *level, const char *listid, const char * /*parentid*/, const char *style, const char *props)
@@ -1095,6 +1171,7 @@ void libabw::ABWContentCollector::_fillParagraphProperties(librevenge::RVNGPrope
     propList.insert("fo:break-before", "page");
   else if (m_ps->m_deferredColumnBreak)
     propList.insert("fo:break-before", "column");
+  _addBorderProperties(m_ps->m_currentParagraphStyle, propList);
   m_ps->m_deferredPageBreak = false;
   m_ps->m_deferredColumnBreak = false;
 }
@@ -1208,18 +1285,36 @@ void libabw::ABWContentCollector::_openSpan()
     if (!sValue.empty() && sValue != "normal")
       propList.insert("fo:font-weight", sValue.c_str());
 
-    sValue = _findCharacterProperty("text-decoration");
-    if (sValue == "underline")
-    {
-      propList.insert("style:text-underline-type", "single");
-      propList.insert("style:text-underline-style", "solid");
-    }
-    else if (sValue == "line-through")
-    {
-      propList.insert("style:text-line-through-type", "single");
-      propList.insert("style:text-line-through-style", "solid");
-    }
+    sValue = _findCharacterProperty("display");
+    if (!sValue.empty() && sValue == "none")
+      propList.insert("text:display", "none");
 
+    sValue = _findCharacterProperty("dir-override");
+    if (!sValue.empty() && sValue == "rtl")
+      propList.insert("style:writing-mode", "rl-tb");
+
+    sValue = _findCharacterProperty("text-decoration");
+    std::vector<std::string> listDecorations;
+    separateSpacesAndReturnsListOfArgs(sValue, listDecorations);
+    for (size_t j=0; j<listDecorations.size(); ++j)
+    {
+      std::string const &decoration=listDecorations[j];
+      if (decoration == "underline")
+      {
+        propList.insert("style:text-underline-type", "single");
+        propList.insert("style:text-underline-style", "solid");
+      }
+      else if (decoration == "line-through")
+      {
+        propList.insert("style:text-line-through-type", "single");
+        propList.insert("style:text-line-through-style", "solid");
+      }
+      else if (decoration == "overline")
+      {
+        propList.insert("style:text-overline-type", "single");
+        propList.insert("style:text-overline-style", "solid");
+      }
+    }
     sValue = getColor(_findCharacterProperty("color"));
     if (!sValue.empty())
       propList.insert("fo:color", sValue.c_str());
@@ -1254,6 +1349,7 @@ void libabw::ABWContentCollector::_openSpan()
         propList.insert("fo:script", get(script).c_str());
     }
 
+    // do we need to check "font-stretch" here or it is always equal to normal ?
     m_outputElements.addOpenSpan(propList);
   }
   m_ps->m_isSpanOpened = true;
@@ -1366,10 +1462,10 @@ void libabw::ABWContentCollector::_openTable()
 
   librevenge::RVNGPropertyListVector tmpColumns;
   parseTableColumns(_findTableProperty("table-column-props"), tmpColumns);
-  unsigned numColumns = tmpColumns.count();
+  unsigned numColumns = unsigned(tmpColumns.count());
   std::map<int, int>::const_iterator iter = m_tableSizes.find(m_ps->m_tableStates.top().m_currentTableId);
   if (iter != m_tableSizes.end())
-    numColumns = iter->second;
+    numColumns = unsigned(iter->second);
   librevenge::RVNGPropertyListVector columns;
   for (unsigned j = 0; j < numColumns; ++j)
   {
@@ -1461,6 +1557,8 @@ void libabw::ABWContentCollector::_openTableCell()
   if (!bgColor.empty())
     propList.insert("fo:background-color", bgColor.c_str());
 
+  // by default, table cells have a small border
+  _addBorderProperties(m_ps->m_tableStates.top().m_currentCellProperties, propList,"0.01in solid #000000");
   m_outputElements.addOpenTableCell(propList);
 
   m_ps->m_tableStates.top().m_currentTableCellNumberInRow++;
@@ -1723,7 +1821,9 @@ void libabw::ABWContentCollector::_recurseListLevels(int oldLevel, int newLevel,
     m_ps->m_listLevels.push(std::make_pair(newLevel, iter->second));
     librevenge::RVNGPropertyList propList;
     iter->second->writeOut(propList);
-    propList.insert("librevenge:list-id", newListId);
+    // osnola: use the element list id if set, if not use newListId
+    propList.insert("librevenge:list-id",
+                    iter->second->m_listId ? iter->second->m_listId : newListId);
     if (iter->second->getType() == ABW_UNORDERED)
       m_outputElements.addOpenUnorderedListLevel(propList);
     else

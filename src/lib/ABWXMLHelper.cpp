@@ -35,11 +35,11 @@ extern "C" {
       return 0;
 
     unsigned long tmpNumBytesRead = 0;
-    const unsigned char *tmpBuffer = input->read(len, tmpNumBytesRead);
+    const unsigned char *tmpBuffer = input->read((unsigned long) len, tmpNumBytesRead);
 
     if (tmpBuffer && tmpNumBytesRead)
       memcpy(buffer, tmpBuffer, tmpNumBytesRead);
-    return tmpNumBytesRead;
+    return int(tmpNumBytesRead);
   }
 
 #ifdef DEBUG

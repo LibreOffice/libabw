@@ -13,6 +13,15 @@
 #include "ABWZlibStream.h"
 #include "libabw_internal.h"
 
+namespace libabw
+{
+// small function needed to call the xml BAD_CAST on a char const *
+static xmlChar *call_BAD_CAST_OnConst(char const *str)
+{
+  return BAD_CAST(const_cast<char *>(str));
+}
+}
+
 /**
 \mainpage libabw documentation
 This document contains both the libabw API specification and the normal libabw
@@ -62,9 +71,9 @@ ABWAPI bool libabw::AbiDocument::isFileFormatSupported(librevenge::RVNGInputStre
       xmlFreeTextReader(reader);
       return false;
     }
-    if (!xmlStrEqual(name, BAD_CAST("abiword")))
+    if (!xmlStrEqual(name, call_BAD_CAST_OnConst("abiword")))
     {
-      if (!xmlStrEqual(name, BAD_CAST("awml")))
+      if (!xmlStrEqual(name, call_BAD_CAST_OnConst("awml")))
       {
         xmlFreeTextReader(reader);
         return false;
@@ -82,7 +91,7 @@ ABWAPI bool libabw::AbiDocument::isFileFormatSupported(librevenge::RVNGInputStre
       return false;
 #endif
     }
-    if (!xmlStrEqual(nsname, BAD_CAST("http://www.abisource.com/awml.dtd")))
+    if (!xmlStrEqual(nsname, call_BAD_CAST_OnConst("http://www.abisource.com/awml.dtd")))
     {
       xmlFreeTextReader(reader);
       return false;
