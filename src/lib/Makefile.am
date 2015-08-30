@@ -26,6 +26,7 @@ generated_files = \
 	$(top_builddir)/src/lib/tokens.h \
 	$(top_builddir)/src/lib/tokenhash.h
 
+libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_CPPFLAGS = -DBOOST_ERROR_CODE_HEADER_ONLY -DBOOST_SYSTEM_NO_DEPRECATED
 libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_LIBADD  = $(REVENGE_LIBS) $(LIBXML_LIBS) $(ZLIB_LIBS) @LIBABW_WIN32_RESOURCE@
 libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_DEPENDENCIES = @LIBABW_WIN32_RESOURCE@
 libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_LDFLAGS = $(version_info) -export-dynamic $(no_undefined)
