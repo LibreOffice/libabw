@@ -29,9 +29,7 @@ AM_CXXFLAGS = -I$(top_srcdir)/inc \
 	-DBOOST_ERROR_CODE_HEADER_ONLY \
 	-DBOOST_SYSTEM_NO_DEPRECATED
 
-generated_files = \
-	$(top_builddir)/src/lib/tokens.h \
-	$(top_builddir)/src/lib/tokenhash.h
+BUILT_SOURCES = tokens.h tokenhash.h
 
 libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_LIBADD  = $(REVENGE_LIBS) $(LIBXML_LIBS) $(ZLIB_LIBS) @LIBABW_WIN32_RESOURCE@
 libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_DEPENDENCIES = @LIBABW_WIN32_RESOURCE@
@@ -56,22 +54,17 @@ libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_SOURCES = \
 	ABWXMLHelper.h \
 	ABWXMLTokenMap.h \
 	ABWZlibStream.h \
-	libabw_internal.h \
-	\
-	$(generated_files)
+	libabw_internal.h
 
-ABWXMLTokenMap.lo : $(generated_files)
-ABWParser.lo : $(generated_files)
+tokens.h : tokens.gperf
 
-$(top_builddir)/src/lib/tokens.h : $(top_builddir)/src/lib/tokens.gperf
+tokenhash.h : tokens.gperf
+	$(GPERF) --compare-strncmp -C -m 20 tokens.gperf \
+		| $(SED) -e 's/(char\*)0/(char\*)0, 0/g' -e 's/register //g' > tokenhash.h
 
-$(top_builddir)/src/lib/tokenhash.h : $(top_builddir)/src/lib/tokens.gperf
-	$(GPERF) --compare-strncmp -C -m 20 $(top_builddir)/src/lib/tokens.gperf \
-		| $(SED) -e 's/(char\*)0/(char\*)0, 0/g' -e 's/register //g' > $(top_builddir)/src/lib/tokenhash.h
-
-$(top_builddir)/src/lib/tokens.gperf : $(top_srcdir)/src/lib/tokens.txt gentoken.pl
-	perl $(top_srcdir)/src/lib/gentoken.pl $(top_srcdir)/src/lib/tokens.txt \
-		$(top_builddir)/src/lib/tokens.h $(top_builddir)/src/lib/tokens.gperf
+tokens.gperf : $(top_srcdir)/src/lib/tokens.txt $(top_srcdir)/src/lib/gentoken.pl
+	$(PERL) $(top_srcdir)/src/lib/gentoken.pl $(top_srcdir)/src/lib/tokens.txt \
+		tokens.h tokens.gperf
 
 if OS_WIN32
 
@@ -80,14 +73,13 @@ if OS_WIN32
 	WINDRES=@WINDRES@ $(top_srcdir)/build/win32/lt-compile-resource libabw.rc @LIBABW_WIN32_RESOURCE@
 endif
 
-distclean-local :
-	rm -f $(generated_files) $(top_builddir)/src/lib/*.gperf
+MOSTLYCLEANFILES = \
+	$(BUILT_SOURCES) \
+	tokens.gperf
 
 EXTRA_DIST = \
+	$(BUILT_SOURCES) \
 	tokens.txt \
-    gentoken.pl \
+	gentoken.pl \
+	libabw.rc \
 	libabw.rc.in
-
-# These may be in the builddir too
-BUILD_EXTRA_DIST = \
-	libabw.rc
