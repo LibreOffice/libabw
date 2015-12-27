@@ -17,6 +17,9 @@
 #include "config.h"
 #endif
 
+#ifndef PACKAGE
+#define PACKAGE "libabw"
+#endif
 #ifndef VERSION
 #define VERSION "UNKNOWN VERSION"
 #endif
@@ -26,12 +29,16 @@ namespace
 
 int printUsage()
 {
-  printf("Usage: abw2raw [OPTION] <AbiWord Document>\n");
+  printf("`abw2raw' is used to test " PACKAGE ".\n");
+  printf("\n");
+  printf("Usage: abw2raw [OPTION] INPUT\n");
   printf("\n");
   printf("Options:\n");
-  printf("--callgraph           Display the call graph nesting level\n");
-  printf("--help                Shows this help message\n");
-  printf("--version             Output abw2raw version \n");
+  printf("\t--callgraph           display the call graph nesting level\n");
+  printf("\t--help                show this help message\n");
+  printf("\t--version             show version information\n");
+  printf("\n");
+  printf("Report bugs to <https://bugs.documentfoundation.org/>.\n");
   return -1;
 }
 

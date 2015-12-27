@@ -27,12 +27,16 @@ namespace
 
 int printUsage()
 {
-  printf("Usage: abw2text [OPTION] <AbiWord Document>\n");
+  printf("`abw2text' converts AbiWord documents to plain text.\n");
+  printf("\n");
+  printf("Usage: abw2text [OPTION] INPUT\n");
   printf("\n");
   printf("Options:\n");
-  printf("--info                Display document metadata instead of the text\n");
-  printf("--help                Shows this help message\n");
-  printf("--version             Output abw2text version\n");
+  printf("\t--info                display document metadata instead of the text\n");
+  printf("\t--help                show this help message\n");
+  printf("\t--version             show version information\n");
+  printf("\n");
+  printf("Report bugs to <https://bugs.documentfoundation.org/>.\n");
   return -1;
 }
 

@@ -26,11 +26,15 @@ namespace
 
 int printUsage()
 {
-  printf("Usage: abw2html [OPTION] <AbiWord Document>\n");
+  printf("`abw2html' converts AbiWord documents to HTML.\n");
+  printf("\n");
+  printf("Usage: abw2html [OPTION] INPUT\n");
   printf("\n");
   printf("Options:\n");
-  printf("--help                Shows this help message\n");
-  printf("--version             Output abw2html version \n");
+  printf("\t--help                show this help message\n");
+  printf("\t--version             show version information\n");
+  printf("\n");
+  printf("Report bugs to <https://bugs.documentfoundation.org/>.\n");
   return -1;
 }
 
