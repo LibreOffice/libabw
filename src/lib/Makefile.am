@@ -15,10 +15,6 @@ version_info = -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
 endif
 
 lib_LTLIBRARIES = libabw-@ABW_MAJOR_VERSION@.@ABW_MINOR_VERSION@.la $(target_libabw_stream)
-libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_includedir = $(includedir)/libabw-@ABW_MAJOR_VERSION@.@ABW_MINOR_VERSION@/libabw
-libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_include_HEADERS = \
-	$(top_srcdir)/inc/libabw/libabw.h \
-	$(top_srcdir)/inc/libabw/AbiDocument.h
 
 AM_CXXFLAGS = -I$(top_srcdir)/inc \
 	$(REVENGE_CFLAGS) \
