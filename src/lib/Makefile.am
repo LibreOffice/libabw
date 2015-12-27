@@ -14,7 +14,7 @@ else
 version_info = -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
 endif
 
-lib_LTLIBRARIES = libabw-@ABW_MAJOR_VERSION@.@ABW_MINOR_VERSION@.la $(target_libabw_stream)
+lib_LTLIBRARIES = libabw-@ABW_MAJOR_VERSION@.@ABW_MINOR_VERSION@.la
 
 AM_CXXFLAGS = -I$(top_srcdir)/inc \
 	$(REVENGE_CFLAGS) \
