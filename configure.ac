@@ -277,7 +277,19 @@ AC_ARG_ENABLE([tools],
 	[enable_tools="$enableval"],
 	[enable_tools=yes]
 )
-AS_IF([test "x$enable_tools" = "xyes"], [
+AM_CONDITIONAL(BUILD_TOOLS, [test "x$enable_tools" = "xyes"])
+
+# =======
+# Fuzzers
+# =======
+AC_ARG_ENABLE([fuzzers],
+	[AS_HELP_STRING([--enable-fuzzers], [Build fuzzer(s)])],
+	[enable_fuzzers="$enableval"],
+	[enable_fuzzers=no]
+)
+AM_CONDITIONAL(BUILD_FUZZERS, [test "x$enable_fuzzers" = "xyes"])
+
+AS_IF([test "x$enable_tools" = "xyes" -o "x$enable_fuzzers" = "xyes"], [
 	PKG_CHECK_MODULES([REVENGE_GENERATORS],[
 		librevenge-generators-0.0
 	])
@@ -289,7 +301,6 @@ AC_SUBST([REVENGE_GENERATORS_CFLAGS])
 AC_SUBST([REVENGE_GENERATORS_LIBS])
 AC_SUBST([REVENGE_STREAM_CFLAGS])
 AC_SUBST([REVENGE_STREAM_LIBS])
-AM_CONDITIONAL(BUILD_TOOLS, [test "x$enable_tools" = "xyes"])
 
 # =====================
 # Prepare all .in files
@@ -304,6 +315,7 @@ src/conv/raw/Makefile
 src/conv/raw/abw2raw.rc
 src/conv/text/Makefile
 src/conv/text/abw2text.rc
+src/fuzz/Makefile
 src/lib/Makefile
 src/lib/libabw.rc
 inc/Makefile
@@ -324,6 +336,7 @@ AC_MSG_NOTICE([
 Build configuration:
 	debug:           ${enable_debug}
 	docs:            ${build_docs}
+	fuzzers:         ${enable_fuzzers}
 	tools:           ${enable_tools}
 	werror:          ${enable_werror}
 ==============================================================================
