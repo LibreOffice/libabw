@@ -917,17 +917,17 @@ libabw::ABWOutputElements::~ABWOutputElements()
   m_elements = 0;
   std::list<ABWOutputElement *>::iterator iterVec;
   for (iterVec = m_bodyElements.begin(); iterVec != m_bodyElements.end(); ++iterVec)
-    delete(*iterVec);
+    delete (*iterVec);
   std::map<int, std::list<ABWOutputElement *> >::iterator iterMap;
   for (iterMap = m_headerElements.begin(); iterMap != m_headerElements.end(); ++iterMap)
   {
     for (iterVec = iterMap->second.begin(); iterVec != iterMap->second.end(); ++iterVec)
-      delete(*iterVec);
+      delete (*iterVec);
   }
   for (iterMap = m_footerElements.begin(); iterMap != m_footerElements.end(); ++iterMap)
   {
     for (iterVec = iterMap->second.begin(); iterVec != iterMap->second.end(); ++iterVec)
-      delete(*iterVec);
+      delete (*iterVec);
   }
 }
 
