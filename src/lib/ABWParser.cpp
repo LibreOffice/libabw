@@ -185,19 +185,18 @@ bool libabw::ABWParser::processXmlDocument(librevenge::RVNGInputStream *input)
   if (!input)
     return false;
 
-  xmlTextReaderPtr reader = xmlReaderForStream(input);
+  boost::shared_ptr<xmlTextReader> reader(xmlReaderForStream(input), xmlFreeTextReader);
   if (!reader)
     return false;
-  int ret = xmlTextReaderRead(reader);
+  int ret = xmlTextReaderRead(reader.get());
   while (1 == ret)
   {
-    int tokenType = xmlTextReaderNodeType(reader);
+    int tokenType = xmlTextReaderNodeType(reader.get());
     if (XML_READER_TYPE_SIGNIFICANT_WHITESPACE != tokenType)
-      processXmlNode(reader);
+      processXmlNode(reader.get());
 
-    ret = xmlTextReaderRead(reader);
+    ret = xmlTextReaderRead(reader.get());
   }
-  xmlFreeTextReader(reader);
 
   if (m_collector)
     m_collector->endDocument();
