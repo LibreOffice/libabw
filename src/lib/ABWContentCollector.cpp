@@ -796,8 +796,8 @@ void libabw::ABWContentCollector::collectHeaderFooter(const char *id, const char
 
 void libabw::ABWContentCollector::collectPageSize(const char *width, const char *height, const char *units, const char * /* pageScale */)
 {
-  std::string widthStr(width);
-  std::string heightStr(height);
+  std::string widthStr(width ? width : "");
+  std::string heightStr(height ? height : "");
   if (units)
   {
     widthStr.append(units);
