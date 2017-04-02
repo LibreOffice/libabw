@@ -21,6 +21,7 @@
 #include "ABWStylesCollector.h"
 #include "libabw_internal.h"
 #include "ABWXMLHelper.h"
+#include "ABWXMLString.h"
 #include "ABWXMLTokenMap.h"
 
 
@@ -378,21 +379,16 @@ int libabw::ABWParser::getElementToken(xmlTextReaderPtr reader)
 
 void libabw::ABWParser::readAbiword(xmlTextReaderPtr reader)
 {
-  xmlChar *const props = xmlTextReaderGetAttribute(reader, BAD_CAST("props"));
+  const ABWXMLString props = xmlTextReaderGetAttribute(reader, BAD_CAST("props"));
   if (m_collector)
-    m_collector->collectDocumentProperties(reinterpret_cast<const char *>(props));
-  if (props)
-    xmlFree(props);
+    m_collector->collectDocumentProperties(static_cast<const char *>(props));
 }
 
 void libabw::ABWParser::readM(xmlTextReaderPtr reader)
 {
-  xmlChar *const key = xmlTextReaderGetAttribute(reader, BAD_CAST("key"));
+  const ABWXMLString key = xmlTextReaderGetAttribute(reader, BAD_CAST("key"));
   if (key)
-  {
-    m_state->m_currentMetadataKey = reinterpret_cast<const char *>(key);
-    xmlFree(key);
-  }
+    m_state->m_currentMetadataKey = static_cast<const char *>(key);
 }
 
 void libabw::ABWParser::readHistory(xmlTextReaderPtr reader)
@@ -467,37 +463,29 @@ void libabw::ABWParser::readIgnoredWords(xmlTextReaderPtr reader)
 
 void libabw::ABWParser::readPageSize(xmlTextReaderPtr reader)
 {
-  xmlChar *width = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("width"));
-  xmlChar *height = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("height"));
-  xmlChar *units = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("units"));
-  xmlChar *pageScale = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("page-scale"));
+  ABWXMLString width = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("width"));
+  ABWXMLString height = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("height"));
+  ABWXMLString units = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("units"));
+  ABWXMLString pageScale = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("page-scale"));
   if (m_collector)
     m_collector->collectPageSize((const char *)width, (const char *)height, (const char *)units, (const char *)pageScale);
-  if (width)
-    xmlFree(width);
-  if (height)
-    xmlFree(height);
-  if (units)
-    xmlFree(units);
-  if (pageScale)
-    xmlFree(pageScale);
 }
 
 void libabw::ABWParser::readSection(xmlTextReaderPtr reader)
 {
-  xmlChar *id = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("id"));
-  xmlChar *type = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("type"));
-  xmlChar *footer = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("footer"));
-  xmlChar *footerLeft = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("footer-even"));
-  xmlChar *footerFirst = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("footer-first"));
-  xmlChar *footerLast = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("footer-last"));
-  xmlChar *header = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("header"));
-  xmlChar *headerLeft = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("header-even"));
-  xmlChar *headerFirst = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("header-first"));
-  xmlChar *headerLast = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("header-last"));
-  xmlChar *props = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("props"));
+  ABWXMLString id = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("id"));
+  ABWXMLString type = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("type"));
+  ABWXMLString footer = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("footer"));
+  ABWXMLString footerLeft = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("footer-even"));
+  ABWXMLString footerFirst = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("footer-first"));
+  ABWXMLString footerLast = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("footer-last"));
+  ABWXMLString header = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("header"));
+  ABWXMLString headerLeft = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("header-even"));
+  ABWXMLString headerFirst = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("header-first"));
+  ABWXMLString headerLast = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("header-last"));
+  ABWXMLString props = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("props"));
 
-  if (!type || (xmlStrncmp(type, call_BAD_CAST_OnConst("header"), 6) && xmlStrncmp(type, call_BAD_CAST_OnConst("footer"), 6)))
+  if (!type || (xmlStrncmp(type.get(), call_BAD_CAST_OnConst("header"), 6) && xmlStrncmp(type.get(), call_BAD_CAST_OnConst("footer"), 6)))
   {
     if (m_collector)
       m_collector->collectSectionProperties((const char *)footer, (const char *)footerLeft,
@@ -511,42 +499,18 @@ void libabw::ABWParser::readSection(xmlTextReaderPtr reader)
     if (m_collector)
       m_collector->collectHeaderFooter((const char *)id, (const char *)type);
   }
-
-  if (id)
-    xmlFree(id);
-  if (type)
-    xmlFree(type);
-  if (footer)
-    xmlFree(footer);
-  if (footerLeft)
-    xmlFree(footerLeft);
-  if (footerFirst)
-    xmlFree(footerFirst);
-  if (footerLast)
-    xmlFree(footerLast);
-  if (header)
-    xmlFree(header);
-  if (headerLeft)
-    xmlFree(headerLeft);
-  if (headerFirst)
-    xmlFree(headerFirst);
-  if (headerLast)
-    xmlFree(headerLast);
-  if (props)
-    xmlFree(props);
 }
 
 void libabw::ABWParser::readD(xmlTextReaderPtr reader)
 {
-  xmlChar *name = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("name"));
-  xmlChar *mimeType = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("mime-type"));
+  ABWXMLString name = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("name"));
+  ABWXMLString mimeType = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("mime-type"));
 
-  xmlChar *tmpBase64 = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("base64"));
+  ABWXMLString tmpBase64 = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("base64"));
   bool base64(false);
   if (tmpBase64)
   {
     findBool((const char *)tmpBase64, base64);
-    xmlFree(tmpBase64);
   }
 
   int ret = 1;
@@ -584,19 +548,15 @@ void libabw::ABWParser::readD(xmlTextReaderPtr reader)
     }
   }
   while ((XML_D != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
-  if (name)
-    xmlFree(name);
-  if (mimeType)
-    xmlFree(mimeType);
 }
 
 void libabw::ABWParser::readS(xmlTextReaderPtr reader)
 {
-  xmlChar *type = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("type"));
-  xmlChar *name = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("name"));
-  xmlChar *basedon = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("basedon"));
-  xmlChar *followedby = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("followedby"));
-  xmlChar *props = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("props"));
+  ABWXMLString type = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("type"));
+  ABWXMLString name = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("name"));
+  ABWXMLString basedon = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("basedon"));
+  ABWXMLString followedby = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("followedby"));
+  ABWXMLString props = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("props"));
   if (type)
   {
     if (m_collector)
@@ -611,135 +571,86 @@ void libabw::ABWParser::readS(xmlTextReaderPtr reader)
         break;
       }
     }
-    xmlFree(type);
   }
-  if (name)
-    xmlFree(name);
-  if (basedon)
-    xmlFree(basedon);
-  if (followedby)
-    xmlFree(followedby);
-  if (props)
-    xmlFree(props);
 }
 
 void libabw::ABWParser::readA(xmlTextReaderPtr reader)
 {
-  xmlChar *href = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("xlink:href"));
+  ABWXMLString href = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("xlink:href"));
   if (m_collector)
     m_collector->openLink((const char *)href);
-  if (href)
-    xmlFree(href);
 }
 
 void libabw::ABWParser::readP(xmlTextReaderPtr reader)
 {
-  xmlChar *level = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("level"));
-  xmlChar *listid = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("listid"));
-  xmlChar *parentid = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("listid"));
-  xmlChar *style = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("style"));
-  xmlChar *props = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("props"));
+  ABWXMLString level = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("level"));
+  ABWXMLString listid = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("listid"));
+  ABWXMLString parentid = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("listid"));
+  ABWXMLString style = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("style"));
+  ABWXMLString props = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("props"));
   if (m_collector)
     m_collector->collectParagraphProperties((const char *)level, (const char *)listid, (const char *)parentid,
                                             (const char *)style, (const char *)props);
-  if (level)
-    xmlFree(level);
-  if (listid)
-    xmlFree(listid);
-  if (parentid)
-    xmlFree(parentid);
-  if (style)
-    xmlFree(style);
-  if (props)
-    xmlFree(props);
 }
 
 void libabw::ABWParser::readC(xmlTextReaderPtr reader)
 {
-  xmlChar *style = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("style"));
-  xmlChar *props = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("props"));
+  ABWXMLString style = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("style"));
+  ABWXMLString props = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("props"));
   if (m_collector)
     m_collector->collectCharacterProperties((const char *)style, (const char *)props);
-  if (style)
-    xmlFree(style);
-  if (props)
-    xmlFree(props);
 
 }
 
 void libabw::ABWParser::readEndnote(xmlTextReaderPtr reader)
 {
-  xmlChar *id = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("endnote-id"));
+  ABWXMLString id = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("endnote-id"));
   if (m_collector)
     m_collector->openEndnote((const char *)id);
-  if (id)
-    xmlFree(id);
 }
 
 void libabw::ABWParser::readFoot(xmlTextReaderPtr reader)
 {
-  xmlChar *id = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("footnote-id"));
+  ABWXMLString id = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("footnote-id"));
   if (m_collector)
     m_collector->openFoot((const char *)id);
-  if (id)
-    xmlFree(id);
 }
 
 void libabw::ABWParser::readTable(xmlTextReaderPtr reader)
 {
-  xmlChar *props = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("props"));
+  ABWXMLString props = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("props"));
   if (m_collector)
     m_collector->openTable((const char *)props);
-  if (props)
-    xmlFree(props);
 }
 
 void libabw::ABWParser::readCell(xmlTextReaderPtr reader)
 {
-  xmlChar *props = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("props"));
+  ABWXMLString props = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("props"));
   if (m_collector)
     m_collector->openCell((const char *)props);
-  if (props)
-    xmlFree(props);
 }
 
 void libabw::ABWParser::readImage(xmlTextReaderPtr reader)
 {
-  xmlChar *props = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("props"));
-  xmlChar *dataid = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("dataid"));
+  ABWXMLString props = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("props"));
+  ABWXMLString dataid = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("dataid"));
   if (m_collector)
     m_collector->insertImage((const char *)dataid, (const char *)props);
-  if (props)
-    xmlFree(props);
-  if (dataid)
-    xmlFree(dataid);
 }
 
 void libabw::ABWParser::readL(xmlTextReaderPtr reader)
 {
-  xmlChar *id = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("id"));
-  xmlChar *listDecimal = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("list-decimal"));
+  ABWXMLString id = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("id"));
+  ABWXMLString listDecimal = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("list-decimal"));
   if (!listDecimal)
     listDecimal = xmlCharStrdup("NULL");
-  xmlChar *listDelim = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("list-delim"));
-  xmlChar *parentid = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("parentid"));
-  xmlChar *startValue = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("start-value"));
-  xmlChar *type = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("type"));
+  ABWXMLString listDelim = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("list-delim"));
+  ABWXMLString parentid = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("parentid"));
+  ABWXMLString startValue = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("start-value"));
+  ABWXMLString type = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("type"));
   if (m_collector)
     m_collector->collectList((const char *)id, (const char *)listDecimal, (const char *)listDelim,
                              (const char *)parentid, (const char *)startValue, (const char *)type);
-  if (id)
-    xmlFree(id);
-  if (listDecimal)
-    xmlFree(listDecimal);
-  if (listDelim)
-    xmlFree(listDelim);
-  if (parentid)
-    xmlFree(parentid);
-  if (startValue)
-    xmlFree(startValue);
-  if (type)
-    xmlFree(type);
 }
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */
