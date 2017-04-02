@@ -7,6 +7,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <boost/shared_ptr.hpp>
+
 #include <libabw/libabw.h>
 #include "ABWXMLHelper.h"
 #include "ABWParser.h"
@@ -43,69 +45,48 @@ Analyzes the content of an input stream to see if it can be parsed
 \return A confidence value which represents the likelihood that the content from
 the input stream can be parsed
 */
-ABWAPI bool libabw::AbiDocument::isFileFormatSupported(librevenge::RVNGInputStream *input)
+ABWAPI bool libabw::AbiDocument::isFileFormatSupported(librevenge::RVNGInputStream *input) try
 {
   ABW_DEBUG_MSG(("AbiDocument::isFileFormatSupported\n"));
   if (!input)
     return false;
-  xmlTextReaderPtr reader = 0;
-  try
-  {
-    input->seek(0, librevenge::RVNG_SEEK_SET);
-    libabw::ABWZlibStream stream(input);
-    stream.seek(0, librevenge::RVNG_SEEK_SET);
-    reader = libabw::xmlReaderForStream(&stream);
-    if (!reader)
-      return false;
-    int ret = xmlTextReaderRead(reader);
-    while (ret == 1 && 1 != xmlTextReaderNodeType(reader))
-      ret = xmlTextReaderRead(reader);
-    if (ret != 1)
-    {
-      xmlFreeTextReader(reader);
-      return false;
-    }
-    const xmlChar *name = xmlTextReaderConstName(reader);
-    if (!name)
-    {
-      xmlFreeTextReader(reader);
-      return false;
-    }
-    if (!xmlStrEqual(name, call_BAD_CAST_OnConst("abiword")))
-    {
-      if (!xmlStrEqual(name, call_BAD_CAST_OnConst("awml")))
-      {
-        xmlFreeTextReader(reader);
-        return false;
-      }
-    }
-
-    // Checking the namespace of AbiWord documents.
-    const xmlChar *nsname = xmlTextReaderConstNamespaceUri(reader);
-    if (!nsname)
-    {
-      xmlFreeTextReader(reader);
-#if 1
-      return true; // Have seen some abiword files without NS declaration
-#else
-      return false;
-#endif
-    }
-    if (!xmlStrEqual(nsname, call_BAD_CAST_OnConst("http://www.abisource.com/awml.dtd")))
-    {
-      xmlFreeTextReader(reader);
-      return false;
-    }
-
-    xmlFreeTextReader(reader);
-    return true;
-  }
-  catch (...)
-  {
-    if (reader)
-      xmlFreeTextReader(reader);
+  boost::shared_ptr<xmlTextReader> reader;
+  input->seek(0, librevenge::RVNG_SEEK_SET);
+  libabw::ABWZlibStream stream(input);
+  stream.seek(0, librevenge::RVNG_SEEK_SET);
+  reader.reset(libabw::xmlReaderForStream(&stream), xmlFreeTextReader);
+  if (!reader)
     return false;
+  int ret = xmlTextReaderRead(reader.get());
+  while (ret == 1 && 1 != xmlTextReaderNodeType(reader.get()))
+    ret = xmlTextReaderRead(reader.get());
+  if (ret != 1)
+    return false;
+  const xmlChar *name = xmlTextReaderConstName(reader.get());
+  if (!name)
+    return false;
+  if (!xmlStrEqual(name, call_BAD_CAST_OnConst("abiword")))
+  {
+    if (!xmlStrEqual(name, call_BAD_CAST_OnConst("awml")))
+      return false;
   }
+
+  // Checking the namespace of AbiWord documents.
+  const xmlChar *nsname = xmlTextReaderConstNamespaceUri(reader.get());
+  if (!nsname)
+#if 1
+    return true; // Have seen some abiword files without NS declaration
+#else
+    return false;
+#endif
+  if (!xmlStrEqual(nsname, call_BAD_CAST_OnConst("http://www.abisource.com/awml.dtd")))
+    return false;
+
+  return true;
+}
+catch (...)
+{
+  return false;
 }
 
 /**
