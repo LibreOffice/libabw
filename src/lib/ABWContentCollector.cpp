@@ -11,6 +11,7 @@
 #include <locale>
 #include <sstream>
 
+#include <boost/make_shared.hpp>
 #include <boost/spirit/include/classic.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
@@ -468,7 +469,6 @@ libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *
 
 libabw::ABWContentCollector::~ABWContentCollector()
 {
-  DELETEP(m_ps);
   for (std::vector<ABWListElement *>::iterator iter = m_dummyListElements.begin();
        iter != m_dummyListElements.end(); ++iter)
     DELETEP(*iter);
@@ -1595,7 +1595,7 @@ void libabw::ABWContentCollector::openFoot(const char *id)
   m_outputElements.addOpenFootnote(propList);
 
   m_parsingStates.push(m_ps);
-  m_ps = new ABWContentParsingState();
+  m_ps = boost::make_shared<ABWContentParsingState>();
 
   m_ps->m_isNote = true;
 }
@@ -1611,7 +1611,6 @@ void libabw::ABWContentCollector::closeFoot()
 
   if (!m_parsingStates.empty())
   {
-    delete m_ps;
     m_ps = m_parsingStates.top();
     m_parsingStates.pop();
   }
@@ -1629,7 +1628,7 @@ void libabw::ABWContentCollector::openEndnote(const char *id)
   m_outputElements.addOpenEndnote(propList);
 
   m_parsingStates.push(m_ps);
-  m_ps = new ABWContentParsingState();
+  m_ps = boost::make_shared<ABWContentParsingState>();
 
   m_ps->m_isNote = true;
 }
@@ -1645,7 +1644,6 @@ void libabw::ABWContentCollector::closeEndnote()
 
   if (!m_parsingStates.empty())
   {
-    delete m_ps;
     m_ps = m_parsingStates.top();
     m_parsingStates.pop();
   }

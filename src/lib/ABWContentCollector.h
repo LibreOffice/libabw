@@ -13,6 +13,9 @@
 #include <vector>
 #include <stack>
 #include <set>
+
+#include <boost/shared_ptr.hpp>
+
 #include <librevenge/librevenge.h>
 #include "ABWOutputElements.h"
 #include "ABWCollector.h"
@@ -205,9 +208,9 @@ private:
 
   void _fillParagraphProperties(librevenge::RVNGPropertyList &propList, bool isListElement);
 
-  ABWContentParsingState *m_ps;
+  boost::shared_ptr<ABWContentParsingState> m_ps;
   librevenge::RVNGTextInterface *m_iface;
-  std::stack<ABWContentParsingState *> m_parsingStates;
+  std::stack<boost::shared_ptr<ABWContentParsingState> > m_parsingStates;
   std::set<std::string> m_dontLoop;
   std::map<std::string, ABWStyle> m_textStyles;
 
