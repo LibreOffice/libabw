@@ -159,10 +159,12 @@ void libabw::ABWStylesCollector::openTable(const char *)
 
 void libabw::ABWStylesCollector::closeTable()
 {
-  m_tableSizes[m_ps->m_tableStates.top().m_currentTableId]
-    = m_ps->m_tableStates.top().m_currentTableWidth;
   if (!m_ps->m_tableStates.empty())
+  {
+    m_tableSizes[m_ps->m_tableStates.top().m_currentTableId]
+      = m_ps->m_tableStates.top().m_currentTableWidth;
     m_ps->m_tableStates.pop();
+  }
 }
 
 void libabw::ABWStylesCollector::openCell(const char *props)
