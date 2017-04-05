@@ -58,7 +58,7 @@ ABWAPI bool libabw::AbiDocument::isFileFormatSupported(librevenge::RVNGInputStre
   if (!reader)
     return false;
   int ret = xmlTextReaderRead(reader.get());
-  while (ret == 1 && 1 != xmlTextReaderNodeType(reader.get()))
+  while (ret == 1 && XML_READER_TYPE_ELEMENT != xmlTextReaderNodeType(reader.get()))
     ret = xmlTextReaderRead(reader.get());
   if (ret != 1)
     return false;
