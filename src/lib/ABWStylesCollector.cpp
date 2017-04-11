@@ -176,8 +176,8 @@ void libabw::ABWStylesCollector::openCell(const char *props)
     int currentRow(0);
     if (!findInt(_findCellProperty("top-attach"), currentRow))
       currentRow = m_ps->m_tableStates.top().m_currentTableRow + 1;
-    while (m_ps->m_tableStates.top().m_currentTableRow < currentRow)
-      m_ps->m_tableStates.top().m_currentTableRow++;
+    if (m_ps->m_tableStates.top().m_currentTableRow < currentRow)
+      m_ps->m_tableStates.top().m_currentTableRow = currentRow;
 
     if (0 == m_ps->m_tableStates.top().m_currentTableRow)
     {
