@@ -10,7 +10,7 @@
 #ifndef __ABWPARSER_H__
 #define __ABWPARSER_H__
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 #include <librevenge/librevenge.h>
 #include "ABWXMLHelper.h"
@@ -65,7 +65,7 @@ private:
   librevenge::RVNGInputStream *m_input;
   librevenge::RVNGTextInterface *m_iface;
   ABWCollector *m_collector;
-  boost::scoped_ptr<ABWParserState> m_state;
+  std::unique_ptr<ABWParserState> m_state;
 };
 
 } // namespace libabw
