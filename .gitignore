@@ -14,8 +14,6 @@ configure
 depcomp
 install-sh
 libtool
-libwpd.spec
-libwpd-zip
 ltmain.sh
 missing
 mkinstalldirs
