@@ -95,10 +95,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWCloseLinkElement();
-  }
 };
 
 class ABWCloseListElementElement : public ABWOutputElement
@@ -109,10 +105,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWCloseListElementElement();
-  }
 };
 
 class ABWCloseOrderedListLevelElement : public ABWOutputElement
@@ -123,10 +115,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWCloseOrderedListLevelElement();
-  }
 };
 
 class ABWClosePageSpanElement : public ABWOutputElement
@@ -137,10 +125,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWClosePageSpanElement();
-  }
 };
 
 class ABWCloseParagraphElement : public ABWOutputElement
@@ -151,10 +135,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWCloseParagraphElement();
-  }
 };
 
 class ABWCloseSectionElement : public ABWOutputElement
@@ -165,10 +145,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWCloseSectionElement();
-  }
 };
 
 class ABWCloseSpanElement : public ABWOutputElement
@@ -179,10 +155,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWCloseSpanElement();
-  }
 };
 
 class ABWCloseTableElement : public ABWOutputElement
@@ -193,10 +165,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWCloseTableElement();
-  }
 };
 
 class ABWCloseTableCellElement : public ABWOutputElement
@@ -207,10 +175,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWCloseTableCellElement();
-  }
 };
 
 class ABWCloseTableRowElement : public ABWOutputElement
@@ -221,10 +185,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWCloseTableRowElement();
-  }
 };
 
 class ABWCloseUnorderedListLevelElement : public ABWOutputElement
@@ -235,10 +195,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWCloseUnorderedListLevelElement();
-  }
 };
 
 class ABWInsertBinaryObjectElement : public ABWOutputElement
@@ -250,10 +206,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWInsertBinaryObjectElement(m_propList);
-  }
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -267,10 +219,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWInsertCoveredTableCellElement(m_propList);
-  }
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -283,10 +231,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWInsertLineBreakElement();
-  }
 };
 
 class ABWInsertSpaceElement : public ABWOutputElement
@@ -297,10 +241,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWInsertSpaceElement();
-  }
 };
 
 class ABWInsertTabElement : public ABWOutputElement
@@ -311,10 +251,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWInsertTabElement();
-  }
 };
 
 class ABWInsertTextElement : public ABWOutputElement
@@ -326,10 +262,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWInsertTextElement(m_text);
-  }
 private:
   librevenge::RVNGString m_text;
 };
@@ -343,10 +275,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWOpenEndnoteElement(m_propList);
-  }
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -360,10 +288,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWOpenFooterElement(m_propList);
-  }
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -377,10 +301,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWOpenFootnoteElement(m_propList);
-  }
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -394,10 +314,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWOpenFrameElement(m_propList);
-  }
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -411,10 +327,6 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const;
-  ABWOutputElement *clone()
-  {
-    return new ABWOpenHeaderElement(m_propList);
-  }
 private:
   librevenge::RVNGPropertyList m_propList;
 };
