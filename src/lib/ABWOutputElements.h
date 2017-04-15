@@ -12,6 +12,8 @@
 
 #include <list>
 #include <map>
+#include <memory>
+
 #include <librevenge/librevenge.h>
 
 namespace libabw
@@ -22,6 +24,9 @@ class ABWOutputElement;
 class ABWOutputElements
 {
 public:
+  typedef std::list<std::unique_ptr<ABWOutputElement>> OutputElements_t;
+  typedef std::map<int, OutputElements_t> OutputElementsMap_t;
+
   ABWOutputElements();
   virtual ~ABWOutputElements();
   void append(const ABWOutputElements &elements);
@@ -74,10 +79,10 @@ public:
 private:
   ABWOutputElements(const ABWOutputElements &);
   ABWOutputElements &operator=(const ABWOutputElements &);
-  std::list<ABWOutputElement *> m_bodyElements;
-  std::map<int, std::list<ABWOutputElement *> > m_headerElements;
-  std::map<int, std::list<ABWOutputElement *> > m_footerElements;
-  std::list<ABWOutputElement *> *m_elements;
+  OutputElements_t m_bodyElements;
+  std::map<int, OutputElements_t > m_headerElements;
+  std::map<int, OutputElements_t > m_footerElements;
+  OutputElements_t *m_elements;
 };
 
 
