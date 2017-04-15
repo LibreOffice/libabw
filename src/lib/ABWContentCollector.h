@@ -10,11 +10,10 @@
 #ifndef __ABWCONTENTCOLLECTOR_H__
 #define __ABWCONTENTCOLLECTOR_H__
 
+#include <memory>
 #include <vector>
 #include <stack>
 #include <set>
-
-#include <boost/shared_ptr.hpp>
 
 #include <librevenge/librevenge.h>
 #include "ABWOutputElements.h"
@@ -208,9 +207,9 @@ private:
 
   void _fillParagraphProperties(librevenge::RVNGPropertyList &propList, bool isListElement);
 
-  boost::shared_ptr<ABWContentParsingState> m_ps;
+  std::shared_ptr<ABWContentParsingState> m_ps;
   librevenge::RVNGTextInterface *m_iface;
-  std::stack<boost::shared_ptr<ABWContentParsingState> > m_parsingStates;
+  std::stack<std::shared_ptr<ABWContentParsingState> > m_parsingStates;
   std::set<std::string> m_dontLoop;
   std::map<std::string, ABWStyle> m_textStyles;
 

@@ -10,7 +10,7 @@
 #ifndef __ABWXMLSTRING_H__
 #define __ABWXMLSTRING_H__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <libxml/xmlstring.h>
 
@@ -28,7 +28,7 @@ public:
   operator const char *() const;
 
 private:
-  boost::shared_ptr<xmlChar> m_xml;
+  std::shared_ptr<xmlChar> m_xml;
 };
 
 }

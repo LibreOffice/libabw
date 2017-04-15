@@ -185,7 +185,7 @@ bool libabw::ABWParser::processXmlDocument(librevenge::RVNGInputStream *input)
   if (!input)
     return false;
 
-  boost::shared_ptr<xmlTextReader> reader(xmlReaderForStream(input), xmlFreeTextReader);
+  std::shared_ptr<xmlTextReader> reader(xmlReaderForStream(input), xmlFreeTextReader);
   if (!reader)
     return false;
   int ret = xmlTextReaderRead(reader.get());

@@ -9,9 +9,9 @@
 
 #include <cassert>
 #include <locale>
+#include <memory>
 #include <sstream>
 
-#include <boost/make_shared.hpp>
 #include <boost/spirit/include/classic.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
@@ -1595,7 +1595,7 @@ void libabw::ABWContentCollector::openFoot(const char *id)
   m_outputElements.addOpenFootnote(propList);
 
   m_parsingStates.push(m_ps);
-  m_ps = boost::make_shared<ABWContentParsingState>();
+  m_ps = std::make_shared<ABWContentParsingState>();
 
   m_ps->m_isNote = true;
 }
@@ -1628,7 +1628,7 @@ void libabw::ABWContentCollector::openEndnote(const char *id)
   m_outputElements.addOpenEndnote(propList);
 
   m_parsingStates.push(m_ps);
-  m_ps = boost::make_shared<ABWContentParsingState>();
+  m_ps = std::make_shared<ABWContentParsingState>();
 
   m_ps->m_isNote = true;
 }
