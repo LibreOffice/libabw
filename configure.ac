@@ -34,6 +34,7 @@ LT_INIT([win32-dll disable-static pic-only])
 AC_CANONICAL_HOST
 
 AX_CXX_COMPILE_STDCXX_11
+AX_GCC_FUNC_ATTRIBUTE([format])
 
 # =================================
 # Libtool/Version Makefile settings
