@@ -116,33 +116,6 @@ static void separateSpacesAndInsertText(ABWOutputElements &outputElements, const
   separateTabsAndInsertText(outputElements, tmpText);
 }
 
-static void separateSpacesAndReturnsListOfArgs(std::string const &attrib, std::vector<std::string> &listArg)
-{
-  listArg.resize(0);
-  if (attrib.empty())
-    return;
-  std::string tmpArg("");
-  for (size_t i=0; i<attrib.length(); ++i)
-  {
-    char c=attrib[i];
-    if (c == ' ')
-    {
-      if (!tmpArg.empty())
-      {
-        listArg.push_back(tmpArg);
-        tmpArg.clear();
-      }
-      continue;
-    }
-    tmpArg.push_back(c);
-  }
-  if (!tmpArg.empty())
-  {
-    listArg.push_back(tmpArg);
-    tmpArg.clear();
-  }
-}
-
 void parseTableColumns(const std::string &str, librevenge::RVNGPropertyListVector &columns)
 {
   if (str.empty())
@@ -1298,7 +1271,7 @@ void libabw::ABWContentCollector::_openSpan()
 
     sValue = _findCharacterProperty("text-decoration");
     std::vector<std::string> listDecorations;
-    separateSpacesAndReturnsListOfArgs(sValue, listDecorations);
+    boost::split(listDecorations, sValue, boost::is_any_of(" "), boost::token_compress_on);
     for (size_t j=0; j<listDecorations.size(); ++j)
     {
       std::string const &decoration=listDecorations[j];
