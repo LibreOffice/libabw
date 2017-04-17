@@ -49,6 +49,7 @@ public:
   void addCloseUnorderedListLevel();
   void addInsertBinaryObject(const librevenge::RVNGPropertyList &propList);
   void addInsertCoveredTableCell(const librevenge::RVNGPropertyList &propList);
+  void addInsertField(const librevenge::RVNGPropertyList &propList);
   void addInsertLineBreak();
   void addInsertSpace();
   void addInsertTab();

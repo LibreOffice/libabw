@@ -330,6 +330,12 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
     if (XML_READER_TYPE_END_ELEMENT == tokenType || emptyToken > 0)
       m_collector->closeEndnote();
     break;
+  case XML_FIELD:
+    if (XML_READER_TYPE_ELEMENT == tokenType)
+      readField(reader);
+    if (XML_READER_TYPE_END_ELEMENT == tokenType || emptyToken > 0)
+      m_collector->closeField();
+    break;
   case XML_TABLE:
     if (XML_READER_TYPE_ELEMENT == tokenType)
       readTable(reader);
@@ -610,6 +616,16 @@ void libabw::ABWParser::readEndnote(xmlTextReaderPtr reader)
   ABWXMLString id = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("endnote-id"));
   if (m_collector)
     m_collector->openEndnote((const char *)id);
+}
+
+void libabw::ABWParser::readField(xmlTextReaderPtr reader)
+{
+  ABWXMLString type = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("type"));
+  //ABWXMLString style = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("style"));
+  //ABWXMLString props = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("props"));
+  ABWXMLString id = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("xid"));
+  if (m_collector)
+    m_collector->openField(type, id);
 }
 
 void libabw::ABWParser::readFoot(xmlTextReaderPtr reader)

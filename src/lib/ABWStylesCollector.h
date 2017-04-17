@@ -66,6 +66,8 @@ public:
   void closeFoot() {}
   void openEndnote(const char *) {}
   void closeEndnote() {}
+  void openField(const char *, const char *) {}
+  void closeField() {}
   void endSection() {}
   void startDocument() {}
   void endDocument() {}

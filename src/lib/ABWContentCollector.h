@@ -136,6 +136,8 @@ public:
   void closeFoot();
   void openEndnote(const char *id);
   void closeEndnote();
+  void openField(const char *type, const char *id);
+  void closeField();
   void endSection();
   void startDocument();
   void endDocument();
@@ -206,6 +208,7 @@ private:
   std::string _findMetadataEntry(const char *name);
 
   void _fillParagraphProperties(librevenge::RVNGPropertyList &propList, bool isListElement);
+  bool _convertFieldDTFormat(std::string const &dtFormat, librevenge::RVNGPropertyListVector &propVect);
 
   std::shared_ptr<ABWContentParsingState> m_ps;
   librevenge::RVNGTextInterface *m_iface;

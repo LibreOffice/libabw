@@ -210,6 +210,19 @@ private:
   librevenge::RVNGPropertyList m_propList;
 };
 
+class ABWInsertFieldElement : public ABWOutputElement
+{
+public:
+  ABWInsertFieldElement(const librevenge::RVNGPropertyList &propList) :
+    m_propList(propList) {}
+  ~ABWInsertFieldElement() {}
+  void write(librevenge::RVNGTextInterface *iface,
+             const OutputElementsMap_t *footers,
+             const OutputElementsMap_t *headers) const;
+private:
+  librevenge::RVNGPropertyList m_propList;
+};
+
 class ABWInsertCoveredTableCellElement : public ABWOutputElement
 {
 public:
@@ -632,6 +645,14 @@ void libabw::ABWInsertBinaryObjectElement::write(librevenge::RVNGTextInterface *
     iface->insertBinaryObject(m_propList);
 }
 
+void libabw::ABWInsertFieldElement::write(librevenge::RVNGTextInterface *iface,
+                                          const OutputElementsMap_t *,
+                                          const OutputElementsMap_t *) const
+{
+  if (iface)
+    iface->insertField(m_propList);
+}
+
 void libabw::ABWInsertCoveredTableCellElement::write(librevenge::RVNGTextInterface *iface,
                                                      const OutputElementsMap_t *,
                                                      const OutputElementsMap_t *) const
@@ -951,6 +972,12 @@ void libabw::ABWOutputElements::addInsertBinaryObject(const librevenge::RVNGProp
 {
   if (m_elements)
     m_elements->push_back(make_unique<ABWInsertBinaryObjectElement>(propList));
+}
+
+void libabw::ABWOutputElements::addInsertField(const librevenge::RVNGPropertyList &propList)
+{
+  if (m_elements)
+    m_elements->push_back(make_unique<ABWInsertFieldElement>(propList));
 }
 
 void libabw::ABWOutputElements::addInsertCoveredTableCell(const librevenge::RVNGPropertyList &propList)

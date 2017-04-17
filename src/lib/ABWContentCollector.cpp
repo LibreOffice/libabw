@@ -1652,6 +1652,328 @@ void libabw::ABWContentCollector::closeEndnote()
   }
 }
 
+void libabw::ABWContentCollector::openField(const char *type, const char * /*id*/)
+{
+  if (!type || type[0]==0)
+  {
+    ABW_DEBUG_MSG(("libabw::ABWContentCollector::openField: called without type\n"));
+    return;
+  }
+  if (!m_ps->m_inParagraphOrListElement)
+    return;
+  librevenge::RVNGPropertyList propList;
+  std::string typ(type);
+  size_t len=typ.length();
+  // see fp_Fields.h
+  switch (typ[0])
+  {
+  case 'a':
+    if (len>4 && typ.substr(0,4)=="app_")
+    {
+      // app_ver, app_compiledate, app_compiletime, app_id, app_target, app_options
+      return;
+    }
+    break;
+  case 'c':
+    if (len==10 && typ=="char_count")
+      propList.insert("librevenge:field-type", "text:character-count");
+    break;
+  case 'd':
+    if (len==4 && typ=="date")
+    {
+      propList.insert("librevenge:field-type", "text:date");
+      propList.insert("number:automatic-order", "true");
+      librevenge::RVNGPropertyListVector pVect;
+      _convertFieldDTFormat("%A, %B %d,%Y",pVect);
+      propList.insert("librevenge:value-type", "date");
+      propList.insert("librevenge:format", pVect);
+      break;
+    }
+    if (len>5 && typ.substr(0,5)=="date_")
+    {
+      propList.insert("librevenge:field-type", "text:date");
+      propList.insert("number:automatic-order", "true");
+      librevenge::RVNGPropertyListVector pVect;
+      if (len==10 && typ=="date_ntdlf") // default
+        ;
+      else if (len==11 && typ=="date_mmddyy")
+        _convertFieldDTFormat("%m/%d/%y",pVect);
+      else if (len==11 && typ=="date_ddmmyy")
+        _convertFieldDTFormat("%d/%m/%y",pVect);
+      else if (len==8 && typ=="date_mdy")
+        _convertFieldDTFormat("%B %d,%Y",pVect);
+      else if (len==10 && typ=="date_mthdy")
+        _convertFieldDTFormat("%b %d,%Y",pVect);
+      else if (len==8 && typ=="date_dfl")
+        _convertFieldDTFormat("%a %b %d %H:%M:%S %Y",pVect);
+      else if (len==10 && typ=="date_wkday")
+        _convertFieldDTFormat("%A",pVect);
+      else if (len==8 && typ=="date_doy") // normally this is the day of the year
+        _convertFieldDTFormat("%d",pVect);
+      if (!pVect.empty())
+      {
+        propList.insert("librevenge:value-type", "date");
+        propList.insert("librevenge:format", pVect);
+      }
+      break;
+    }
+    if (len==15 && typ=="datetime_custom")   // TODO add format
+    {
+      propList.insert("librevenge:field-type", "text:date");
+      propList.insert("number:automatic-order", "true");
+      librevenge::RVNGPropertyListVector pVect;
+      _convertFieldDTFormat("%d/%m/%y %H:%M:%S",pVect);
+      propList.insert("librevenge:value-type", "date");
+      propList.insert("librevenge:format", pVect);
+      break;
+    }
+    break;
+  case 'e':
+    if (len==12 && typ=="endnote_anch")
+      return;
+    if (len==11 && typ=="endnote_ref")
+      return;
+    break;
+  case 'f':
+    if (len==9 && typ=="file_name")
+    {
+      propList.insert("librevenge:field-type", "text:file-name");
+      propList.insert("text:display", "full");
+      break;
+    }
+    if (len==13 && typ=="footnote_anch")
+      return;
+    if (len==12 && typ=="footnote_ref")
+      return;
+    break;
+  case 'l':
+    if (len==10 && typ=="list_label")
+      return;
+    // line_count
+    break;
+  case 'm':
+    if (len>5 && typ.substr(0,5)=="meta_")
+    {
+      if (len==10 && typ=="meta_title")
+        propList.insert("librevenge:field-type", "text:title");
+      else if (len==12 && typ=="meta_subject")
+        propList.insert("librevenge:field-type", "text:subject");
+      else if (len==12 && typ=="meta_creator")
+        propList.insert("librevenge:field-type", "text:creator");
+      else if (len==14 && typ=="meta_publisher")
+        propList.insert("librevenge:field-type", "text:printed-by");
+      //else if (len==16 && typ=="meta_contributor")
+      // else if (len==9 && typ=="meta_type")
+      else if (len==13 && typ=="meta_keywords")
+        propList.insert("librevenge:field-type", "text:keywords");
+      //else if (len==13 && typ=="meta_language")
+      else if (len==16 && typ=="meta_description")
+        propList.insert("librevenge:field-type", "text:description");
+      //else if (len==13 && typ=="meta_coverage")
+      //else if (len==11 && typ=="meta_rights")
+      else if (len==9 && typ=="meta_date")
+        propList.insert("librevenge:field-type", "text:creation-date");
+      else if (len==22 && typ=="meta_date_last_changed")
+        propList.insert("librevenge:field-type", "text:modification-date");
+      break;
+    }
+    if (len==10 && typ=="mail_merge") // a datafield?
+      return;
+    break;
+  case 'n':
+    // nbsp_count
+    break;
+  case 'p':
+    if (len>5 && typ.substr(0,5)=="page_")
+    {
+      if (len==11 && typ=="page_number")
+        propList.insert("librevenge:field-type", "text:page-number");
+      else if (len==10 && typ=="page_count")
+        propList.insert("librevenge:field-type", "text:page-count");
+      // page_ref ?
+      break;
+    }
+    if (len>5 && typ.substr(0,5)=="para_")
+    {
+      if (len==10 && typ=="para_count")
+        propList.insert("librevenge:field-type", "text:paragraph-count");
+      break;
+    }
+    break;
+  case 's':
+    if (len==15 && typ=="short_file_name")
+    {
+      propList.insert("librevenge:field-type", "text:file-name");
+      propList.insert("text:display", "full"); // checkme
+      break;
+    }
+    if (len>4 && typ.substr(0,4)=="sum_")
+    {
+      // sum_cols, sum_rows
+      break;
+    }
+    break;
+  case 't':
+    if (len==4 && typ=="time")
+    {
+      propList.insert("librevenge:field-type", "text:time");
+      propList.insert("number:automatic-order", "true");
+      break;
+    }
+    if (len>5 && typ.substr(0,5)=="time_")   // TODO add format
+    {
+      propList.insert("librevenge:field-type", "text:time");
+      propList.insert("number:automatic-order", "true");
+      librevenge::RVNGPropertyListVector pVect;
+      if (len==9 && typ=="time_ampm")
+        _convertFieldDTFormat("%I:%M:%S %p",pVect);
+      if (len==9 && typ=="time_zone") // CEST, ...
+        return;
+      // if (len==10 && typ=="time_epoch") //second since ...
+      if (len==12 && typ=="time_miltime") // ""
+        return;
+      if (!pVect.empty())
+      {
+        propList.insert("librevenge:value-type", "time");
+        propList.insert("librevenge:format", pVect);
+      }
+      break;
+    }
+    if (len>4 && typ.substr(0,4)=="toc_")
+    {
+      if (len==14 && typ=="toc_list_label")
+        return;
+      // toc_page_number
+      break;
+    }
+    break;
+  case 'w':
+    if (len==11 && typ=="word_count")
+      propList.insert("librevenge:field-type", "text:word-count");
+    break;
+  default:
+    break;
+  }
+  if (propList.empty())
+  {
+    ABW_DEBUG_MSG(("libabw::ABWContentCollector::openField: sorry, unknown type=%s\n", type));
+  }
+  else
+  {
+    if (!m_ps->m_isSpanOpened)
+      _openSpan();
+    m_outputElements.addInsertField(propList);
+    m_ps->m_isFirstTextInListElement = false;
+  }
+}
+
+bool libabw::ABWContentCollector::_convertFieldDTFormat(std::string const &dtFormat, librevenge::RVNGPropertyListVector &propVect)
+{
+  propVect.clear();
+  size_t len=dtFormat.size();
+  std::string text("");
+  librevenge::RVNGPropertyList list;
+  for (size_t c=0; c < len; ++c)
+  {
+    if (dtFormat[c]!='%' || c+1==len)
+    {
+      text+=dtFormat[c];
+      continue;
+    }
+    char ch=dtFormat[++c];
+    if (ch=='%')
+    {
+      text += '%';
+      continue;
+    }
+    if (!text.empty())
+    {
+      list.clear();
+      list.insert("librevenge:value-type", "text");
+      list.insert("librevenge:text", text.c_str());
+      propVect.append(list);
+      text.clear();
+    }
+    list.clear();
+    switch (ch)
+    {
+    case 'Y':
+      list.insert("number:style", "long");
+    // fall-through intended
+    case 'y':
+      list.insert("librevenge:value-type", "year");
+      propVect.append(list);
+      break;
+    case 'B':
+      list.insert("number:style", "long");
+    // fall-through intended
+    case 'b':
+    case 'h':
+      list.insert("librevenge:value-type", "month");
+      list.insert("number:textual", true);
+      propVect.append(list);
+      break;
+    case 'm':
+      list.insert("librevenge:value-type", "month");
+      propVect.append(list);
+      break;
+    case 'e':
+      list.insert("number:style", "long");
+    // fall-through intended
+    case 'd':
+      list.insert("librevenge:value-type", "day");
+      propVect.append(list);
+      break;
+    case 'A':
+      list.insert("number:style", "long");
+    // fall-through intended
+    case 'a':
+      list.insert("librevenge:value-type", "day-of-week");
+      propVect.append(list);
+      break;
+
+    case 'H':
+      list.insert("number:style", "long");
+    // fall-through intended
+    case 'I':
+      list.insert("librevenge:value-type", "hours");
+      propVect.append(list);
+      break;
+    case 'M':
+      list.insert("librevenge:value-type", "minutes");
+      list.insert("number:style", "long");
+      propVect.append(list);
+      break;
+    case 'S':
+      list.insert("librevenge:value-type", "seconds");
+      list.insert("number:style", "long");
+      propVect.append(list);
+      break;
+    case 'p':
+      list.clear();
+      list.insert("librevenge:value-type", "am-pm");
+      propVect.append(list);
+      break;
+#if !defined(__clang__)
+    default:
+      ABW_DEBUG_MSG(("libabw::ABWContentCollector::_convertFieldDTFormat: find unimplement command %c(ignored)\n", ch));
+#endif
+    }
+  }
+  if (!text.empty())
+  {
+    list.clear();
+    list.insert("librevenge:value-type", "text");
+    list.insert("librevenge:text", text.c_str());
+    propVect.append(list);
+  }
+  return propVect.count()!=0;
+}
+
+void libabw::ABWContentCollector::closeField()
+{
+}
+
 void libabw::ABWContentCollector::openTable(const char *props)
 {
   _closeParagraph();

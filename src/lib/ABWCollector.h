@@ -127,6 +127,8 @@ public:
   virtual void closeFoot() = 0;
   virtual void openEndnote(const char *id) = 0;
   virtual void closeEndnote() = 0;
+  virtual void openField(const char *type, const char *id)= 0;
+  virtual void closeField()= 0;
   virtual void endSection() = 0;
   virtual void startDocument() = 0;
   virtual void endDocument() = 0;

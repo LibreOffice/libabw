@@ -57,6 +57,7 @@ private:
   void readS(xmlTextReaderPtr reader);
   void readEndnote(xmlTextReaderPtr reader);
   void readFoot(xmlTextReaderPtr reader);
+  void readField(xmlTextReaderPtr reader);
   void readImage(xmlTextReaderPtr reader);
 
   void readTable(xmlTextReaderPtr reader);
