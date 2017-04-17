@@ -984,8 +984,9 @@ void libabw::ABWContentCollector::_openPageSpan()
       startDocument();
 
     librevenge::RVNGPropertyList propList;
-    propList.insert("fo:page-width", m_ps->m_pageWidth);
-    propList.insert("fo:page-height", m_ps->m_pageHeight);
+    // assume default page size is A4
+    propList.insert("fo:page-width", m_ps->m_pageWidth>0 ? m_ps->m_pageWidth : 8.27);
+    propList.insert("fo:page-height", m_ps->m_pageHeight>0 ? m_ps->m_pageHeight : 11.7);
     propList.insert("fo:margin-left", m_ps->m_pageMarginLeft);
     propList.insert("fo:margin-right", m_ps->m_pageMarginRight);
     propList.insert("fo:margin-top", m_ps->m_pageMarginTop);
