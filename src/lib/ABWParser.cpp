@@ -191,10 +191,7 @@ bool libabw::ABWParser::processXmlDocument(librevenge::RVNGInputStream *input)
   int ret = xmlTextReaderRead(reader.get());
   while (1 == ret)
   {
-    int tokenType = xmlTextReaderNodeType(reader.get());
-    if (XML_READER_TYPE_SIGNIFICANT_WHITESPACE != tokenType)
-      processXmlNode(reader.get());
-
+    processXmlNode(reader.get());
     ret = xmlTextReaderRead(reader.get());
   }
 
@@ -210,7 +207,14 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
   int tokenId = getElementToken(reader);
   int tokenType = xmlTextReaderNodeType(reader);
   int emptyToken = xmlTextReaderIsEmptyElement(reader);
-  if (XML_READER_TYPE_TEXT == tokenType)
+  if (XML_READER_TYPE_SIGNIFICANT_WHITESPACE == tokenType)
+  {
+    const char *text = (const char *)xmlTextReaderConstValue(reader);
+    if (!m_state->m_inMetadata && text && text[0]==' ' && text[1]==0)
+      m_collector->insertText(text);
+    return;
+  }
+  else if (XML_READER_TYPE_TEXT == tokenType)
   {
     const char *text = (const char *)xmlTextReaderConstValue(reader);
     ABW_DEBUG_MSG(("ABWParser::processXmlNode: text %s\n", text));

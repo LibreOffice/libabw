@@ -964,6 +964,8 @@ void libabw::ABWContentCollector::insertText(const char *text)
 {
   if (!m_ps->m_inParagraphOrListElement)
     return;
+  if (m_ps->m_isFirstTextInListElement && text && text[0]==' ' && text[1]==0)
+    return;
   if (!m_ps->m_isSpanOpened)
     _openSpan();
   if (!text)
