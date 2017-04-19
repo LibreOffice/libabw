@@ -585,8 +585,7 @@ void libabw::ABWContentCollector::_addBorderProperties(const std::map<std::strin
 
 void libabw::ABWContentCollector::collectParagraphProperties(const char *level, const char *listid, const char * /*parentid*/, const char *style, const char *props)
 {
-  _closeParagraph();
-  _closeListElement();
+  _closeBlock();
   if (!level || !findInt(level, m_ps->m_currentListLevel) || m_ps->m_currentListLevel < 1)
     m_ps->m_currentListLevel = 0;
   if (!listid || !findInt(listid, m_ps->m_currentListId) || m_ps->m_currentListId < 0)
@@ -807,8 +806,7 @@ void libabw::ABWContentCollector::endDocument()
     if (!m_ps->m_isPageSpanOpened)
       _openPageSpan();
 
-    _closeParagraph();
-    _closeListElement();
+    _closeBlock();
 
     m_ps->m_currentListLevel = 0;
     _changeList(); // flush the list
@@ -874,8 +872,7 @@ void libabw::ABWContentCollector::closeParagraphOrListElement()
   // we have an empty paragraph, insert it
   if (!m_ps->m_isParagraphOpened && !m_ps->m_isListElementOpened)
     _openSpan();
-  _closeParagraph();
-  _closeListElement();
+  _closeBlock();
   m_ps->m_currentParagraphStyle.clear();
   m_ps->m_inParagraphOrListElement = false;
 }
@@ -884,14 +881,7 @@ void libabw::ABWContentCollector::openLink(const char *href)
 {
   if (m_ps->m_isSpanOpened)
     _closeSpan();
-  if (!m_ps->m_isParagraphOpened && !m_ps->m_isListElementOpened)
-  {
-    _changeList();
-    if (m_ps->m_currentListLevel == 0)
-      _openParagraph();
-    else
-      _openListElement();
-  }
+  _openBlock();
   librevenge::RVNGPropertyList propList;
   if (href)
     propList.insert("xlink:href", decodeUrl(href).c_str());
@@ -923,15 +913,13 @@ void libabw::ABWContentCollector::insertLineBreak()
 
 void libabw::ABWContentCollector::insertColumnBreak()
 {
-  _closeParagraph();
-  _closeListElement();
+  _closeBlock();
   m_ps->m_deferredColumnBreak = true;
 }
 
 void libabw::ABWContentCollector::insertPageBreak()
 {
-  _closeParagraph();
-  _closeListElement();
+  _closeBlock();
   m_ps->m_deferredPageBreak = true;
 }
 
@@ -1154,6 +1142,28 @@ void libabw::ABWContentCollector::_fillParagraphProperties(librevenge::RVNGPrope
   m_ps->m_deferredColumnBreak = false;
 }
 
+void libabw::ABWContentCollector::_openBlock()
+{
+  if (m_ps->m_isParagraphOpened || m_ps->m_isListElementOpened)
+    return;
+  if (m_ps->m_currentListLevel == 0)
+    _openParagraph();
+  else
+    _openListElement();
+}
+
+void libabw::ABWContentCollector::_closeBlock()
+{
+  if (!m_ps->m_isParagraphOpened && !m_ps->m_isListElementOpened)
+    return;
+  if (m_ps->m_isSpanOpened)
+    _closeSpan();
+  if (m_ps->m_isParagraphOpened)
+    _closeParagraph();
+  if (m_ps->m_isListElementOpened)
+    _closeListElement();
+}
+
 void libabw::ABWContentCollector::_openParagraph()
 {
   if (!m_ps->m_isParagraphOpened)
@@ -1236,13 +1246,7 @@ void libabw::ABWContentCollector::_openSpan()
 {
   if (!m_ps->m_isSpanOpened)
   {
-    if (!m_ps->m_isParagraphOpened && !m_ps->m_isListElementOpened)
-    {
-      if (m_ps->m_currentListLevel == 0)
-        _openParagraph();
-      else
-        _openListElement();
-    }
+    _openBlock();
 
     librevenge::RVNGPropertyList propList;
     ABWUnit unit(ABW_NONE);
@@ -1340,8 +1344,7 @@ void libabw::ABWContentCollector::_closeSection()
     while (!m_ps->m_tableStates.empty())
       _closeTable();
 
-    _closeParagraph();
-    _closeListElement();
+    _closeBlock();
     m_ps->m_currentListLevel = 0;
     _changeList();
 
@@ -1358,8 +1361,7 @@ void libabw::ABWContentCollector::_closeHeader()
     while (!m_ps->m_tableStates.empty())
       _closeTable();
 
-    _closeParagraph();
-    _closeListElement();
+    _closeBlock();
     m_ps->m_currentListLevel = 0;
     _changeList();
 
@@ -1378,8 +1380,7 @@ void libabw::ABWContentCollector::_closeFooter()
     while (!m_ps->m_tableStates.empty())
       _closeTable();
 
-    _closeParagraph();
-    _closeListElement();
+    _closeBlock();
     m_ps->m_currentListLevel = 0;
     _changeList();
 
@@ -1551,8 +1552,7 @@ void libabw::ABWContentCollector::_closeTableCell()
   {
     if (m_ps->m_tableStates.top().m_isCellWithoutParagraph)
       _openSpan();
-    _closeParagraph();
-    _closeListElement();
+    _closeBlock();
     m_ps->m_currentListLevel = 0;
     _changeList();
 
@@ -1580,8 +1580,7 @@ void libabw::ABWContentCollector::openFoot(const char *id)
 
 void libabw::ABWContentCollector::closeFoot()
 {
-  _closeParagraph();
-  _closeListElement();
+  _closeBlock();
   m_ps->m_currentListLevel = 0;
   _changeList();
 
@@ -1613,8 +1612,7 @@ void libabw::ABWContentCollector::openEndnote(const char *id)
 
 void libabw::ABWContentCollector::closeEndnote()
 {
-  _closeParagraph();
-  _closeListElement();
+  _closeBlock();
   m_ps->m_currentListLevel = 0;
   _changeList();
 
@@ -1951,8 +1949,7 @@ void libabw::ABWContentCollector::closeField()
 
 void libabw::ABWContentCollector::openTable(const char *props)
 {
-  _closeParagraph();
-  _closeListElement();
+  _closeBlock();
   m_ps->m_currentListLevel = 0;
   _changeList();
 
@@ -1986,8 +1983,7 @@ void libabw::ABWContentCollector::openTable(const char *props)
 
 void libabw::ABWContentCollector::closeTable()
 {
-  _closeParagraph();
-  _closeListElement();
+  _closeBlock();
   m_ps->m_currentListLevel = 0;
   _changeList();
   _closeTable();
@@ -2102,15 +2098,8 @@ void libabw::ABWContentCollector::openFrame(const char *props, const char *image
     iter = propMap.find(isParagraph ? "ypos" : "frame-page-ypos");
     if (iter != propMap.end() && findDouble(iter->second, value, unit) && ABW_IN == unit)
       propList.insert("svg:y", value);
-    if (isParagraph && !m_ps->m_isParagraphOpened && !m_ps->m_isListElementOpened)
-    {
-      _changeList();
-      if (m_ps->m_currentListLevel == 0)
-        _openParagraph();
-      else
-        _openListElement();
-    }
-    else if (!isParagraph)
+    if (isParagraph) _openBlock();
+    else
     {
       iter = propMap.find("frame-pref-page");
       int page=0;
@@ -2273,8 +2262,7 @@ void libabw::ABWContentCollector::_recurseListLevels(int oldLevel, int newLevel,
 
 void libabw::ABWContentCollector::_changeList()
 {
-  _closeParagraph();
-  _closeListElement();
+  _closeBlock();
   _handleListChange();
 }
 

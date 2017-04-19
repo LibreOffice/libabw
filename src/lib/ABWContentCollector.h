@@ -175,6 +175,11 @@ private:
   void _openSection();
   void _closeSection();
 
+  //! open a paragraph or a list element (depend on m_currentListLevel)
+  void _openBlock();
+  //! close the current paragraph or list element
+  void _closeBlock();
+
   void _openParagraph();
   void _closeParagraph();
 

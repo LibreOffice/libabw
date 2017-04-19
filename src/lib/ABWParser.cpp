@@ -148,6 +148,7 @@ bool libabw::ABWParser::parse()
     return false;
 
   std::map<int, ABWListElement *> listElements;
+  bool ok=true;
   try
   {
     std::map<int, int> tableSizes;
@@ -165,19 +166,14 @@ bool libabw::ABWParser::parse()
     m_collector = &contentCollector;
     m_input->seek(0, librevenge::RVNG_SEEK_SET);
     if (!processXmlDocument(m_input))
-    {
-      clearListElements(listElements);
-      return false;
-    }
-
-    clearListElements(listElements);
-    return true;
+      ok=false;
   }
   catch (...)
   {
-    clearListElements(listElements);
-    return false;
+    ok=false;
   }
+  clearListElements(listElements);
+  return ok;
 }
 
 bool libabw::ABWParser::processXmlDocument(librevenge::RVNGInputStream *input)
