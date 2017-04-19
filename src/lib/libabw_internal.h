@@ -10,6 +10,10 @@
 #ifndef __LIBABW_INTERNAL_H__
 #define __LIBABW_INTERNAL_H__
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 /* Various functions/defines that need not/should not be exported externally */
 
 #define DELETEP(m) if (m) { delete m; m = 0; }
