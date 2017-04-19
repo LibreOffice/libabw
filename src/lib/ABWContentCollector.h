@@ -210,6 +210,8 @@ private:
   void _fillParagraphProperties(librevenge::RVNGPropertyList &propList, bool isListElement);
   bool _convertFieldDTFormat(std::string const &dtFormat, librevenge::RVNGPropertyListVector &propVect);
 
+  int getCellPos(const char *startProp, const char *endProp, int defStart);
+
   std::shared_ptr<ABWContentParsingState> m_ps;
   librevenge::RVNGTextInterface *m_iface;
   std::stack<std::shared_ptr<ABWContentParsingState> > m_parsingStates;

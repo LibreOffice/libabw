@@ -1997,9 +1997,8 @@ void libabw::ABWContentCollector::openCell(const char *props)
   {
     if (props)
       parsePropString(props, m_ps->m_tableStates.top().m_currentCellProperties);
-    int currentRow(0);
-    if (!findInt(_findCellProperty("top-attach"), currentRow))
-      currentRow = m_ps->m_tableStates.top().m_currentTableRow + 1;
+    const int currentRow(getCellPos("top-attach", "bottom-attach", m_ps->m_tableStates.top().m_currentTableRow + 1));
+
     while (m_ps->m_tableStates.top().m_currentTableRow < currentRow)
     {
       if (m_ps->m_tableStates.top().m_currentTableRow >= 0)
@@ -2007,9 +2006,43 @@ void libabw::ABWContentCollector::openCell(const char *props)
       _openTableRow();
     }
 
-    if (!findInt(_findCellProperty("left-attach"), m_ps->m_tableStates.top().m_currentTableCol))
-      m_ps->m_tableStates.top().m_currentTableCol++;
+    m_ps->m_tableStates.top().m_currentTableCol =
+      getCellPos("left-attach", "right-attach", m_ps->m_tableStates.top().m_currentTableCol + 1);
   }
+}
+
+int libabw::ABWContentCollector::getCellPos(const char *startProp, const char *endProp, int defStart)
+{
+  int startAttach(0);
+  const bool haveStart(findInt(_findCellProperty(startProp), startAttach));
+  int endAttach(0);
+  const bool haveEnd(findInt(_findCellProperty(endProp), endAttach));
+
+  int newStartAttach(startAttach);
+
+  if (haveStart && haveEnd)
+  {
+    if (endAttach <= startAttach && endAttach > 0)
+      newStartAttach = endAttach - 1;
+  }
+  else if (haveStart && !haveEnd)
+  {
+    if (startAttach / 1000 > defStart) // likely a damaged input
+      newStartAttach = defStart;
+  }
+  else if (!haveStart && haveEnd)
+  {
+    if (endAttach <= 0 || endAttach / 1000 > defStart) // likely a damaged input
+      newStartAttach = defStart;
+    else
+      newStartAttach = endAttach - 1;
+  }
+  else
+  {
+    newStartAttach = defStart;
+  }
+
+  return newStartAttach;
 }
 
 void libabw::ABWContentCollector::closeCell()
