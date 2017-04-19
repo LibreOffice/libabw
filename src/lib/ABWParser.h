@@ -64,10 +64,11 @@ private:
   void readCell(xmlTextReaderPtr reader);
 
   void readFrame(xmlTextReaderPtr reader);
+  void readCloseFrame();
 
   librevenge::RVNGInputStream *m_input;
   librevenge::RVNGTextInterface *m_iface;
-  ABWCollector *m_collector;
+  std::unique_ptr<ABWCollector> m_collector;
   std::unique_ptr<ABWParserState> m_state;
 };
 

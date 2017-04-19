@@ -29,7 +29,7 @@ public:
 
   ABWOutputElements();
   virtual ~ABWOutputElements();
-  void append(const ABWOutputElements &elements);
+  void splice(ABWOutputElements &elements);
   void write(librevenge::RVNGTextInterface *iface) const;
   void addCloseEndnote();
   void addCloseFooter();
@@ -46,6 +46,7 @@ public:
   void addCloseTable();
   void addCloseTableCell();
   void addCloseTableRow();
+  void addCloseTextBox();
   void addCloseUnorderedListLevel();
   void addInsertBinaryObject(const librevenge::RVNGPropertyList &propList);
   void addInsertCoveredTableCell(const librevenge::RVNGPropertyList &propList);
@@ -71,6 +72,7 @@ public:
   void addOpenTable(const librevenge::RVNGPropertyList &propList);
   void addOpenTableCell(const librevenge::RVNGPropertyList &propList);
   void addOpenTableRow(const librevenge::RVNGPropertyList &propList);
+  void addOpenTextBox(const librevenge::RVNGPropertyList &propList);
   void addOpenUnorderedListLevel(const librevenge::RVNGPropertyList &propList);
   void addStartDocument(const librevenge::RVNGPropertyList &propList);
   bool empty() const

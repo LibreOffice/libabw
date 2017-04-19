@@ -10,6 +10,8 @@
 #include <string.h>
 
 #include <set>
+#include <stack>
+#include <utility>
 
 #include <libxml/xmlIO.h>
 #include <libxml/xmlstring.h>
@@ -120,21 +122,36 @@ static void updateListElementIds(std::map<int, ABWListElement *> &listElements)
 struct ABWParserState
 {
   ABWParserState();
+  ~ABWParserState();
+  std::map<int, int> m_tableSizes;
+  std::map<std::string, ABWData> m_data;
+  std::map<int, ABWListElement *> m_listElements;
 
   bool m_inMetadata;
   std::string m_currentMetadataKey;
+  bool m_inStyleParsing;
+  std::stack<std::unique_ptr<ABWCollector> > m_collectorStack;
 };
 
 ABWParserState::ABWParserState()
-  : m_inMetadata(false)
+  : m_tableSizes()
+  , m_data()
+  , m_listElements()
+  , m_inMetadata(false)
   , m_currentMetadataKey()
+  , m_inStyleParsing(false)
+  , m_collectorStack()
 {
 }
 
+ABWParserState::~ABWParserState()
+{
+  clearListElements(m_listElements);
+}
 } // namespace libabw
 
 libabw::ABWParser::ABWParser(librevenge::RVNGInputStream *input, librevenge::RVNGTextInterface *iface)
-  : m_input(input), m_iface(iface), m_collector(0), m_state(new ABWParserState())
+  : m_input(input), m_iface(iface), m_collector(), m_state(new ABWParserState())
 {
 }
 
@@ -147,33 +164,23 @@ bool libabw::ABWParser::parse()
   if (!m_input)
     return false;
 
-  std::map<int, ABWListElement *> listElements;
-  bool ok=true;
   try
   {
-    std::map<int, int> tableSizes;
-    std::map<std::string, ABWData> data;
-    ABWStylesCollector stylesCollector(tableSizes, data, listElements);
-    m_collector = &stylesCollector;
+    m_collector.reset(new ABWStylesCollector(m_state->m_tableSizes, m_state->m_data, m_state->m_listElements));
     m_input->seek(0, librevenge::RVNG_SEEK_SET);
+    m_state->m_inStyleParsing=true;
     if (!processXmlDocument(m_input))
-    {
-      clearListElements(listElements);
       return false;
-    }
-    updateListElementIds(listElements);
-    ABWContentCollector contentCollector(m_iface, tableSizes, data, listElements);
-    m_collector = &contentCollector;
+    updateListElementIds(m_state->m_listElements);
+    m_collector.reset(new ABWContentCollector(m_iface, m_state->m_tableSizes, m_state->m_data, m_state->m_listElements));
     m_input->seek(0, librevenge::RVNG_SEEK_SET);
-    if (!processXmlDocument(m_input))
-      ok=false;
+    m_state->m_inStyleParsing=false;
+    return processXmlDocument(m_input) && m_state->m_collectorStack.empty();
   }
   catch (...)
   {
-    ok=false;
   }
-  clearListElements(listElements);
-  return ok;
+  return false;
 }
 
 bool libabw::ABWParser::processXmlDocument(librevenge::RVNGInputStream *input)
@@ -352,7 +359,7 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
     if (XML_READER_TYPE_ELEMENT == tokenType)
       readFrame(reader);
     if (XML_READER_TYPE_END_ELEMENT == tokenType || emptyToken > 0)
-      m_collector->closeFrame();
+      readCloseFrame();
     break;
   default:
     break;
@@ -390,14 +397,14 @@ int libabw::ABWParser::getElementToken(xmlTextReaderPtr reader)
 
 void libabw::ABWParser::readAbiword(xmlTextReaderPtr reader)
 {
-  const ABWXMLString props = xmlTextReaderGetAttribute(reader, BAD_CAST("props"));
+  const ABWXMLString props = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("props"));
   if (m_collector)
     m_collector->collectDocumentProperties(static_cast<const char *>(props));
 }
 
 void libabw::ABWParser::readM(xmlTextReaderPtr reader)
 {
-  const ABWXMLString key = xmlTextReaderGetAttribute(reader, BAD_CAST("key"));
+  const ABWXMLString key = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("key"));
   if (key)
     m_state->m_currentMetadataKey = static_cast<const char *>(key);
 }
@@ -661,12 +668,38 @@ void libabw::ABWParser::readImage(xmlTextReaderPtr reader)
 
 void libabw::ABWParser::readFrame(xmlTextReaderPtr reader)
 {
+  if (!m_collector)
+    return;
   ABWXMLString props = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("props"));
   ABWXMLString imageId = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("strux-image-dataid"));
   ABWXMLString title = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("title"));
   ABWXMLString alt = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("alt"));
-  if (m_collector)
-    m_collector->openFrame((const char *)props, (const char *) imageId, (const char *) title, (const char *) alt);
+  if (!m_state->m_inStyleParsing)
+  {
+    m_state->m_collectorStack.push(std::move(m_collector));
+    m_collector.reset(new ABWContentCollector(m_iface, m_state->m_tableSizes, m_state->m_data, m_state->m_listElements));
+  }
+  m_collector->openFrame((const char *)props, (const char *) imageId, (const char *) title, (const char *) alt);
+}
+
+void libabw::ABWParser::readCloseFrame()
+{
+  if (!m_collector)
+    return;
+  ABWOutputElements *elements=0;
+  bool pageFrame=false;
+  m_collector->closeFrame(elements,pageFrame);
+  if (m_state->m_inStyleParsing)
+    return;
+  if (m_state->m_collectorStack.empty())
+  {
+    ABW_DEBUG_MSG(("libabw::ABWParser::readCloseFrame: oops, the collector stack is empty\n"));
+    return; // throw ?
+  }
+  if (elements)
+    m_state->m_collectorStack.top()->addFrameElements(*elements, pageFrame);
+  m_collector.swap(m_state->m_collectorStack.top());
+  m_state->m_collectorStack.pop();
 }
 
 void libabw::ABWParser::readL(xmlTextReaderPtr reader)

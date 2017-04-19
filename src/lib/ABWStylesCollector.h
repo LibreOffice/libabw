@@ -88,7 +88,11 @@ public:
   void closeCell();
 
   void openFrame(const char *, const char *, const char *, const char *) {}
-  void closeFrame() {}
+  void closeFrame(ABWOutputElements *(&elements), bool &)
+  {
+    elements=0;
+  }
+  void addFrameElements(ABWOutputElements &, bool) {}
 
   void addMetadataEntry(const char *, const char *) {}
 

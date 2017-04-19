@@ -26,7 +26,10 @@ enum ABWContext
 {
   ABW_SECTION,
   ABW_HEADER,
-  ABW_FOOTER
+  ABW_FOOTER,
+  ABW_FRAME_IMAGE,
+  ABW_FRAME_TEXTBOX,
+  ABW_FRAME_UNKNOWN
 };
 
 struct ABWStyle
@@ -69,6 +72,8 @@ struct ABWContentParsingState
   bool m_isSectionOpened;
   bool m_isHeaderOpened;
   bool m_isFooterOpened;
+
+  bool m_isPageFrame;
 
   bool m_isSpanOpened;
   bool m_isParagraphOpened;
@@ -157,7 +162,8 @@ public:
   void closeCell();
 
   void openFrame(const char *props, const char *imageId, const char *title, const char *alt);
-  void closeFrame();
+  void closeFrame(ABWOutputElements *(&elements), bool &pageFrame);
+  void addFrameElements(ABWOutputElements &elements, bool pageFrame);
 
   void addMetadataEntry(const char *name, const char *value);
 

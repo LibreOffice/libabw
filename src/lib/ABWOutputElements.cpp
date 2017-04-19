@@ -187,6 +187,16 @@ public:
              const OutputElementsMap_t *headers) const;
 };
 
+class ABWCloseTextBoxElement : public ABWOutputElement
+{
+public:
+  ABWCloseTextBoxElement() {}
+  ~ABWCloseTextBoxElement() {}
+  void write(librevenge::RVNGTextInterface *iface,
+             const OutputElementsMap_t *footers,
+             const OutputElementsMap_t *headers) const;
+};
+
 class ABWCloseUnorderedListLevelElement : public ABWOutputElement
 {
 public:
@@ -494,6 +504,19 @@ private:
   librevenge::RVNGPropertyList m_propList;
 };
 
+class ABWOpenTextBoxElement : public ABWOutputElement
+{
+public:
+  ABWOpenTextBoxElement(const librevenge::RVNGPropertyList &propList) :
+    m_propList(propList) {}
+  ~ABWOpenTextBoxElement() {}
+  void write(librevenge::RVNGTextInterface *iface,
+             const OutputElementsMap_t *footers,
+             const OutputElementsMap_t *headers) const;
+private:
+  librevenge::RVNGPropertyList m_propList;
+};
+
 class ABWOpenUnorderedListLevelElement : public ABWOutputElement
 {
 public:
@@ -627,6 +650,14 @@ void libabw::ABWCloseTableRowElement::write(librevenge::RVNGTextInterface *iface
 {
   if (iface)
     iface->closeTableRow();
+}
+
+void libabw::ABWCloseTextBoxElement::write(librevenge::RVNGTextInterface *iface,
+                                           const OutputElementsMap_t *,
+                                           const OutputElementsMap_t *) const
+{
+  if (iface)
+    iface->closeTextBox();
 }
 
 void libabw::ABWCloseUnorderedListLevelElement::write(librevenge::RVNGTextInterface *iface,
@@ -843,6 +874,14 @@ void libabw::ABWOpenTableRowElement::write(librevenge::RVNGTextInterface *iface,
     iface->openTableRow(m_propList);
 }
 
+void libabw::ABWOpenTextBoxElement::write(librevenge::RVNGTextInterface *iface,
+                                          const OutputElementsMap_t *,
+                                          const OutputElementsMap_t *) const
+{
+  if (iface)
+    iface->openTextBox(m_propList);
+}
+
 void libabw::ABWOpenUnorderedListLevelElement::write(librevenge::RVNGTextInterface *iface,
                                                      const OutputElementsMap_t *,
                                                      const OutputElementsMap_t *) const
@@ -861,6 +900,11 @@ libabw::ABWOutputElements::ABWOutputElements()
 
 libabw::ABWOutputElements::~ABWOutputElements()
 {
+}
+
+void libabw::ABWOutputElements::splice(ABWOutputElements &elements)
+{
+  m_bodyElements.splice(m_bodyElements.end(), elements.m_bodyElements);
 }
 
 void libabw::ABWOutputElements::write(librevenge::RVNGTextInterface *iface) const
@@ -960,6 +1004,12 @@ void libabw::ABWOutputElements::addCloseTableRow()
 {
   if (m_elements)
     m_elements->push_back(make_unique<ABWCloseTableRowElement>());
+}
+
+void libabw::ABWOutputElements::addCloseTextBox()
+{
+  if (m_elements)
+    m_elements->push_back(make_unique<ABWCloseTextBoxElement>());
 }
 
 void libabw::ABWOutputElements::addCloseUnorderedListLevel()
@@ -1108,6 +1158,12 @@ void libabw::ABWOutputElements::addOpenTableRow(const librevenge::RVNGPropertyLi
 {
   if (m_elements)
     m_elements->push_back(make_unique<ABWOpenTableRowElement>(propList));
+}
+
+void libabw::ABWOutputElements::addOpenTextBox(const librevenge::RVNGPropertyList &propList)
+{
+  if (m_elements)
+    m_elements->push_back(make_unique<ABWOpenTextBoxElement>(propList));
 }
 
 void libabw::ABWOutputElements::addOpenUnorderedListLevel(const librevenge::RVNGPropertyList &propList)

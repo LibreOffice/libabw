@@ -330,6 +330,8 @@ libabw::ABWContentParsingState::ABWContentParsingState() :
   m_isHeaderOpened(false),
   m_isFooterOpened(false),
 
+  m_isPageFrame(false),
+
   m_isSpanOpened(false),
   m_isParagraphOpened(false),
   m_isListElementOpened(false),
@@ -376,6 +378,8 @@ libabw::ABWContentParsingState::ABWContentParsingState(const ABWContentParsingSt
   m_isSectionOpened(ps.m_isSectionOpened),
   m_isHeaderOpened(ps.m_isHeaderOpened),
   m_isFooterOpened(ps.m_isFooterOpened),
+
+  m_isPageFrame(ps.m_isPageFrame),
 
   m_isSpanOpened(ps.m_isSpanOpened),
   m_isParagraphOpened(ps.m_isParagraphOpened),
@@ -1183,6 +1187,13 @@ void libabw::ABWContentCollector::_openParagraph()
       if (!m_ps->m_isSectionOpened)
         _openSection();
       break;
+    case ABW_FRAME_IMAGE:
+      ABW_DEBUG_MSG(("libabw::ABWContentCollector::_openParagraph: can not open a paragraph\n"));
+      m_ps->m_parsingContext=ABW_FRAME_UNKNOWN;
+      break;
+    case ABW_FRAME_TEXTBOX:
+    case ABW_FRAME_UNKNOWN:
+      break;
     }
 
     if (!m_ps->m_tableStates.empty() && !m_ps->m_tableStates.top().m_isTableCellOpened)
@@ -1222,6 +1233,13 @@ void libabw::ABWContentCollector::_openListElement()
     default:
       if (!m_ps->m_isSectionOpened)
         _openSection();
+      break;
+    case ABW_FRAME_IMAGE:
+      ABW_DEBUG_MSG(("libabw::ABWContentCollector::_openListElement: can not open a list\n"));
+      m_ps->m_parsingContext=ABW_FRAME_UNKNOWN;
+      break;
+    case ABW_FRAME_TEXTBOX:
+    case ABW_FRAME_UNKNOWN:
       break;
     }
 
@@ -1428,6 +1446,10 @@ void libabw::ABWContentCollector::_openTable()
   default:
     if (!m_ps->m_isSectionOpened)
       _openSection();
+    break;
+  case ABW_FRAME_IMAGE:
+  case ABW_FRAME_TEXTBOX:
+  case ABW_FRAME_UNKNOWN:
     break;
   }
 
@@ -1970,6 +1992,10 @@ void libabw::ABWContentCollector::openTable(const char *props)
       if (!m_ps->m_isSectionOpened)
         _openSection();
       break;
+    case ABW_FRAME_IMAGE:
+    case ABW_FRAME_TEXTBOX:
+    case ABW_FRAME_UNKNOWN:
+      break;
     }
   }
 
@@ -2057,13 +2083,101 @@ void libabw::ABWContentCollector::openFrame(const char *props, const char *image
   ABWPropertyMap propMap;
   if (props)
     parsePropString(props, propMap);
-  ABWPropertyMap::const_iterator iter = propMap.find("frame-type");
+  ABWPropertyMap::const_iterator iter;
+
+  librevenge::RVNGPropertyList propList;
+  ABWUnit unit(ABW_NONE);
+  double value(0.0);
+  // size
+  iter = propMap.find("frame-height");
+  if (iter != propMap.end() && findDouble(iter->second, value, unit) && ABW_IN == unit)
+    propList.insert("svg:height", value);
+  iter = propMap.find("frame-width");
+  if (iter != propMap.end() && findDouble(iter->second, value, unit) && ABW_IN == unit)
+    propList.insert("svg:width", value);
+  // position
+  bool isParagraph=true;
+  iter = propMap.find("position-to");
+  if (iter != propMap.end())
+  {
+    if (iter->second=="page-above-text")
+      isParagraph=false;
+    else if (iter->second=="column-above-text")
+      /* unsure how to retrieve that, so check if the page positions
+         are defined, if yes, use a page anchor. */
+      isParagraph=(propMap.find("frame-page-ypos")==propMap.end());
+    else if (iter->second!="block-above-text")
+    {
+      ABW_DEBUG_MSG(("libabw::ABWContentCollector::openFrame: sorry, unknown pos: %s asume paragraph\n", iter->second.c_str()));
+    }
+  }
+  iter = propMap.find(isParagraph ? "xpos" : "frame-page-xpos");
+  if (iter != propMap.end() && findDouble(iter->second, value, unit) && ABW_IN == unit)
+    propList.insert("svg:x", value);
+  iter = propMap.find(isParagraph ? "ypos" : "frame-page-ypos");
+  if (iter != propMap.end() && findDouble(iter->second, value, unit) && ABW_IN == unit)
+    propList.insert("svg:y", value);
+  if (!isParagraph)
+  {
+    propList.insert("style:vertical-rel", "page");
+    propList.insert("style:horizontal-rel", "page");
+  }
+  if (!isParagraph)
+  {
+    iter = propMap.find("frame-pref-page");
+    int page=0;
+    if (iter != propMap.end() && findInt(iter->second, page))
+      propList.insert("text:anchor-page-number", page+1);
+  }
+  // style
+  int intValue;
+  iter = propMap.find("bg-style"); // 0: none, 1: color=background-color
+  if (iter != propMap.end() && findInt(iter->second, intValue) && intValue==1)
+  {
+    iter = propMap.find("background-color");
+    if (iter != propMap.end())
+    {
+      std::string color("#");
+      color+=iter->second;
+      propList.insert("fo:background-color", color.c_str());
+    }
+  }
+  propList.insert("text:anchor-type", isParagraph ? "paragraph" : "page");
+  iter = propMap.find("wrap-mode");
+  if (iter != propMap.end())
+  {
+    if (iter->second=="wrapped-to-left")
+      propList.insert("style:wrap", "left");
+    else if (iter->second=="wrapped-to-right")
+      propList.insert("style:wrap", "right");
+    else if (iter->second=="wrapped-to-both")
+      propList.insert("style:wrap", "parallel");
+    else if (iter->second=="above-text")
+    {
+      propList.insert("style:wrap", "dynamic");
+      propList.insert("style:run-through", "foreground");
+    }
+    else if (iter->second=="below-text")
+    {
+      propList.insert("style:wrap", "dynamic");
+      propList.insert("style:run-through", "background");
+    }
+    else
+    {
+      ABW_DEBUG_MSG(("libabw::ABWContentCollector::openFrame: sorry, unknown wrap mode: %s\n", iter->second.c_str()));
+    }
+  }
+  m_ps->m_isPageFrame=!isParagraph;
+  m_outputElements.addOpenFrame(propList);
+
+  iter = propMap.find("frame-type");
   if (iter==propMap.end())
   {
     ABW_DEBUG_MSG(("libabw::ABWContentCollector::openFrame: can not find the frame type\n"));
   }
-  if (iter->second=="image")
+  else if (iter->second=="image")
   {
+    m_ps->m_parsingContext=ABW_FRAME_IMAGE;
     std::map<std::string, ABWData>::const_iterator imIter;
     if (imageId) imIter= m_data.find(imageId);
     if (imIter==m_data.end())
@@ -2072,86 +2186,58 @@ void libabw::ABWContentCollector::openFrame(const char *props, const char *image
       return;
     }
 
-    librevenge::RVNGPropertyList propList;
-    ABWUnit unit(ABW_NONE);
-    double value(0.0);
-    iter = propMap.find("frame-height");
-    if (iter != propMap.end() && findDouble(iter->second, value, unit) && ABW_IN == unit)
-      propList.insert("svg:height", value);
-    iter = propMap.find("frame-width");
-    if (iter != propMap.end() && findDouble(iter->second, value, unit) && ABW_IN == unit)
-      propList.insert("svg:width", value);
-    bool isParagraph=true;
-    iter = propMap.find("position-to");
-    if (iter != propMap.end())
-    {
-      if (iter->second=="page-above-text" || iter->second=="column-above-text")
-        isParagraph=false;
-      else if (iter->second!="block-above-text")
-      {
-        ABW_DEBUG_MSG(("libabw::ABWContentCollector::openFrame: sorry, unknown pos: %s asume paragraph\n", iter->second.c_str()));
-      }
-    }
-    iter = propMap.find(isParagraph ? "xpos" : "frame-page-xpos");
-    if (iter != propMap.end() && findDouble(iter->second, value, unit) && ABW_IN == unit)
-      propList.insert("svg:x", value);
-    iter = propMap.find(isParagraph ? "ypos" : "frame-page-ypos");
-    if (iter != propMap.end() && findDouble(iter->second, value, unit) && ABW_IN == unit)
-      propList.insert("svg:y", value);
-    if (isParagraph) _openBlock();
-    else
-    {
-      iter = propMap.find("frame-pref-page");
-      int page=0;
-      if (iter != propMap.end() && findInt(iter->second, page))
-        propList.insert("text:anchor-page-number", page+1);
-    }
-    propList.insert("text:anchor-type", isParagraph ? "paragraph" : "page");
-    iter = propMap.find("wrap-mode");
-    if (iter != propMap.end())
-    {
-      if (iter->second=="wrapped-to-left")
-        propList.insert("style:wrap", "left");
-      else if (iter->second=="wrapped-to-right")
-        propList.insert("style:wrap", "right");
-      else if (iter->second=="wrapped-to-both")
-        propList.insert("style:wrap", "parallel");
-      else if (iter->second=="above-text")
-      {
-        propList.insert("style:wrap", "dynamic");
-        propList.insert("style:run-through", "foreground");
-      }
-      else if (iter->second=="below-text")
-      {
-        propList.insert("style:wrap", "dynamic");
-        propList.insert("style:run-through", "background");
-      }
-      else
-      {
-        ABW_DEBUG_MSG(("libabw::ABWContentCollector::openFrame: sorry, unknown wrap mode: %s\n", iter->second.c_str()));
-      }
-    }
-    ABWOutputElements &outputElements=isParagraph ? m_outputElements : m_pageOutputElements;
-    outputElements.addOpenFrame(propList);
-
     propList.clear();
     propList.insert("librevenge:mime-type", imIter->second.m_mimeType);
     propList.insert("office:binary-data", imIter->second.m_binaryData);
-    outputElements.addInsertBinaryObject(propList);
+    m_outputElements.addInsertBinaryObject(propList);
 
-    outputElements.addCloseFrame();
     return;
   }
-  if (iter->second=="textbox")
+  else if (iter->second=="textbox")
   {
-    ABW_DEBUG_MSG(("libabw::ABWContentCollector::openFrame: sorry, opening a text box is not defined\n"));
+    m_ps->m_parsingContext=ABW_FRAME_TEXTBOX;
+    propList.clear();
+    m_outputElements.addOpenTextBox(propList);
     return;
   }
+  m_ps->m_parsingContext=ABW_FRAME_UNKNOWN;
   ABW_DEBUG_MSG(("libabw::ABWContentCollector::openFrame: sorry, unknown frame type: %s\n", iter->second.c_str()));
 }
 
-void libabw::ABWContentCollector::closeFrame()
+void libabw::ABWContentCollector::closeFrame(libabw::ABWOutputElements *(&elements), bool &pageFrame)
 {
+  elements=0;
+  pageFrame=false;
+  if (m_ps->m_isNote)
+  {
+    ABW_DEBUG_MSG(("libabw::ABWContentCollector::closeFrame: sorry, oops, sorry, a note is not closed\n"));
+    return;
+  }
+  if (m_ps->m_parsingContext!=ABW_FRAME_IMAGE && m_ps->m_parsingContext!=ABW_FRAME_TEXTBOX)
+    return;
+
+  while (!m_ps->m_tableStates.empty())
+    _closeTable();
+  _closeBlock();
+  m_ps->m_currentListLevel = 0;
+  _changeList(); // flush the list
+
+  if (m_ps->m_parsingContext==ABW_FRAME_TEXTBOX)
+    m_outputElements.addCloseTextBox();
+  m_outputElements.addCloseFrame();
+  elements=&m_outputElements;
+  pageFrame=m_ps->m_isPageFrame;
+}
+
+void libabw::ABWContentCollector::addFrameElements(ABWOutputElements &elements, bool pageFrame)
+{
+  if (pageFrame)
+    m_pageOutputElements.splice(elements);
+  else
+  {
+    _openBlock();
+    m_outputElements.splice(elements);
+  }
 }
 
 void libabw::ABWContentCollector::collectData(const char *, const char *, const librevenge::RVNGBinaryData &)
