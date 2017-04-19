@@ -87,6 +87,9 @@ public:
   void openCell(const char *props);
   void closeCell();
 
+  void openFrame(const char *, const char *, const char *, const char *) {}
+  void closeFrame() {}
+
   void addMetadataEntry(const char *, const char *) {}
 
 private:

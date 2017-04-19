@@ -156,6 +156,9 @@ public:
   void openCell(const char *props);
   void closeCell();
 
+  void openFrame(const char *props, const char *imageId, const char *title, const char *alt);
+  void closeFrame();
+
   void addMetadataEntry(const char *name, const char *value);
 
 private:
@@ -225,6 +228,7 @@ private:
   const std::map<int, int> &m_tableSizes;
   int m_tableCounter;
   ABWOutputElements m_outputElements;
+  ABWOutputElements m_pageOutputElements;
   const std::map<int, ABWListElement *> &m_listElements;
   std::vector<ABWListElement *> m_dummyListElements;
 };

@@ -63,6 +63,8 @@ private:
   void readTable(xmlTextReaderPtr reader);
   void readCell(xmlTextReaderPtr reader);
 
+  void readFrame(xmlTextReaderPtr reader);
+
   librevenge::RVNGInputStream *m_input;
   librevenge::RVNGTextInterface *m_iface;
   ABWCollector *m_collector;

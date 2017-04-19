@@ -148,6 +148,9 @@ public:
   virtual void openCell(const char *props) = 0;
   virtual void closeCell() = 0;
 
+  virtual void openFrame(const char *props, const char *imageId, const char *title, const char *alt) = 0;
+  virtual void closeFrame() = 0;
+
   virtual void addMetadataEntry(const char *name, const char *value) = 0;
 };
 

@@ -435,6 +435,7 @@ libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *
   m_tableSizes(tableSizes),
   m_tableCounter(0),
   m_outputElements(),
+  m_pageOutputElements(),
   m_listElements(listElements),
   m_dummyListElements()
 {
@@ -821,6 +822,7 @@ void libabw::ABWContentCollector::endDocument()
 
     if (m_iface)
     {
+      m_pageOutputElements.write(m_iface);
       m_outputElements.write(m_iface);
       m_iface->endDocument();
     }
@@ -2052,6 +2054,115 @@ void libabw::ABWContentCollector::closeCell()
     _closeTableCell();
     m_ps->m_tableStates.top().m_currentCellProperties.clear();
   }
+}
+
+void libabw::ABWContentCollector::openFrame(const char *props, const char *imageId, const char */*title*/, const char */*alt*/)
+{
+  ABWPropertyMap propMap;
+  if (props)
+    parsePropString(props, propMap);
+  ABWPropertyMap::const_iterator iter = propMap.find("frame-type");
+  if (iter==propMap.end())
+  {
+    ABW_DEBUG_MSG(("libabw::ABWContentCollector::openFrame: can not find the frame type\n"));
+  }
+  if (iter->second=="image")
+  {
+    std::map<std::string, ABWData>::const_iterator imIter;
+    if (imageId) imIter= m_data.find(imageId);
+    if (imIter==m_data.end())
+    {
+      ABW_DEBUG_MSG(("libabw::ABWContentCollector::openFrame: can not find the image\n"));
+      return;
+    }
+
+    librevenge::RVNGPropertyList propList;
+    ABWUnit unit(ABW_NONE);
+    double value(0.0);
+    iter = propMap.find("frame-height");
+    if (iter != propMap.end() && findDouble(iter->second, value, unit) && ABW_IN == unit)
+      propList.insert("svg:height", value);
+    iter = propMap.find("frame-width");
+    if (iter != propMap.end() && findDouble(iter->second, value, unit) && ABW_IN == unit)
+      propList.insert("svg:width", value);
+    bool isParagraph=true;
+    iter = propMap.find("position-to");
+    if (iter != propMap.end())
+    {
+      if (iter->second=="page-above-text" || iter->second=="column-above-text")
+        isParagraph=false;
+      else if (iter->second!="block-above-text")
+      {
+        ABW_DEBUG_MSG(("libabw::ABWContentCollector::openFrame: sorry, unknown pos: %s asume paragraph\n", iter->second.c_str()));
+      }
+    }
+    iter = propMap.find(isParagraph ? "xpos" : "frame-page-xpos");
+    if (iter != propMap.end() && findDouble(iter->second, value, unit) && ABW_IN == unit)
+      propList.insert("svg:x", value);
+    iter = propMap.find(isParagraph ? "ypos" : "frame-page-ypos");
+    if (iter != propMap.end() && findDouble(iter->second, value, unit) && ABW_IN == unit)
+      propList.insert("svg:y", value);
+    if (isParagraph && !m_ps->m_isParagraphOpened && !m_ps->m_isListElementOpened)
+    {
+      _changeList();
+      if (m_ps->m_currentListLevel == 0)
+        _openParagraph();
+      else
+        _openListElement();
+    }
+    else if (!isParagraph)
+    {
+      iter = propMap.find("frame-pref-page");
+      int page=0;
+      if (iter != propMap.end() && findInt(iter->second, page))
+        propList.insert("text:anchor-page-number", page+1);
+    }
+    propList.insert("text:anchor-type", isParagraph ? "paragraph" : "page");
+    iter = propMap.find("wrap-mode");
+    if (iter != propMap.end())
+    {
+      if (iter->second=="wrapped-to-left")
+        propList.insert("style:wrap", "left");
+      else if (iter->second=="wrapped-to-right")
+        propList.insert("style:wrap", "right");
+      else if (iter->second=="wrapped-to-both")
+        propList.insert("style:wrap", "parallel");
+      else if (iter->second=="above-text")
+      {
+        propList.insert("style:wrap", "dynamic");
+        propList.insert("style:run-through", "foreground");
+      }
+      else if (iter->second=="below-text")
+      {
+        propList.insert("style:wrap", "dynamic");
+        propList.insert("style:run-through", "background");
+      }
+      else
+      {
+        ABW_DEBUG_MSG(("libabw::ABWContentCollector::openFrame: sorry, unknown wrap mode: %s\n", iter->second.c_str()));
+      }
+    }
+    ABWOutputElements &outputElements=isParagraph ? m_outputElements : m_pageOutputElements;
+    outputElements.addOpenFrame(propList);
+
+    propList.clear();
+    propList.insert("librevenge:mime-type", imIter->second.m_mimeType);
+    propList.insert("office:binary-data", imIter->second.m_binaryData);
+    outputElements.addInsertBinaryObject(propList);
+
+    outputElements.addCloseFrame();
+    return;
+  }
+  if (iter->second=="textbox")
+  {
+    ABW_DEBUG_MSG(("libabw::ABWContentCollector::openFrame: sorry, opening a text box is not defined\n"));
+    return;
+  }
+  ABW_DEBUG_MSG(("libabw::ABWContentCollector::openFrame: sorry, unknown frame type: %s\n", iter->second.c_str()));
+}
+
+void libabw::ABWContentCollector::closeFrame()
+{
 }
 
 void libabw::ABWContentCollector::collectData(const char *, const char *, const librevenge::RVNGBinaryData &)

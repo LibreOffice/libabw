@@ -352,6 +352,12 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
     if (XML_READER_TYPE_ELEMENT == tokenType)
       readImage(reader);
     break;
+  case XML_FRAME:
+    if (XML_READER_TYPE_ELEMENT == tokenType)
+      readFrame(reader);
+    if (XML_READER_TYPE_END_ELEMENT == tokenType || emptyToken > 0)
+      m_collector->closeFrame();
+    break;
   default:
     break;
   }
@@ -655,6 +661,16 @@ void libabw::ABWParser::readImage(xmlTextReaderPtr reader)
   ABWXMLString dataid = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("dataid"));
   if (m_collector)
     m_collector->insertImage((const char *)dataid, (const char *)props);
+}
+
+void libabw::ABWParser::readFrame(xmlTextReaderPtr reader)
+{
+  ABWXMLString props = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("props"));
+  ABWXMLString imageId = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("strux-image-dataid"));
+  ABWXMLString title = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("title"));
+  ABWXMLString alt = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("alt"));
+  if (m_collector)
+    m_collector->openFrame((const char *)props, (const char *) imageId, (const char *) title, (const char *) alt);
 }
 
 void libabw::ABWParser::readL(xmlTextReaderPtr reader)
