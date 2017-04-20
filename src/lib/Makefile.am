@@ -37,7 +37,6 @@ libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_SOURCES = \
 	ABWParser.cpp \
 	ABWStylesCollector.cpp \
 	ABWXMLHelper.cpp \
-	ABWXMLString.cpp \
 	ABWXMLTokenMap.cpp \
 	ABWZlibStream.cpp \
 	AbiDocument.cpp \
@@ -49,7 +48,6 @@ libabw_@ABW_MAJOR_VERSION@_@ABW_MINOR_VERSION@_la_SOURCES = \
 	ABWParser.h \
 	ABWStylesCollector.h \
 	ABWXMLHelper.h \
-	ABWXMLString.h \
 	ABWXMLTokenMap.h \
 	ABWZlibStream.h \
 	libabw_internal.h

@@ -23,7 +23,6 @@
 #include "ABWStylesCollector.h"
 #include "libabw_internal.h"
 #include "ABWXMLHelper.h"
-#include "ABWXMLString.h"
 #include "ABWXMLTokenMap.h"
 
 

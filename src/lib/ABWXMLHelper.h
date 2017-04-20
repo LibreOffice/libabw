@@ -10,11 +10,29 @@
 #ifndef __ABWXMLHELPER_H__
 #define __ABWXMLHELPER_H__
 
+#include <memory>
+
 #include <librevenge-stream/librevenge-stream.h>
+
 #include <libxml/xmlreader.h>
+#include <libxml/xmlstring.h>
 
 namespace libabw
 {
+
+// An exception-safe wrapper around xmlChar *
+class ABWXMLString
+{
+public:
+  ABWXMLString(xmlChar *xml);
+
+  const xmlChar *get() const;
+
+  operator const char *() const;
+
+private:
+  std::shared_ptr<xmlChar> m_xml;
+};
 
 // create an xmlTextReader pointer from a librevenge::RVNGInputStream pointer
 // needs to be freed using xmlTextReaderFree function.

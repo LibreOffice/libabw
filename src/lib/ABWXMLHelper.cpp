@@ -9,10 +9,13 @@
 
 #include <string.h>
 #include <libxml/xmlIO.h>
-#include <libxml/xmlstring.h>
+#include <libxml/xmlmemory.h>
 #include <librevenge-stream/librevenge-stream.h>
 #include "ABWXMLHelper.h"
 #include "libabw_internal.h"
+
+namespace libabw
+{
 
 namespace
 {
@@ -71,14 +74,31 @@ extern "C" {
 
 } // anonymous namespace
 
+ABWXMLString::ABWXMLString(xmlChar *xml)
+  : m_xml(xml, xmlFree)
+{
+}
+
+const xmlChar *ABWXMLString::get() const
+{
+  return m_xml.get();
+}
+
+ABWXMLString::operator const char *() const
+{
+  return reinterpret_cast<const char *>(m_xml.get());
+}
+
 // xmlTextReader helper function
 
-xmlTextReaderPtr libabw::xmlReaderForStream(librevenge::RVNGInputStream *input)
+xmlTextReaderPtr xmlReaderForStream(librevenge::RVNGInputStream *input)
 {
   xmlTextReaderPtr reader = xmlReaderForIO(abwxmlInputReadFunc, abwxmlInputCloseFunc, (void *)input, 0, 0,
                                            XML_PARSE_NOBLANKS|XML_PARSE_NOENT|XML_PARSE_NONET|XML_PARSE_RECOVER);
   xmlTextReaderSetErrorHandler(reader, abwxmlReaderErrorFunc, 0);
   return reader;
+}
+
 }
 
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */
