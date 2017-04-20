@@ -109,11 +109,13 @@ void ABWXMLErrorWatcher::setError()
 
 // xmlTextReader helper function
 
-xmlTextReaderPtr xmlReaderForStream(librevenge::RVNGInputStream *input, ABWXMLErrorWatcher *watcher)
+std::unique_ptr<xmlTextReader, void(*)(xmlTextReaderPtr)> xmlReaderForStream(librevenge::RVNGInputStream *input, ABWXMLErrorWatcher *watcher)
 {
-  xmlTextReaderPtr reader = xmlReaderForIO(abwxmlInputReadFunc, abwxmlInputCloseFunc, (void *)input, 0, 0,
-                                           XML_PARSE_NOBLANKS|XML_PARSE_NOENT|XML_PARSE_NONET|XML_PARSE_RECOVER);
-  xmlTextReaderSetErrorHandler(reader, abwxmlReaderErrorFunc, watcher);
+  std::unique_ptr<xmlTextReader, void(*)(xmlTextReaderPtr)> reader(
+    xmlReaderForIO(abwxmlInputReadFunc, abwxmlInputCloseFunc, (void *)input, 0, 0,
+                   XML_PARSE_NOBLANKS|XML_PARSE_NOENT|XML_PARSE_NONET|XML_PARSE_RECOVER),
+    xmlFreeTextReader);
+  xmlTextReaderSetErrorHandler(reader.get(), abwxmlReaderErrorFunc, watcher);
   return reader;
 }
 

@@ -7,8 +7,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <memory>
-
 #include <libabw/libabw.h>
 #include "ABWXMLHelper.h"
 #include "ABWParser.h"
@@ -50,11 +48,10 @@ ABWAPI bool libabw::AbiDocument::isFileFormatSupported(librevenge::RVNGInputStre
   ABW_DEBUG_MSG(("AbiDocument::isFileFormatSupported\n"));
   if (!input)
     return false;
-  std::unique_ptr<xmlTextReader, void (*)(xmlTextReaderPtr)> reader(nullptr, xmlFreeTextReader);
   input->seek(0, librevenge::RVNG_SEEK_SET);
   libabw::ABWZlibStream stream(input);
   stream.seek(0, librevenge::RVNG_SEEK_SET);
-  reader.reset(libabw::xmlReaderForStream(&stream));
+  auto reader = libabw::xmlReaderForStream(&stream);
   if (!reader)
     return false;
   int ret = xmlTextReaderRead(reader.get());

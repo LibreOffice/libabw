@@ -188,7 +188,7 @@ bool libabw::ABWParser::processXmlDocument(librevenge::RVNGInputStream *input)
     return false;
 
   ABWXMLErrorWatcher watcher;
-  std::shared_ptr<xmlTextReader> reader(xmlReaderForStream(input, &watcher), xmlFreeTextReader);
+  auto reader(xmlReaderForStream(input, &watcher));
   if (!reader)
     return false;
   int ret = xmlTextReaderRead(reader.get());
