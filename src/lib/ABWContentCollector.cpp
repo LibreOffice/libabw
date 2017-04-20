@@ -20,6 +20,7 @@
 #include "libabw_internal.h"
 
 #define ABW_EPSILON 1.0E-06
+#define MAX_LIST_LEVEL 64 // a safeguard against damaged files
 
 using boost::optional;
 
@@ -592,6 +593,8 @@ void libabw::ABWContentCollector::collectParagraphProperties(const char *level, 
   _closeBlock();
   if (!level || !findInt(level, m_ps->m_currentListLevel) || m_ps->m_currentListLevel < 1)
     m_ps->m_currentListLevel = 0;
+  if (m_ps->m_currentListLevel > MAX_LIST_LEVEL)
+    m_ps->m_currentListLevel = MAX_LIST_LEVEL;
   if (!listid || !findInt(listid, m_ps->m_currentListId) || m_ps->m_currentListId < 0)
     m_ps->m_currentListId = 0;
 
