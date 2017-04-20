@@ -115,7 +115,8 @@ std::unique_ptr<xmlTextReader, void(*)(xmlTextReaderPtr)> xmlReaderForStream(lib
     xmlReaderForIO(abwxmlInputReadFunc, abwxmlInputCloseFunc, (void *)input, 0, 0,
                    XML_PARSE_NOBLANKS|XML_PARSE_NOENT|XML_PARSE_NONET|XML_PARSE_RECOVER),
     xmlFreeTextReader);
-  xmlTextReaderSetErrorHandler(reader.get(), abwxmlReaderErrorFunc, watcher);
+  if (reader)
+    xmlTextReaderSetErrorHandler(reader.get(), abwxmlReaderErrorFunc, watcher);
   return reader;
 }
 
