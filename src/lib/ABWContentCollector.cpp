@@ -2181,7 +2181,7 @@ void libabw::ABWContentCollector::openFrame(const char *props, const char *image
   else if (iter->second=="image")
   {
     m_ps->m_parsingContext=ABW_FRAME_IMAGE;
-    std::map<std::string, ABWData>::const_iterator imIter;
+    std::map<std::string, ABWData>::const_iterator imIter = m_data.end();
     if (imageId) imIter= m_data.find(imageId);
     if (imIter==m_data.end())
     {
