@@ -46,11 +46,12 @@ extern "C" {
   }
 
 #ifdef DEBUG
-  static void abwxmlReaderErrorFunc(void *, const char *message, xmlParserSeverities severity, xmlTextReaderLocatorPtr)
+  static void abwxmlReaderErrorFunc(void *arg, const char *message, xmlParserSeverities severity, xmlTextReaderLocatorPtr)
 #else
-  static void abwxmlReaderErrorFunc(void *, const char *, xmlParserSeverities severity, xmlTextReaderLocatorPtr)
+  static void abwxmlReaderErrorFunc(void *arg, const char *, xmlParserSeverities severity, xmlTextReaderLocatorPtr)
 #endif
   {
+    const auto watcher = reinterpret_cast<ABWXMLErrorWatcher *>(arg);
     switch (severity)
     {
     case XML_PARSER_SEVERITY_VALIDITY_WARNING:
@@ -64,6 +65,8 @@ extern "C" {
       break;
     case XML_PARSER_SEVERITY_ERROR:
       ABW_DEBUG_MSG(("Found xml parser severity error %s\n", message));
+      if (watcher)
+        watcher->setError();
       break;
     default:
       break;
@@ -89,13 +92,28 @@ ABWXMLString::operator const char *() const
   return reinterpret_cast<const char *>(m_xml.get());
 }
 
+ABWXMLErrorWatcher::ABWXMLErrorWatcher()
+  : m_error(false)
+{
+}
+
+bool ABWXMLErrorWatcher::isError() const
+{
+  return m_error;
+}
+
+void ABWXMLErrorWatcher::setError()
+{
+  m_error = true;
+}
+
 // xmlTextReader helper function
 
-xmlTextReaderPtr xmlReaderForStream(librevenge::RVNGInputStream *input)
+xmlTextReaderPtr xmlReaderForStream(librevenge::RVNGInputStream *input, ABWXMLErrorWatcher *watcher)
 {
   xmlTextReaderPtr reader = xmlReaderForIO(abwxmlInputReadFunc, abwxmlInputCloseFunc, (void *)input, 0, 0,
                                            XML_PARSE_NOBLANKS|XML_PARSE_NOENT|XML_PARSE_NONET|XML_PARSE_RECOVER);
-  xmlTextReaderSetErrorHandler(reader, abwxmlReaderErrorFunc, 0);
+  xmlTextReaderSetErrorHandler(reader, abwxmlReaderErrorFunc, watcher);
   return reader;
 }
 
