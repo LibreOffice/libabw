@@ -101,12 +101,10 @@ static int abw_unichar_to_utf8(unsigned c, char *outbuf)
 static void appendUCS4(librevenge::RVNGString &str, unsigned ucs4)
 {
   int charLength = abw_unichar_to_utf8(ucs4, 0);
-  char *utf8 = new char[charLength+1];
+  std::vector<char> utf8(charLength+1);
   utf8[charLength] = '\0';
-  abw_unichar_to_utf8(ucs4, utf8);
-  str.append(utf8);
-
-  delete[] utf8;
+  abw_unichar_to_utf8(ucs4, utf8.data());
+  str.append(utf8.data());
 }
 
 } // anonymous namespace
@@ -146,7 +144,6 @@ libabw::ABWStylesCollector::ABWStylesCollector(std::map<int, int> &tableSizes,
 
 libabw::ABWStylesCollector::~ABWStylesCollector()
 {
-  DELETEP(m_ps);
 }
 
 void libabw::ABWStylesCollector::openTable(const char *)

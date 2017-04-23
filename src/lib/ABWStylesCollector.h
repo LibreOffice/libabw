@@ -10,6 +10,7 @@
 #ifndef __ABWSTYLESCOLLECTOR_H__
 #define __ABWSTYLESCOLLECTOR_H__
 
+#include <memory>
 #include <stack>
 #include <librevenge/librevenge.h>
 #include "ABWCollector.h"
@@ -103,7 +104,7 @@ private:
   std::string _findCellProperty(const char *name);
   void _processList(int id, const char *listDelim, int parentid, int startValue, int type);
 
-  ABWStylesParsingState *m_ps;
+  std::unique_ptr<ABWStylesParsingState> m_ps;
   std::map<int, int> &m_tableSizes;
   std::map<std::string, ABWData> &m_data;
   int m_tableCounter;
