@@ -135,7 +135,7 @@ libabw::ABWStylesParsingState::~ABWStylesParsingState() {}
 
 libabw::ABWStylesCollector::ABWStylesCollector(std::map<int, int> &tableSizes,
                                                std::map<std::string, ABWData> &data,
-                                               std::map<int, ABWListElement *> &listElements) :
+                                               std::map<int, std::shared_ptr<ABWListElement>> &listElements) :
   m_ps(new ABWStylesParsingState),
   m_tableSizes(tableSizes),
   m_data(data),
@@ -216,7 +216,7 @@ void libabw::ABWStylesCollector::_processList(int id, const char *listDelim, int
 
   if ((type >= BULLETED_LIST && type < LAST_BULLETED_LIST) || type == NOT_A_LIST)
   {
-    ABWUnorderedListElement *tmpElement = new ABWUnorderedListElement();
+    auto tmpElement = std::make_shared<ABWUnorderedListElement>();
     switch (type)
     {
     case BULLETED_LIST:
@@ -263,7 +263,7 @@ void libabw::ABWStylesCollector::_processList(int id, const char *listDelim, int
   }
   else
   {
-    ABWOrderedListElement *tmpElement = new ABWOrderedListElement();
+    auto tmpElement = std::make_shared<ABWOrderedListElement>();
     switch (type)
     {
     case NUMBERED_LIST:
@@ -320,7 +320,7 @@ void libabw::ABWStylesCollector::collectList(const char *id, const char *, const
   if (!intId)
     return;
   if (m_listElements[intId])
-    delete m_listElements[intId];
+    m_listElements[intId].reset();
   int intType(0);
   if (!type || !findInt(type, intType) || intType < 0)
     intType = 5;
@@ -346,7 +346,7 @@ void libabw::ABWStylesCollector::collectParagraphProperties(const char *level, c
   if (!listid || !findInt(listid, intListId) || intListId < 0)
     intListId = 0;
 
-  std::map<int, ABWListElement *>::iterator iter = m_listElements.find(intListId);
+  auto iter = m_listElements.find(intListId);
   if (iter == m_listElements.end() || !iter->second)
   {
     ABWPropertyMap::const_iterator i = properties.find("list-style");
@@ -406,7 +406,7 @@ void libabw::ABWStylesCollector::collectParagraphProperties(const char *level, c
   }
   if (iter != m_listElements.end() && iter->second)
   {
-    ABWListElement *listElement = iter->second;
+    const auto &listElement = iter->second;
 
     if (!level || !findInt(level, listElement->m_listLevel) || listElement->m_listLevel < 0)
       listElement->m_listLevel = 0;

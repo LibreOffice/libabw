@@ -32,17 +32,6 @@ namespace libabw
 namespace
 {
 
-static void clearListElements(std::map<int, ABWListElement *> &listElements)
-{
-  for (std::map<int, ABWListElement *>::iterator i = listElements.begin();
-       i != listElements.end(); ++i)
-  {
-    if (i->second)
-      delete i->second;
-  }
-  listElements.clear();
-}
-
 static bool findBool(const std::string &str, bool &res)
 {
   using namespace ::boost::spirit::classic;
@@ -81,11 +70,11 @@ static xmlChar *call_BAD_CAST_OnConst(char const *str)
     Seen corresponds to the list of level that we have already examined,
     it is used to check also for loop
   */
-static int _findAndUpdateListElementId(std::map<int, ABWListElement *> &listElements, int id, std::set<int> &seen)
+static int _findAndUpdateListElementId(std::map<int, std::shared_ptr<ABWListElement>> &listElements, int id, std::set<int> &seen)
 {
   if (listElements.find(id)==listElements.end() || !listElements.find(id)->second)
     return 0;
-  ABWListElement *tmpElement= listElements.find(id)->second;
+  const std::shared_ptr<ABWListElement> &tmpElement= listElements.find(id)->second;
   if (tmpElement->m_listId)
     return tmpElement->m_listId;
   if (seen.find(id)!=seen.end())
@@ -105,14 +94,13 @@ static int _findAndUpdateListElementId(std::map<int, ABWListElement *> &listElem
 }
 
 /** try to update the final list id for each list elements */
-static void updateListElementIds(std::map<int, ABWListElement *> &listElements)
+static void updateListElementIds(std::map<int, std::shared_ptr<ABWListElement>> &listElements)
 {
   std::set<int> seens;
-  for (std::map<int, ABWListElement *>::iterator it=listElements.begin();
-       it!=listElements.end(); ++it)
+  for (const auto &elem : listElements)
   {
-    if (!it->second) continue;
-    _findAndUpdateListElementId(listElements, it->first, seens);
+    if (!elem.second) continue;
+    _findAndUpdateListElementId(listElements, elem.first, seens);
   }
 }
 
@@ -124,7 +112,7 @@ struct ABWParserState
   ~ABWParserState();
   std::map<int, int> m_tableSizes;
   std::map<std::string, ABWData> m_data;
-  std::map<int, ABWListElement *> m_listElements;
+  std::map<int, std::shared_ptr<ABWListElement>> m_listElements;
 
   bool m_inMetadata;
   std::string m_currentMetadataKey;
@@ -145,7 +133,6 @@ ABWParserState::ABWParserState()
 
 ABWParserState::~ABWParserState()
 {
-  clearListElements(m_listElements);
 }
 } // namespace libabw
 

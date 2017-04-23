@@ -45,7 +45,7 @@ class ABWStylesCollector : public ABWCollector
 public:
   ABWStylesCollector(std::map<int, int> &tableSizes,
                      std::map<std::string, ABWData> &data,
-                     std::map<int, ABWListElement *> &listElements);
+                     std::map<int, std::shared_ptr<ABWListElement>> &listElements);
   virtual ~ABWStylesCollector();
 
   // collector functions
@@ -108,7 +108,7 @@ private:
   std::map<int, int> &m_tableSizes;
   std::map<std::string, ABWData> &m_data;
   int m_tableCounter;
-  std::map<int, ABWListElement *> &m_listElements;
+  std::map<int, std::shared_ptr<ABWListElement>> &m_listElements;
 };
 
 } // namespace libabw

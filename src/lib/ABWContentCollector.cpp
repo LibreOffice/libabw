@@ -428,7 +428,7 @@ libabw::ABWContentParsingState::~ABWContentParsingState()
 
 libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes,
                                                  const std::map<std::string, ABWData> &data,
-                                                 const std::map<int, ABWListElement *> &listElements) :
+                                                 const std::map<int, std::shared_ptr<ABWListElement>> &listElements) :
   m_ps(new ABWContentParsingState),
   m_iface(iface),
   m_parsingStates(),
@@ -448,9 +448,6 @@ libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *
 
 libabw::ABWContentCollector::~ABWContentCollector()
 {
-  for (std::vector<ABWListElement *>::iterator iter = m_dummyListElements.begin();
-       iter != m_dummyListElements.end(); ++iter)
-    DELETEP(*iter);
 }
 
 void libabw::ABWContentCollector::collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props)
@@ -2316,7 +2313,7 @@ void libabw::ABWContentCollector::_writeOutDummyListLevels(int oldLevel, int new
   if (oldLevel < newLevel)
   {
     _writeOutDummyListLevels(oldLevel, newLevel-1);
-    m_dummyListElements.push_back(new ABWUnorderedListElement());
+    m_dummyListElements.push_back(std::make_shared<ABWUnorderedListElement>());
     m_dummyListElements.back()->m_listLevel = newLevel;
     m_ps->m_listLevels.push(std::make_pair(newLevel, m_dummyListElements.back()));
     librevenge::RVNGPropertyList propList;
@@ -2329,7 +2326,7 @@ void libabw::ABWContentCollector::_recurseListLevels(int oldLevel, int newLevel,
 {
   if (oldLevel >= newLevel)
     return;
-  std::map<int, ABWListElement *>::const_iterator iter = m_listElements.find(newListId);
+  const auto iter = m_listElements.find(newListId);
   if (iter != m_listElements.end() && iter->second)
   {
     if (iter->second->m_parentId)

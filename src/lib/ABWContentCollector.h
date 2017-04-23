@@ -112,7 +112,7 @@ struct ABWContentParsingState
   bool m_isFirstTextInListElement;
 
   std::stack<ABWContentTableState> m_tableStates;
-  std::stack<std::pair<int, ABWListElement *> > m_listLevels;
+  std::stack<std::pair<int, std::shared_ptr<ABWListElement>>> m_listLevels;
 };
 
 class ABWContentCollector : public ABWCollector
@@ -120,7 +120,7 @@ class ABWContentCollector : public ABWCollector
 public:
   ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes,
                       const std::map<std::string, ABWData> &data,
-                      const std::map<int, ABWListElement *> &listElements);
+                      const std::map<int, std::shared_ptr<ABWListElement>> &listElements);
   virtual ~ABWContentCollector();
 
   // collector functions
@@ -240,8 +240,8 @@ private:
   int m_tableCounter;
   ABWOutputElements m_outputElements;
   ABWOutputElements m_pageOutputElements;
-  const std::map<int, ABWListElement *> &m_listElements;
-  std::vector<ABWListElement *> m_dummyListElements;
+  const std::map<int, std::shared_ptr<ABWListElement>> &m_listElements;
+  std::vector<std::shared_ptr<ABWListElement>> m_dummyListElements;
 };
 
 } // namespace libabw
