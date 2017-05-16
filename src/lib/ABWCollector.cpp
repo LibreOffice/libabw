@@ -13,7 +13,7 @@
 
 bool libabw::findInt(const std::string &str, int &res)
 {
-  using namespace ::boost::spirit::classic;
+  using namespace boost::spirit::classic;
 
   if (str.empty())
     return false;
@@ -47,7 +47,7 @@ void libabw::parsePropString(const std::string &str, ABWPropertyMap &props)
 
 bool libabw::findDouble(const std::string &str, double &res, ABWUnit &unit)
 {
-  using namespace ::boost::spirit::classic;
+  using namespace boost::spirit::classic;
 
   if (str.empty())
     return false;

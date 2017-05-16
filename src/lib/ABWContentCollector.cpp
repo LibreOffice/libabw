@@ -244,7 +244,7 @@ void parseLang(const std::string &langStr, optional<std::string> &lang, optional
 
 static std::string decodeUrl(const std::string &str)
 {
-  using namespace ::boost::spirit::classic;
+  using namespace boost::spirit::classic;
 
   if (str.empty())
     return str;

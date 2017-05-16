@@ -34,7 +34,7 @@ namespace
 
 static bool findBool(const std::string &str, bool &res)
 {
-  using namespace ::boost::spirit::classic;
+  using namespace boost::spirit::classic;
 
   if (str.empty())
     return false;
