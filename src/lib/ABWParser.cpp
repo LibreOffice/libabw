@@ -16,7 +16,7 @@
 #include <libxml/xmlIO.h>
 #include <libxml/xmlstring.h>
 #include <librevenge-stream/librevenge-stream.h>
-#include <boost/spirit/include/classic.hpp>
+#include <boost/spirit/include/qi.hpp>
 #include "ABWParser.h"
 #include "ABWContentCollector.h"
 #include "ABWStylesCollector.h"
@@ -33,28 +33,21 @@ namespace
 
 static bool findBool(const std::string &str, bool &res)
 {
-  using namespace boost::spirit::classic;
+  using namespace boost::spirit::qi;
 
   if (str.empty())
     return false;
 
-  return parse(str.c_str(),
-               //  Begin grammar
-               (
-                 str_p("true")[assign_a(res,true)]
-                 |
-                 str_p("false")[assign_a(res,false)]
-                 |
-                 str_p("yes")[assign_a(res,true)]
-                 |
-                 str_p("no")[assign_a(res,false)]
-                 |
-                 str_p("TRUE")[assign_a(res,true)]
-                 |
-                 str_p("FALSE")[assign_a(res,false)]
-               ) >> end_p,
-               //  End grammar
-               space_p).full;
+  symbols<char, bool> bools;
+  bools.add
+  ("true", true)
+  ("false", false)
+  ("yes", true)
+  ("no", false)
+  ;
+
+  auto it = str.cbegin();
+  return phrase_parse(it, str.cend(), no_case[bools], space, res) && it == str.cend();
 }
 
 // small function needed to call the xml BAD_CAST on a char const *

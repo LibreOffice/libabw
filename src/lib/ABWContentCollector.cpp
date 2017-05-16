@@ -12,7 +12,7 @@
 #include <memory>
 #include <sstream>
 
-#include <boost/spirit/include/classic.hpp>
+#include <boost/spirit/include/qi.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
 #include <librevenge/librevenge.h>
@@ -244,31 +244,22 @@ void parseLang(const std::string &langStr, optional<std::string> &lang, optional
 
 static std::string decodeUrl(const std::string &str)
 {
-  using namespace boost::spirit::classic;
+  using namespace boost::spirit::qi;
 
   if (str.empty())
     return str;
 
   // look for a hexadecimal number of 2 digits
-  uint_parser<char,16,2,2> urlhex_p;
+  uint_parser<char,16,2,2> urlhex;
   std::string decoded_string;
-  if (parse(str.c_str(),
-            //  Begin grammar
-            *(
-              (ch_p('%') >>
-               (
-                 urlhex_p[push_back_a(decoded_string)]
-                 |
-                 ch_p('%')[push_back_a(decoded_string)]
-               )
-              )
-              |
-              (
-                (~ch_p('%'))[push_back_a(decoded_string)]
-              )
-            ) >> end_p,
-            //  End grammar
-            space_p).full)
+  auto it = str.cbegin();
+  if (parse(it, str.cend(),
+            +(
+              (lit('%') >> (char_('%') | urlhex))
+              | (!lit('%') >> char_)
+            ),
+            decoded_string)
+      && it == str.cend())
     return decoded_string;
 
   return str;

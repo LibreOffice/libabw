@@ -8,23 +8,20 @@
  */
 
 #include <boost/algorithm/string.hpp>
-#include <boost/spirit/include/classic.hpp>
+#include <boost/optional.hpp>
+#include <boost/spirit/include/qi.hpp>
+
 #include "ABWCollector.h"
 
 bool libabw::findInt(const std::string &str, int &res)
 {
-  using namespace boost::spirit::classic;
+  using namespace boost::spirit::qi;
 
   if (str.empty())
     return false;
 
-  return parse(str.c_str(),
-               //  Begin grammar
-               (
-                 int_p[assign_a(res)]
-               ) >> end_p,
-               //  End grammar
-               space_p).full;
+  auto it = str.cbegin();
+  return phrase_parse(it, str.cend(), int_, space, res) && it == str.cend();
 }
 
 void libabw::parsePropString(const std::string &str, ABWPropertyMap &props)
@@ -47,67 +44,38 @@ void libabw::parsePropString(const std::string &str, ABWPropertyMap &props)
 
 bool libabw::findDouble(const std::string &str, double &res, ABWUnit &unit)
 {
-  using namespace boost::spirit::classic;
+  using namespace boost::spirit::qi;
 
   if (str.empty())
     return false;
 
-  unit = ABW_NONE;
+  symbols<char, std::pair<ABWUnit, double>> units;
+  units.add
+  ("cm", {ABW_IN, 2.54})
+  ("inch", {ABW_IN, 1.0})
+  ("in", {ABW_IN, 1.0})
+  ("mm", {ABW_IN, 25.4})
+  ("pi", {ABW_IN, 6.0})
+  ("pt", {ABW_IN, 72.0})
+  ("px", {ABW_IN, 72.0})
+  ("%", {ABW_PERCENT, 100.0})
+  ;
 
-  if (!parse(str.c_str(),
-             //  Begin grammar
-             (
-               real_p[assign_a(res)] >>
-               (
-                 str_p("cm")[assign_a(unit,ABW_CM)]
-                 |
-                 str_p("inch")[assign_a(unit,ABW_IN)]
-                 |
-                 str_p("in")[assign_a(unit,ABW_IN)]
-                 |
-                 str_p("mm")[assign_a(unit,ABW_MM)]
-                 |
-                 str_p("pi")[assign_a(unit,ABW_PI)]
-                 |
-                 str_p("pt")[assign_a(unit,ABW_PT)]
-                 |
-                 str_p("px")[assign_a(unit,ABW_PT)]
-                 |
-                 str_p("%")[assign_a(unit,ABW_PERCENT)]
-                 |
-                 eps_p
-               )
-             ) >> end_p,
-             //  End grammar
-             space_p).full)
-  {
+  boost::optional<std::pair<ABWUnit, double>> u;
+
+  auto it = str.cbegin();
+  if (!phrase_parse(it, str.cend(), double_ >> -units, space, res, u) || it != str.cend())
     return false;
-  }
 
-  if (unit == ABW_PERCENT)
-    res /= 100.0;
-  if (unit == ABW_PI)
+  if (u)
   {
-    res = res / 6.0;
-    unit = ABW_IN;
+    unit = get(u).first;
+    res /= get(u).second;
   }
-  if (unit == ABW_PT || unit == ABW_PX)
+  else
   {
-    res = res / 72.0;
-    unit = ABW_IN;
-  }
-  if (unit == ABW_CM)
-  {
-    res = res / 2.54;
-    unit = ABW_IN;
-  }
-  if (unit == ABW_MM)
-  {
-    res = res / 25.4;
-    unit = ABW_IN;
-  }
-  if (unit == ABW_NONE)
     unit = ABW_PERCENT;
+  }
 
   return true;
 }

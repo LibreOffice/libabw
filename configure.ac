@@ -265,7 +265,8 @@ AC_SUBST(ZLIB_LIBS)
 AC_CHECK_HEADERS(
 	boost/algorithm/string.hpp \
 	boost/optional.hpp \
-	boost/spirit/include/classic.hpp,
+	boost/spirit/include/qi.hpp \
+        ,
 	[],
 	[AC_MSG_ERROR([Required boost headers not found.])],
 	[]
