@@ -7,8 +7,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <boost/spirit/include/classic.hpp>
+#include <vector>
+
 #include <boost/algorithm/string.hpp>
+
 #include <librevenge/librevenge.h>
 #include "ABWStylesCollector.h"
 #include "libabw_internal.h"

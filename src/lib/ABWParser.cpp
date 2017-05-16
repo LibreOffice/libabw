@@ -17,7 +17,6 @@
 #include <libxml/xmlstring.h>
 #include <librevenge-stream/librevenge-stream.h>
 #include <boost/spirit/include/classic.hpp>
-#include <boost/algorithm/string.hpp>
 #include "ABWParser.h"
 #include "ABWContentCollector.h"
 #include "ABWStylesCollector.h"
