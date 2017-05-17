@@ -160,8 +160,8 @@ void libabw::ABWStylesCollector::closeTable()
 {
   if (!m_ps->m_tableStates.empty())
   {
-    m_tableSizes[m_ps->m_tableStates.top().m_currentTableId]
-      = m_ps->m_tableStates.top().m_currentTableWidth;
+    auto curWidth = m_ps->m_tableStates.top().m_currentTableWidth;
+    m_tableSizes[m_ps->m_tableStates.top().m_currentTableId] = curWidth > 0 ? curWidth : 0;
     m_ps->m_tableStates.pop();
   }
 }
