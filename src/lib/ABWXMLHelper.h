@@ -34,23 +34,29 @@ private:
   std::shared_ptr<xmlChar> m_xml;
 };
 
-class ABWXMLErrorWatcher
+class ABWXMLProgressWatcher
 {
-  ABWXMLErrorWatcher(const ABWXMLErrorWatcher &) = delete;
-  ABWXMLErrorWatcher &operator=(const ABWXMLErrorWatcher &) = delete;
+  ABWXMLProgressWatcher(const ABWXMLProgressWatcher &) = delete;
+  ABWXMLProgressWatcher &operator=(const ABWXMLProgressWatcher &) = delete;
 
 public:
-  ABWXMLErrorWatcher();
+  ABWXMLProgressWatcher();
 
-  bool isError() const;
-  void setError();
+  void setReader(xmlTextReaderPtr reader);
+
+  bool isStuck() const;
+  void signalError();
 
 private:
-  bool m_error;
+  xmlTextReaderPtr m_reader;
+  int m_line;
+  int m_col;
+  bool m_wasError;
+  bool m_isStuck;
 };
 
 // create an xmlTextReader pointer from a librevenge::RVNGInputStream pointer
-std::unique_ptr<xmlTextReader, void(*)(xmlTextReaderPtr)> xmlReaderForStream(librevenge::RVNGInputStream *input, ABWXMLErrorWatcher *watcher = 0);
+std::unique_ptr<xmlTextReader, void(*)(xmlTextReaderPtr)> xmlReaderForStream(librevenge::RVNGInputStream *input, ABWXMLProgressWatcher *watcher = 0);
 
 } // namespace libabw
 

@@ -51,7 +51,7 @@ extern "C" {
   static void abwxmlReaderErrorFunc(void *arg, const char *, xmlParserSeverities severity, xmlTextReaderLocatorPtr)
 #endif
   {
-    const auto watcher = reinterpret_cast<ABWXMLErrorWatcher *>(arg);
+    const auto watcher = reinterpret_cast<ABWXMLProgressWatcher *>(arg);
     switch (severity)
     {
     case XML_PARSER_SEVERITY_VALIDITY_WARNING:
@@ -66,7 +66,7 @@ extern "C" {
     case XML_PARSER_SEVERITY_ERROR:
       ABW_DEBUG_MSG(("Found xml parser severity error %s\n", message));
       if (watcher)
-        watcher->setError();
+        watcher->signalError();
       break;
     default:
       break;
@@ -92,29 +92,50 @@ ABWXMLString::operator const char *() const
   return reinterpret_cast<const char *>(m_xml.get());
 }
 
-ABWXMLErrorWatcher::ABWXMLErrorWatcher()
-  : m_error(false)
+ABWXMLProgressWatcher::ABWXMLProgressWatcher()
+  : m_reader(nullptr)
+  , m_line(0)
+  , m_col(0)
+  , m_wasError(false)
+  , m_isStuck(false)
 {
 }
 
-bool ABWXMLErrorWatcher::isError() const
+void ABWXMLProgressWatcher::setReader(xmlTextReaderPtr reader)
 {
-  return m_error;
+  m_reader = reader;
 }
 
-void ABWXMLErrorWatcher::setError()
+bool ABWXMLProgressWatcher::isStuck() const
 {
-  m_error = true;
+  return m_isStuck;
+}
+
+void ABWXMLProgressWatcher::signalError()
+{
+  if (m_reader && !m_isStuck)
+  {
+    const int line = m_line;
+    const int col = m_col;
+    const bool checkStuck = m_wasError;
+    m_wasError = true;
+    m_line = xmlTextReaderGetParserLineNumber(m_reader);
+    m_col = xmlTextReaderGetParserColumnNumber(m_reader);
+    if (checkStuck)
+      m_isStuck = line == m_line && col == m_col;
+  }
 }
 
 // xmlTextReader helper function
 
-std::unique_ptr<xmlTextReader, void(*)(xmlTextReaderPtr)> xmlReaderForStream(librevenge::RVNGInputStream *input, ABWXMLErrorWatcher *watcher)
+std::unique_ptr<xmlTextReader, void(*)(xmlTextReaderPtr)> xmlReaderForStream(librevenge::RVNGInputStream *input, ABWXMLProgressWatcher *watcher)
 {
   std::unique_ptr<xmlTextReader, void(*)(xmlTextReaderPtr)> reader(
     xmlReaderForIO(abwxmlInputReadFunc, abwxmlInputCloseFunc, (void *)input, 0, 0,
                    XML_PARSE_NOBLANKS|XML_PARSE_NOENT|XML_PARSE_NONET|XML_PARSE_RECOVER),
     xmlFreeTextReader);
+  if (watcher)
+    watcher->setReader(reader.get());
   if (reader)
     xmlTextReaderSetErrorHandler(reader.get(), abwxmlReaderErrorFunc, watcher);
   return reader;

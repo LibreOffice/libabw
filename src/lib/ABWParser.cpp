@@ -166,12 +166,12 @@ bool libabw::ABWParser::processXmlDocument(librevenge::RVNGInputStream *input)
   if (!input)
     return false;
 
-  ABWXMLErrorWatcher watcher;
+  ABWXMLProgressWatcher watcher;
   auto reader(xmlReaderForStream(input, &watcher));
   if (!reader)
     return false;
   int ret = xmlTextReaderRead(reader.get());
-  while (1 == ret && !watcher.isError())
+  while (1 == ret && !watcher.isStuck())
   {
     processXmlNode(reader.get());
     ret = xmlTextReaderRead(reader.get());
@@ -179,7 +179,7 @@ bool libabw::ABWParser::processXmlDocument(librevenge::RVNGInputStream *input)
 
   if (m_collector)
     m_collector->endDocument();
-  return !watcher.isError();
+  return ret == 1 && !watcher.isStuck();
 }
 
 void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
