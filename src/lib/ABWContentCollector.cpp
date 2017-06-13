@@ -1885,14 +1885,14 @@ bool libabw::ABWContentCollector::_convertFieldDTFormat(std::string const &dtFor
     {
     case 'Y':
       list.insert("number:style", "long");
-    // fall-through intended
+    /* FALLTHRU */
     case 'y':
       list.insert("librevenge:value-type", "year");
       propVect.append(list);
       break;
     case 'B':
       list.insert("number:style", "long");
-    // fall-through intended
+    /* FALLTHRU */
     case 'b':
     case 'h':
       list.insert("librevenge:value-type", "month");
@@ -1905,14 +1905,14 @@ bool libabw::ABWContentCollector::_convertFieldDTFormat(std::string const &dtFor
       break;
     case 'e':
       list.insert("number:style", "long");
-    // fall-through intended
+    /* FALLTHRU */
     case 'd':
       list.insert("librevenge:value-type", "day");
       propVect.append(list);
       break;
     case 'A':
       list.insert("number:style", "long");
-    // fall-through intended
+    /* FALLTHRU */
     case 'a':
       list.insert("librevenge:value-type", "day-of-week");
       propVect.append(list);
@@ -1920,7 +1920,7 @@ bool libabw::ABWContentCollector::_convertFieldDTFormat(std::string const &dtFor
 
     case 'H':
       list.insert("number:style", "long");
-    // fall-through intended
+    /* FALLTHRU */
     case 'I':
       list.insert("librevenge:value-type", "hours");
       propVect.append(list);
