@@ -179,7 +179,7 @@ bool libabw::ABWParser::processXmlDocument(librevenge::RVNGInputStream *input)
 
   if (m_collector)
     m_collector->endDocument();
-  return ret == 1 && !watcher.isStuck();
+  return ret == 0 && !watcher.isStuck();
 }
 
 void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
