@@ -356,7 +356,7 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
     {
       const xmlChar *name1 = xmlTextReaderConstName(reader);
       const xmlChar *value1 = xmlTextReaderConstValue(reader);
-      printf(" %s=\"%s\"", name1, value1);
+      ABW_DEBUG_MSG((" %s=\"%s\"", name1, value1));
     }
   }
 
