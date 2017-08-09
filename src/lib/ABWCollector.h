@@ -76,9 +76,9 @@ struct ABWOrderedListElement : public ABWListElement
 {
   ABWOrderedListElement()
     : ABWListElement(), m_numFormat(), m_numPrefix(), m_numSuffix(), m_startValue(-1) {}
-  ~ABWOrderedListElement() {}
-  void writeOut(librevenge::RVNGPropertyList &propList) const;
-  ABWListType getType() const
+  ~ABWOrderedListElement() override {}
+  void writeOut(librevenge::RVNGPropertyList &propList) const override;
+  ABWListType getType() const override
   {
     return ABW_ORDERED;
   }
@@ -93,9 +93,9 @@ struct ABWUnorderedListElement : public ABWListElement
 {
   ABWUnorderedListElement()
     : ABWListElement(), m_bulletChar() {}
-  ~ABWUnorderedListElement() {}
-  void writeOut(librevenge::RVNGPropertyList &propList) const;
-  ABWListType getType() const
+  ~ABWUnorderedListElement() override {}
+  void writeOut(librevenge::RVNGPropertyList &propList) const override;
+  ABWListType getType() const override
   {
     return ABW_UNORDERED;
   }

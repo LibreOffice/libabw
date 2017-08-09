@@ -46,56 +46,56 @@ public:
   ABWStylesCollector(std::map<int, int> &tableSizes,
                      std::map<std::string, ABWData> &data,
                      std::map<int, std::shared_ptr<ABWListElement>> &listElements);
-  virtual ~ABWStylesCollector();
+  ~ABWStylesCollector() override;
 
   // collector functions
 
-  void collectTextStyle(const char *, const char *, const char *, const char *) {}
-  void collectDocumentProperties(const char *) {}
+  void collectTextStyle(const char *, const char *, const char *, const char *) override {}
+  void collectDocumentProperties(const char *) override {}
   void collectParagraphProperties(const char *level, const char *listid, const char *parentid,
-                                  const char *style, const char *props);
+                                  const char *style, const char *props) override;
   void collectSectionProperties(const char *, const char *, const char *, const char *,
                                 const char *, const char *, const char *, const char *,
-                                const char *) {}
-  void collectCharacterProperties(const char *, const char *) {}
-  void collectPageSize(const char *, const char *, const char *, const char *) {}
-  void closeParagraphOrListElement() {}
-  void closeSpan() {}
-  void openLink(const char *) {}
-  void closeLink() {}
-  void openFoot(const char *) {}
-  void closeFoot() {}
-  void openEndnote(const char *) {}
-  void closeEndnote() {}
-  void openField(const char *, const char *) {}
-  void closeField() {}
-  void endSection() {}
-  void startDocument() {}
-  void endDocument() {}
-  void insertLineBreak() {}
-  void insertColumnBreak() {}
-  void insertPageBreak() {}
-  void insertText(const char *) {}
-  void insertImage(const char *, const char *) {}
+                                const char *) override {}
+  void collectCharacterProperties(const char *, const char *) override {}
+  void collectPageSize(const char *, const char *, const char *, const char *) override {}
+  void closeParagraphOrListElement() override {}
+  void closeSpan() override {}
+  void openLink(const char *) override {}
+  void closeLink() override {}
+  void openFoot(const char *) override {}
+  void closeFoot() override {}
+  void openEndnote(const char *) override {}
+  void closeEndnote() override {}
+  void openField(const char *, const char *) override {}
+  void closeField() override {}
+  void endSection() override {}
+  void startDocument() override {}
+  void endDocument() override {}
+  void insertLineBreak() override {}
+  void insertColumnBreak() override {}
+  void insertPageBreak() override {}
+  void insertText(const char *) override {}
+  void insertImage(const char *, const char *) override {}
 
-  void collectData(const char *name, const char *mimeType, const librevenge::RVNGBinaryData &data);
-  void collectHeaderFooter(const char *, const char *) {}
+  void collectData(const char *name, const char *mimeType, const librevenge::RVNGBinaryData &data) override;
+  void collectHeaderFooter(const char *, const char *) override {}
   void collectList(const char *id, const char *listDecimal, const char *listDelim,
-                   const char *parentid, const char *startValue, const char *type);
+                   const char *parentid, const char *startValue, const char *type) override;
 
-  void openTable(const char *props);
-  void closeTable();
-  void openCell(const char *props);
-  void closeCell();
+  void openTable(const char *props) override;
+  void closeTable() override;
+  void openCell(const char *props) override;
+  void closeCell() override;
 
-  void openFrame(const char *, const char *, const char *, const char *) {}
-  void closeFrame(ABWOutputElements *(&elements), bool &)
+  void openFrame(const char *, const char *, const char *, const char *) override {}
+  void closeFrame(ABWOutputElements *(&elements), bool &) override
   {
     elements=0;
   }
-  void addFrameElements(ABWOutputElements &, bool) {}
+  void addFrameElements(ABWOutputElements &, bool) override {}
 
-  void addMetadataEntry(const char *, const char *) {}
+  void addMetadataEntry(const char *, const char *) override {}
 
 private:
   ABWStylesCollector(const ABWStylesCollector &);

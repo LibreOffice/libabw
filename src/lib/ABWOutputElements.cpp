@@ -41,170 +41,170 @@ class ABWCloseEndnoteElement : public ABWOutputElement
 {
 public:
   ABWCloseEndnoteElement() {}
-  ~ABWCloseEndnoteElement() {}
+  ~ABWCloseEndnoteElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 };
 
 class ABWCloseFooterElement : public ABWOutputElement
 {
 public:
   ABWCloseFooterElement() {}
-  ~ABWCloseFooterElement() {}
+  ~ABWCloseFooterElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 };
 
 class ABWCloseFootnoteElement : public ABWOutputElement
 {
 public:
   ABWCloseFootnoteElement() {}
-  ~ABWCloseFootnoteElement() {}
+  ~ABWCloseFootnoteElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 };
 
 class ABWCloseFrameElement : public ABWOutputElement
 {
 public:
   ABWCloseFrameElement() {}
-  ~ABWCloseFrameElement() {}
+  ~ABWCloseFrameElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 };
 
 class ABWCloseHeaderElement : public ABWOutputElement
 {
 public:
   ABWCloseHeaderElement() {}
-  ~ABWCloseHeaderElement() {}
+  ~ABWCloseHeaderElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 };
 
 class ABWCloseLinkElement : public ABWOutputElement
 {
 public:
   ABWCloseLinkElement() {}
-  ~ABWCloseLinkElement() {}
+  ~ABWCloseLinkElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 };
 
 class ABWCloseListElementElement : public ABWOutputElement
 {
 public:
   ABWCloseListElementElement() {}
-  ~ABWCloseListElementElement() {}
+  ~ABWCloseListElementElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 };
 
 class ABWCloseOrderedListLevelElement : public ABWOutputElement
 {
 public:
   ABWCloseOrderedListLevelElement() {}
-  ~ABWCloseOrderedListLevelElement() {}
+  ~ABWCloseOrderedListLevelElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 };
 
 class ABWClosePageSpanElement : public ABWOutputElement
 {
 public:
   ABWClosePageSpanElement() {}
-  ~ABWClosePageSpanElement() {}
+  ~ABWClosePageSpanElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 };
 
 class ABWCloseParagraphElement : public ABWOutputElement
 {
 public:
   ABWCloseParagraphElement() {}
-  ~ABWCloseParagraphElement() {}
+  ~ABWCloseParagraphElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 };
 
 class ABWCloseSectionElement : public ABWOutputElement
 {
 public:
   ABWCloseSectionElement() {}
-  ~ABWCloseSectionElement() {}
+  ~ABWCloseSectionElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 };
 
 class ABWCloseSpanElement : public ABWOutputElement
 {
 public:
   ABWCloseSpanElement() {}
-  ~ABWCloseSpanElement() {}
+  ~ABWCloseSpanElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 };
 
 class ABWCloseTableElement : public ABWOutputElement
 {
 public:
   ABWCloseTableElement() {}
-  ~ABWCloseTableElement() {}
+  ~ABWCloseTableElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 };
 
 class ABWCloseTableCellElement : public ABWOutputElement
 {
 public:
   ABWCloseTableCellElement() {}
-  ~ABWCloseTableCellElement() {}
+  ~ABWCloseTableCellElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 };
 
 class ABWCloseTableRowElement : public ABWOutputElement
 {
 public:
   ABWCloseTableRowElement() {}
-  ~ABWCloseTableRowElement() {}
+  ~ABWCloseTableRowElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 };
 
 class ABWCloseTextBoxElement : public ABWOutputElement
 {
 public:
   ABWCloseTextBoxElement() {}
-  ~ABWCloseTextBoxElement() {}
+  ~ABWCloseTextBoxElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 };
 
 class ABWCloseUnorderedListLevelElement : public ABWOutputElement
 {
 public:
   ABWCloseUnorderedListLevelElement() {}
-  ~ABWCloseUnorderedListLevelElement() {}
+  ~ABWCloseUnorderedListLevelElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 };
 
 class ABWInsertBinaryObjectElement : public ABWOutputElement
@@ -212,10 +212,10 @@ class ABWInsertBinaryObjectElement : public ABWOutputElement
 public:
   ABWInsertBinaryObjectElement(const librevenge::RVNGPropertyList &propList) :
     m_propList(propList) {}
-  ~ABWInsertBinaryObjectElement() {}
+  ~ABWInsertBinaryObjectElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -225,10 +225,10 @@ class ABWInsertFieldElement : public ABWOutputElement
 public:
   ABWInsertFieldElement(const librevenge::RVNGPropertyList &propList) :
     m_propList(propList) {}
-  ~ABWInsertFieldElement() {}
+  ~ABWInsertFieldElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -238,10 +238,10 @@ class ABWInsertCoveredTableCellElement : public ABWOutputElement
 public:
   ABWInsertCoveredTableCellElement(const librevenge::RVNGPropertyList &propList) :
     m_propList(propList) {}
-  ~ABWInsertCoveredTableCellElement() {}
+  ~ABWInsertCoveredTableCellElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -250,30 +250,30 @@ class ABWInsertLineBreakElement : public ABWOutputElement
 {
 public:
   ABWInsertLineBreakElement() {}
-  ~ABWInsertLineBreakElement() {}
+  ~ABWInsertLineBreakElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 };
 
 class ABWInsertSpaceElement : public ABWOutputElement
 {
 public:
   ABWInsertSpaceElement() {}
-  ~ABWInsertSpaceElement() {}
+  ~ABWInsertSpaceElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 };
 
 class ABWInsertTabElement : public ABWOutputElement
 {
 public:
   ABWInsertTabElement() {}
-  ~ABWInsertTabElement() {}
+  ~ABWInsertTabElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 };
 
 class ABWInsertTextElement : public ABWOutputElement
@@ -281,10 +281,10 @@ class ABWInsertTextElement : public ABWOutputElement
 public:
   ABWInsertTextElement(const librevenge::RVNGString &text) :
     m_text(text) {}
-  ~ABWInsertTextElement() {}
+  ~ABWInsertTextElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   librevenge::RVNGString m_text;
 };
@@ -294,10 +294,10 @@ class ABWOpenEndnoteElement : public ABWOutputElement
 public:
   ABWOpenEndnoteElement(const librevenge::RVNGPropertyList &propList) :
     m_propList(propList) {}
-  ~ABWOpenEndnoteElement() {}
+  ~ABWOpenEndnoteElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -307,10 +307,10 @@ class ABWOpenFooterElement : public ABWOutputElement
 public:
   ABWOpenFooterElement(const librevenge::RVNGPropertyList &propList) :
     m_propList(propList) {}
-  ~ABWOpenFooterElement() {}
+  ~ABWOpenFooterElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -320,10 +320,10 @@ class ABWOpenFootnoteElement : public ABWOutputElement
 public:
   ABWOpenFootnoteElement(const librevenge::RVNGPropertyList &propList) :
     m_propList(propList) {}
-  ~ABWOpenFootnoteElement() {}
+  ~ABWOpenFootnoteElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -333,10 +333,10 @@ class ABWOpenFrameElement : public ABWOutputElement
 public:
   ABWOpenFrameElement(const librevenge::RVNGPropertyList &propList) :
     m_propList(propList) {}
-  ~ABWOpenFrameElement() {}
+  ~ABWOpenFrameElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -346,10 +346,10 @@ class ABWOpenHeaderElement : public ABWOutputElement
 public:
   ABWOpenHeaderElement(const librevenge::RVNGPropertyList &propList) :
     m_propList(propList) {}
-  ~ABWOpenHeaderElement() {}
+  ~ABWOpenHeaderElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -359,10 +359,10 @@ class ABWOpenLinkElement : public ABWOutputElement
 public:
   ABWOpenLinkElement(const librevenge::RVNGPropertyList &propList) :
     m_propList(propList) {}
-  ~ABWOpenLinkElement() {}
+  ~ABWOpenLinkElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -372,10 +372,10 @@ class ABWOpenListElementElement : public ABWOutputElement
 public:
   ABWOpenListElementElement(const librevenge::RVNGPropertyList &propList) :
     m_propList(propList) {}
-  ~ABWOpenListElementElement() {}
+  ~ABWOpenListElementElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -385,10 +385,10 @@ class ABWOpenOrderedListLevelElement : public ABWOutputElement
 public:
   ABWOpenOrderedListLevelElement(const librevenge::RVNGPropertyList &propList) :
     m_propList(propList) {}
-  ~ABWOpenOrderedListLevelElement() {}
+  ~ABWOpenOrderedListLevelElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -408,10 +408,10 @@ public:
     m_headerLeft(headerLeft),
     m_headerFirst(headerFirst),
     m_headerLast(headerLast) {}
-  ~ABWOpenPageSpanElement() {}
+  ~ABWOpenPageSpanElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   void _writeElements(librevenge::RVNGTextInterface *iface, int id,
                       const OutputElementsMap_t *elements) const;
@@ -431,10 +431,10 @@ class ABWOpenParagraphElement : public ABWOutputElement
 public:
   ABWOpenParagraphElement(const librevenge::RVNGPropertyList &propList) :
     m_propList(propList) {}
-  ~ABWOpenParagraphElement() {}
+  ~ABWOpenParagraphElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -444,10 +444,10 @@ class ABWOpenSectionElement : public ABWOutputElement
 public:
   ABWOpenSectionElement(const librevenge::RVNGPropertyList &propList) :
     m_propList(propList) {}
-  ~ABWOpenSectionElement() {}
+  ~ABWOpenSectionElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -457,10 +457,10 @@ class ABWOpenSpanElement : public ABWOutputElement
 public:
   ABWOpenSpanElement(const librevenge::RVNGPropertyList &propList) :
     m_propList(propList) {}
-  ~ABWOpenSpanElement() {}
+  ~ABWOpenSpanElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -470,10 +470,10 @@ class ABWOpenTableElement : public ABWOutputElement
 public:
   ABWOpenTableElement(const librevenge::RVNGPropertyList &propList) :
     m_propList(propList) {}
-  ~ABWOpenTableElement() {}
+  ~ABWOpenTableElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -483,10 +483,10 @@ class ABWOpenTableCellElement : public ABWOutputElement
 public:
   ABWOpenTableCellElement(const librevenge::RVNGPropertyList &propList) :
     m_propList(propList) {}
-  ~ABWOpenTableCellElement() {}
+  ~ABWOpenTableCellElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -496,10 +496,10 @@ class ABWOpenTableRowElement : public ABWOutputElement
 public:
   ABWOpenTableRowElement(const librevenge::RVNGPropertyList &propList) :
     m_propList(propList) {}
-  ~ABWOpenTableRowElement() {}
+  ~ABWOpenTableRowElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -509,10 +509,10 @@ class ABWOpenTextBoxElement : public ABWOutputElement
 public:
   ABWOpenTextBoxElement(const librevenge::RVNGPropertyList &propList) :
     m_propList(propList) {}
-  ~ABWOpenTextBoxElement() {}
+  ~ABWOpenTextBoxElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   librevenge::RVNGPropertyList m_propList;
 };
@@ -522,10 +522,10 @@ class ABWOpenUnorderedListLevelElement : public ABWOutputElement
 public:
   ABWOpenUnorderedListLevelElement(const librevenge::RVNGPropertyList &propList) :
     m_propList(propList) {}
-  ~ABWOpenUnorderedListLevelElement() {}
+  ~ABWOpenUnorderedListLevelElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
-             const OutputElementsMap_t *headers) const;
+             const OutputElementsMap_t *headers) const override;
 private:
   librevenge::RVNGPropertyList m_propList;
 };

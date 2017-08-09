@@ -121,51 +121,51 @@ public:
   ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes,
                       const std::map<std::string, ABWData> &data,
                       const std::map<int, std::shared_ptr<ABWListElement>> &listElements);
-  virtual ~ABWContentCollector();
+  ~ABWContentCollector() override;
 
   // collector functions
 
-  void collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props);
-  void collectDocumentProperties(const char *props);
-  void collectParagraphProperties(const char *level, const char *listid, const char *parentid, const char *style, const char *props);
+  void collectTextStyle(const char *name, const char *basedon, const char *followedby, const char *props) override;
+  void collectDocumentProperties(const char *props) override;
+  void collectParagraphProperties(const char *level, const char *listid, const char *parentid, const char *style, const char *props) override;
   void collectSectionProperties(const char *footer, const char *footerLeft, const char *footerFirst, const char *footerLast,
                                 const char *header, const char *headerLeft, const char *headerFirst, const char *headerLast,
-                                const char *props);
-  void collectCharacterProperties(const char *style, const char *props);
-  void collectPageSize(const char *width, const char *height, const char *units, const char *pageScale);
-  void closeParagraphOrListElement();
-  void closeSpan();
-  void openLink(const char *href);
-  void closeLink();
-  void openFoot(const char *id);
-  void closeFoot();
-  void openEndnote(const char *id);
-  void closeEndnote();
-  void openField(const char *type, const char *id);
-  void closeField();
-  void endSection();
-  void startDocument();
-  void endDocument();
-  void insertLineBreak();
-  void insertColumnBreak();
-  void insertPageBreak();
-  void insertText(const char *text);
-  void insertImage(const char *dataid, const char *props);
-  void collectList(const char *, const char *, const char *, const char *, const char *, const char *) {}
+                                const char *props) override;
+  void collectCharacterProperties(const char *style, const char *props) override;
+  void collectPageSize(const char *width, const char *height, const char *units, const char *pageScale) override;
+  void closeParagraphOrListElement() override;
+  void closeSpan() override;
+  void openLink(const char *href) override;
+  void closeLink() override;
+  void openFoot(const char *id) override;
+  void closeFoot() override;
+  void openEndnote(const char *id) override;
+  void closeEndnote() override;
+  void openField(const char *type, const char *id) override;
+  void closeField() override;
+  void endSection() override;
+  void startDocument() override;
+  void endDocument() override;
+  void insertLineBreak() override;
+  void insertColumnBreak() override;
+  void insertPageBreak() override;
+  void insertText(const char *text) override;
+  void insertImage(const char *dataid, const char *props) override;
+  void collectList(const char *, const char *, const char *, const char *, const char *, const char *) override {}
 
-  void collectData(const char *name, const char *mimeType, const librevenge::RVNGBinaryData &data);
-  void collectHeaderFooter(const char *id, const char *type);
+  void collectData(const char *name, const char *mimeType, const librevenge::RVNGBinaryData &data) override;
+  void collectHeaderFooter(const char *id, const char *type) override;
 
-  void openTable(const char *props);
-  void closeTable();
-  void openCell(const char *props);
-  void closeCell();
+  void openTable(const char *props) override;
+  void closeTable() override;
+  void openCell(const char *props) override;
+  void closeCell() override;
 
-  void openFrame(const char *props, const char *imageId, const char *title, const char *alt);
-  void closeFrame(ABWOutputElements *(&elements), bool &pageFrame);
-  void addFrameElements(ABWOutputElements &elements, bool pageFrame);
+  void openFrame(const char *props, const char *imageId, const char *title, const char *alt) override;
+  void closeFrame(ABWOutputElements *(&elements), bool &pageFrame) override;
+  void addFrameElements(ABWOutputElements &elements, bool pageFrame) override;
 
-  void addMetadataEntry(const char *name, const char *value);
+  void addMetadataEntry(const char *name, const char *value) override;
 
 private:
   ABWContentCollector(const ABWContentCollector &);
