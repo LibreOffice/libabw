@@ -823,7 +823,7 @@ void libabw::ABWOpenPageSpanElement::_writeElements(librevenge::RVNGTextInterfac
 
   for (OutputElements_t::const_iterator iterVec = iterMap->second.begin();
        iterVec != iterMap->second.end(); ++iterVec)
-    (*iterVec)->write(iface, 0, 0);
+    (*iterVec)->write(iface, nullptr, nullptr);
 }
 
 void libabw::ABWOpenParagraphElement::write(librevenge::RVNGTextInterface *iface,
@@ -893,7 +893,7 @@ void libabw::ABWOpenUnorderedListLevelElement::write(librevenge::RVNGTextInterfa
 // ABWOutputElements
 
 libabw::ABWOutputElements::ABWOutputElements()
-  : m_bodyElements(), m_headerElements(), m_footerElements(), m_elements(0)
+  : m_bodyElements(), m_headerElements(), m_footerElements(), m_elements(nullptr)
 {
   m_elements = &m_bodyElements;
 }

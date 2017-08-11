@@ -665,7 +665,7 @@ void libabw::ABWParser::readCloseFrame()
 {
   if (!m_collector)
     return;
-  ABWOutputElements *elements=0;
+  ABWOutputElements *elements=nullptr;
   bool pageFrame=false;
   m_collector->closeFrame(elements,pageFrame);
   if (m_state->m_inStyleParsing)

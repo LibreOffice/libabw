@@ -80,7 +80,7 @@ static bool getInflatedBuffer(librevenge::RVNGInputStream *input, std::vector<un
 
 ABWZlibStream::ABWZlibStream(librevenge::RVNGInputStream *input) :
   librevenge::RVNGInputStream(),
-  m_input(0),
+  m_input(nullptr),
   m_offset(0),
   m_buffer()
 {
@@ -104,7 +104,7 @@ const unsigned char *ABWZlibStream::read(unsigned long numBytes, unsigned long &
   numBytesRead = 0;
 
   if (numBytes == 0)
-    return 0;
+    return nullptr;
 
   unsigned long numBytesToRead;
 
@@ -116,7 +116,7 @@ const unsigned char *ABWZlibStream::read(unsigned long numBytes, unsigned long &
   numBytesRead = numBytesToRead; // about as paranoid as we can be..
 
   if (numBytesToRead == 0)
-    return 0;
+    return nullptr;
 
   long oldOffset = m_offset;
   m_offset += numBytesToRead;

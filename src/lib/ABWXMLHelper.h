@@ -56,7 +56,7 @@ private:
 };
 
 // create an xmlTextReader pointer from a librevenge::RVNGInputStream pointer
-std::unique_ptr<xmlTextReader, void(*)(xmlTextReaderPtr)> xmlReaderForStream(librevenge::RVNGInputStream *input, ABWXMLProgressWatcher *watcher = 0);
+std::unique_ptr<xmlTextReader, void(*)(xmlTextReaderPtr)> xmlReaderForStream(librevenge::RVNGInputStream *input, ABWXMLProgressWatcher *watcher = nullptr);
 
 } // namespace libabw
 

@@ -2193,7 +2193,7 @@ void libabw::ABWContentCollector::openFrame(const char *props, const char *image
 
 void libabw::ABWContentCollector::closeFrame(libabw::ABWOutputElements *(&elements), bool &pageFrame)
 {
-  elements=0;
+  elements=nullptr;
   pageFrame=false;
   if (m_ps->m_isNote)
   {

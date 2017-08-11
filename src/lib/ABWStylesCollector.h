@@ -91,7 +91,7 @@ public:
   void openFrame(const char *, const char *, const char *, const char *) override {}
   void closeFrame(ABWOutputElements *(&elements), bool &) override
   {
-    elements=0;
+    elements=nullptr;
   }
   void addFrameElements(ABWOutputElements &, bool) override {}
 

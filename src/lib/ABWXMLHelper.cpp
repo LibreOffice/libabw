@@ -131,7 +131,7 @@ void ABWXMLProgressWatcher::signalError()
 std::unique_ptr<xmlTextReader, void(*)(xmlTextReaderPtr)> xmlReaderForStream(librevenge::RVNGInputStream *input, ABWXMLProgressWatcher *watcher)
 {
   std::unique_ptr<xmlTextReader, void(*)(xmlTextReaderPtr)> reader(
-    xmlReaderForIO(abwxmlInputReadFunc, abwxmlInputCloseFunc, (void *)input, 0, 0,
+    xmlReaderForIO(abwxmlInputReadFunc, abwxmlInputCloseFunc, (void *)input, nullptr, nullptr,
                    XML_PARSE_NOBLANKS|XML_PARSE_NOENT|XML_PARSE_NONET|XML_PARSE_RECOVER),
     xmlFreeTextReader);
   if (watcher)
