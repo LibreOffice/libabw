@@ -32,11 +32,11 @@ void libabw::parsePropString(const std::string &str, ABWPropertyMap &props)
   std::string propString(boost::trim_copy(str));
   std::vector<std::string> strVec;
   boost::algorithm::split(strVec, propString, boost::is_any_of(";"), boost::token_compress_on);
-  for (std::vector<std::string>::size_type i = 0; i < strVec.size(); ++i)
+  for (auto &i : strVec)
   {
-    boost::algorithm::trim(strVec[i]);
+    boost::algorithm::trim(i);
     std::vector<std::string> tmpVec;
-    boost::algorithm::split(tmpVec, strVec[i], boost::is_any_of(":"), boost::token_compress_on);
+    boost::algorithm::split(tmpVec, i, boost::is_any_of(":"), boost::token_compress_on);
     if (tmpVec.size() == 2)
       props[tmpVec[0]] = tmpVec[1];
   }

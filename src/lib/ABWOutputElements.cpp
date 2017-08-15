@@ -821,9 +821,8 @@ void libabw::ABWOpenPageSpanElement::_writeElements(librevenge::RVNGTextInterfac
   if (iterMap == elements->end() || iterMap->second.empty())
     return;
 
-  for (OutputElements_t::const_iterator iterVec = iterMap->second.begin();
-       iterVec != iterMap->second.end(); ++iterVec)
-    (*iterVec)->write(iface, nullptr, nullptr);
+  for (const auto &iterVec : iterMap->second)
+    iterVec->write(iface, nullptr, nullptr);
 }
 
 void libabw::ABWOpenParagraphElement::write(librevenge::RVNGTextInterface *iface,

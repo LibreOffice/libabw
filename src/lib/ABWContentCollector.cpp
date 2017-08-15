@@ -126,12 +126,12 @@ void parseTableColumns(const std::string &str, librevenge::RVNGPropertyListVecto
   std::vector<std::string> strVec;
 
   boost::algorithm::split(strVec, propString, boost::is_any_of("/"), boost::token_compress_on);
-  for (std::vector<std::string>::size_type i = 0; i < strVec.size(); ++i)
+  for (auto &i : strVec)
   {
     ABWUnit unit(ABW_NONE);
     double value(0.0);
-    boost::algorithm::trim(strVec[i]);
-    if (findDouble(strVec[i], value, unit) || ABW_IN != unit)
+    boost::algorithm::trim(i);
+    if (findDouble(i, value, unit) || ABW_IN != unit)
     {
       librevenge::RVNGPropertyList propList;
       propList.insert("style:column-width", value);
@@ -207,11 +207,11 @@ void parseTabStops(const std::string &str, librevenge::RVNGPropertyListVector &t
   std::string sTabStops(boost::trim_copy_if(str, boost::is_any_of(", ")));
   std::vector<std::string> strVec;
   boost::algorithm::split(strVec, sTabStops, boost::is_any_of(","), boost::token_compress_on);
-  for (std::vector<std::string>::size_type i = 0; i < strVec.size(); ++i)
+  for (auto &i : strVec)
   {
-    boost::trim(strVec[i]);
+    boost::trim(i);
     librevenge::RVNGPropertyList tabStop;
-    if (parseTabStop(strVec[i], tabStop))
+    if (parseTabStop(i, tabStop))
       tabStops.append(tabStop);
   }
 }
@@ -462,8 +462,8 @@ void libabw::ABWContentCollector::_recurseTextProperties(const char *name, ABWPr
       _recurseTextProperties(iter->second.basedon.c_str(), styleProps);
     if (iter != m_textStyles.end())
     {
-      for (ABWPropertyMap::const_iterator i = iter->second.properties.begin(); i != iter->second.properties.end(); ++i)
-        styleProps[i->first] = i->second;
+      for (const auto &propertie : iter->second.properties)
+        styleProps[propertie.first] = propertie.second;
     }
 
     // Styles based on "Heading X" style are recognized as headings.
@@ -1283,9 +1283,8 @@ void libabw::ABWContentCollector::_openSpan()
     sValue = _findCharacterProperty("text-decoration");
     std::vector<std::string> listDecorations;
     boost::split(listDecorations, sValue, boost::is_any_of(" "), boost::token_compress_on);
-    for (size_t j=0; j<listDecorations.size(); ++j)
+    for (const auto &decoration : listDecorations)
     {
-      std::string const &decoration=listDecorations[j];
       if (decoration == "underline")
       {
         propList.insert("style:text-underline-type", "single");
