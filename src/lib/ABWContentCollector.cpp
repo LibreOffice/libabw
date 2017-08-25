@@ -7,6 +7,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <cassert>
 #include <locale>
 #include <memory>
@@ -845,6 +849,13 @@ void libabw::ABWContentCollector::_setMetadata()
   if (!prop.empty())
     propList.insert("meta:initial-creator", prop.c_str());
 
+#ifdef VERSION
+  const std::string version(VERSION);
+#else
+  const std::string version("unknown");
+#endif
+  std::string generator = "libabw/" + version;
+  propList.insert("meta:generator", generator.c_str());
   if (m_iface)
     m_iface->setDocumentMetaData(propList);
 }
