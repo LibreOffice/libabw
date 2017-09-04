@@ -830,7 +830,7 @@ void libabw::ABWContentCollector::_setMetadata()
 {
   librevenge::RVNGPropertyList propList;
 
-  const std::string dcKeys[] = { "creator", "language", "publisher", "source", "subject", "title", "type" };
+  const std::string dcKeys[] = { "language", "publisher", "source", "subject", "title", "type" };
 
   for (std::size_t i = 0; i != ABW_NUM_ELEMENTS(dcKeys); ++i)
   {
@@ -845,7 +845,7 @@ void libabw::ABWContentCollector::_setMetadata()
   if (!prop.empty())
     propList.insert("meta:keyword", prop.c_str());
 
-  prop = _findMetadataEntry("meta:initial-creator");
+  prop = _findMetadataEntry("dc.creator");
   if (!prop.empty())
     propList.insert("meta:initial-creator", prop.c_str());
 
