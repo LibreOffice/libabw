@@ -232,18 +232,14 @@ AM_MISSING_PROG([PERL], [perl])
 # ===============
 # Find librevenge
 # ===============
-PKG_CHECK_MODULES([REVENGE],[
-	librevenge-0.0
-])
+PKG_CHECK_MODULES([REVENGE],[librevenge-0.0])
 AC_SUBST([REVENGE_CFLAGS])
 AC_SUBST([REVENGE_LIBS])
 
 # ============
 # Find libxml2
 # ============
-PKG_CHECK_MODULES([LIBXML],[
-	libxml-2.0
-])
+PKG_CHECK_MODULES([LIBXML],[libxml-2.0])
 AC_SUBST([LIBXML_CFLAGS])
 AC_SUBST([LIBXML_LIBS])
 
@@ -288,12 +284,8 @@ AC_ARG_ENABLE([fuzzers],
 AM_CONDITIONAL(BUILD_FUZZERS, [test "x$enable_fuzzers" = "xyes"])
 
 AS_IF([test "x$enable_tools" = "xyes" -o "x$enable_fuzzers" = "xyes"], [
-	PKG_CHECK_MODULES([REVENGE_GENERATORS],[
-		librevenge-generators-0.0
-	])
-	PKG_CHECK_MODULES([REVENGE_STREAM],[
-		librevenge-stream-0.0
-	])
+	PKG_CHECK_MODULES([REVENGE_GENERATORS],[librevenge-generators-0.0])
+	PKG_CHECK_MODULES([REVENGE_STREAM],[librevenge-stream-0.0])
 ])
 AC_SUBST([REVENGE_GENERATORS_CFLAGS])
 AC_SUBST([REVENGE_GENERATORS_LIBS])
