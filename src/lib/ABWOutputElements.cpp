@@ -817,7 +817,7 @@ void libabw::ABWOpenPageSpanElement::_writeElements(librevenge::RVNGTextInterfac
   if (!elements || id < 0 || !iface)
     return;
 
-  OutputElementsMap_t::const_iterator iterMap = elements->find(id);
+  auto iterMap = elements->find(id);
   if (iterMap == elements->end() || iterMap->second.empty())
     return;
 

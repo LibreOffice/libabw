@@ -191,14 +191,14 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
   int emptyToken = xmlTextReaderIsEmptyElement(reader);
   if (XML_READER_TYPE_SIGNIFICANT_WHITESPACE == tokenType)
   {
-    const char *text = (const char *)xmlTextReaderConstValue(reader);
+    const auto *text = (const char *)xmlTextReaderConstValue(reader);
     if (!m_state->m_inMetadata && text && text[0]==' ' && text[1]==0)
       m_collector->insertText(text);
     return;
   }
   else if (XML_READER_TYPE_TEXT == tokenType)
   {
-    const char *text = (const char *)xmlTextReaderConstValue(reader);
+    const auto *text = (const char *)xmlTextReaderConstValue(reader);
     ABW_DEBUG_MSG(("ABWParser::processXmlNode: text %s\n", text));
     if (m_state->m_inMetadata)
     {

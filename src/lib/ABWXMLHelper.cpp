@@ -29,7 +29,7 @@ extern "C" {
 
   static int abwxmlInputReadFunc(void *context, char *buffer, int len)
   {
-    librevenge::RVNGInputStream *input = (librevenge::RVNGInputStream *)context;
+    auto *input = (librevenge::RVNGInputStream *)context;
 
     if ((!input) || (!buffer) || (len < 0))
       return -1;

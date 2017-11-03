@@ -273,7 +273,7 @@ std::string findProperty(const ABWPropertyMap &propMap, const char *const name)
 {
   if (!name)
     return std::string();
-  ABWPropertyMap::const_iterator iter = propMap.find(name);
+  auto iter = propMap.find(name);
   if (iter != propMap.end())
     return iter->second;
   return std::string();
@@ -1460,8 +1460,8 @@ void libabw::ABWContentCollector::_openTable()
 
   librevenge::RVNGPropertyListVector tmpColumns;
   parseTableColumns(_findTableProperty("table-column-props"), tmpColumns);
-  unsigned numColumns = unsigned(tmpColumns.count());
-  std::map<int, int>::const_iterator iter = m_tableSizes.find(m_ps->m_tableStates.top().m_currentTableId);
+  auto numColumns = unsigned(tmpColumns.count());
+  auto iter = m_tableSizes.find(m_ps->m_tableStates.top().m_currentTableId);
   if (iter != m_tableSizes.end())
     numColumns = unsigned(iter->second);
   librevenge::RVNGPropertyListVector columns;
@@ -2175,7 +2175,7 @@ void libabw::ABWContentCollector::openFrame(const char *props, const char *image
   else if (iter->second=="image")
   {
     m_ps->m_parsingContext=ABW_FRAME_IMAGE;
-    std::map<std::string, ABWData>::const_iterator imIter = m_data.end();
+    auto imIter = m_data.end();
     if (imageId) imIter= m_data.find(imageId);
     if (imIter==m_data.end())
     {
@@ -2251,7 +2251,7 @@ void libabw::ABWContentCollector::insertImage(const char *dataid, const char *pr
     parsePropString(props, properties);
   if (dataid)
   {
-    std::map<std::string, ABWData>::const_iterator iter = m_data.find(dataid);
+    auto iter = m_data.find(dataid);
     if (iter != m_data.end())
     {
       librevenge::RVNGPropertyList propList;

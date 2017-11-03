@@ -89,7 +89,7 @@ static int abw_unichar_to_utf8(unsigned c, char *outbuf)
 
   if (outbuf)
   {
-    for (unsigned char i = (unsigned char)(len - 1); i > 0; --i)
+    for (auto i = (unsigned char)(len - 1); i > 0; --i)
     {
       outbuf[i] = (char)((c & 0x3f) | 0x80);
       c >>= 6;
