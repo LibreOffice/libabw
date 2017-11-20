@@ -7,6 +7,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <limits>
 #include <vector>
 
 #include <boost/algorithm/string.hpp>
@@ -182,7 +183,12 @@ void libabw::ABWStylesCollector::openCell(const char *props)
     {
       int leftAttach(0);
       int rightAttach(0);
-      if (findInt(_findCellProperty("left-attach"), leftAttach) && findInt(_findCellProperty("right-attach"), rightAttach))
+      if (findInt(_findCellProperty("left-attach"), leftAttach)
+          && findInt(_findCellProperty("right-attach"), rightAttach)
+          && leftAttach >= 0
+          && rightAttach > leftAttach
+          && rightAttach - leftAttach < std::numeric_limits<int>::max() - m_ps->m_tableStates.top().m_currentTableWidth
+         )
         m_ps->m_tableStates.top().m_currentTableWidth += rightAttach - leftAttach;
       else
         m_ps->m_tableStates.top().m_currentTableWidth++;
