@@ -175,7 +175,11 @@ void libabw::ABWStylesCollector::openCell(const char *props)
       parsePropString(props, m_ps->m_tableStates.top().m_currentCellProperties);
     int currentRow(0);
     if (!findInt(_findCellProperty("top-attach"), currentRow))
-      currentRow = m_ps->m_tableStates.top().m_currentTableRow + 1;
+    {
+      currentRow = m_ps->m_tableStates.top().m_currentTableRow;
+      if (currentRow < std::numeric_limits<int>::max())
+        ++currentRow;
+    }
     if (m_ps->m_tableStates.top().m_currentTableRow < currentRow)
       m_ps->m_tableStates.top().m_currentTableRow = currentRow;
 
