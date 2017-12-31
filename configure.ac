@@ -7,7 +7,7 @@ AC_PREREQ([2.65])
 # ====================
 m4_define([libabw_version_major],[0])
 m4_define([libabw_version_minor],[1])
-m4_define([libabw_version_micro],[1])
+m4_define([libabw_version_micro],[2])
 m4_define([libabw_version],[libabw_version_major.libabw_version_minor.libabw_version_micro])
 
 # =============

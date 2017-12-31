@@ -1,3 +1,19 @@
+libabw 0.1.2
+
+- Fix several issues identified by Coverity.
+- Parse paragraph and cell borders.
+- Improve parsing of lists.
+- Fix build with boost >= 1.59.
+- Make the output of abw2* --help more compatible with help2man.
+- Fix various problems when parsing broken files found by oss-fuzz.
+- Require C++11 for build.
+- Parse date/time and some metadata fields.
+- Parse floating (not inline) images. (tdf#74463)
+- Parse text boxes.
+- Drop outdated MSVC project files.
+- Set minimal width/height of inline images (which usually do not have
+  dimensions set in the file) to 1 inch. (tdf#74462)
+
 libabw 0.1.1
 
 - Use symbol visibility on Linux. The library only exports the two public
