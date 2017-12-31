@@ -2260,9 +2260,13 @@ void libabw::ABWContentCollector::insertImage(const char *dataid, const char *pr
       ABWPropertyMap::const_iterator i = properties.find("height");
       if (i != properties.end() && findDouble(i->second, value, unit) && ABW_IN == unit)
         propList.insert("svg:height", value);
+      else
+        propList.insert("fo:min-height", 1.0);
       i = properties.find("width");
       if (i != properties.end() && findDouble(i->second, value, unit) && ABW_IN == unit)
         propList.insert("svg:width", value);
+      else
+        propList.insert("fo:min-width", 1.0);
       propList.insert("text:anchor-type", "as-char");
 
       m_outputElements.addOpenFrame(propList);
