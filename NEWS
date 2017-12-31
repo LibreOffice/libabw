@@ -7,7 +7,7 @@ libabw 0.1.2
 - Make the output of abw2* --help more compatible with help2man.
 - Fix various problems when parsing broken files found by oss-fuzz.
 - Require C++11 for build.
-- Parse date/time and some metadata fields.
+- Parse fields. (tdf#74466)
 - Parse floating (not inline) images. (tdf#74463)
 - Parse text boxes.
 - Drop outdated MSVC project files.
