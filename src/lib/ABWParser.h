@@ -40,18 +40,18 @@ private:
   // Functions to read the AWML document structure
 
   bool processXmlDocument(librevenge::RVNGInputStream *input);
-  void processXmlNode(xmlTextReaderPtr reader);
+  int processXmlNode(xmlTextReaderPtr reader);
 
   void readAbiword(xmlTextReaderPtr reader);
   void readM(xmlTextReaderPtr reader);
-  void readHistory(xmlTextReaderPtr reader);
-  void readRevisions(xmlTextReaderPtr reader);
-  void readIgnoredWords(xmlTextReaderPtr reader);
+  int readHistory(xmlTextReaderPtr reader);
+  int readRevisions(xmlTextReaderPtr reader);
+  int readIgnoredWords(xmlTextReaderPtr reader);
   void readPageSize(xmlTextReaderPtr reader);
   void readSection(xmlTextReaderPtr reader);
   void readA(xmlTextReaderPtr reader);
   void readC(xmlTextReaderPtr reader);
-  void readD(xmlTextReaderPtr reader);
+  int readD(xmlTextReaderPtr reader);
   void readL(xmlTextReaderPtr reader);
   void readP(xmlTextReaderPtr reader);
   void readS(xmlTextReaderPtr reader);

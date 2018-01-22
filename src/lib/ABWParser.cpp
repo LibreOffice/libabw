@@ -173,8 +173,9 @@ bool libabw::ABWParser::processXmlDocument(librevenge::RVNGInputStream *input)
   int ret = xmlTextReaderRead(reader.get());
   while (1 == ret && !watcher.isStuck())
   {
-    processXmlNode(reader.get());
-    ret = xmlTextReaderRead(reader.get());
+    ret = processXmlNode(reader.get());
+    if (ret == 1)
+      ret = xmlTextReaderRead(reader.get());
   }
 
   if (m_collector)
@@ -182,10 +183,10 @@ bool libabw::ABWParser::processXmlDocument(librevenge::RVNGInputStream *input)
   return ret == 0 && !watcher.isStuck();
 }
 
-void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
+int libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
 {
   if (!reader)
-    return;
+    return -1;
   int tokenId = getElementToken(reader);
   int tokenType = xmlTextReaderNodeType(reader);
   int emptyToken = xmlTextReaderIsEmptyElement(reader);
@@ -194,7 +195,7 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
     const auto *text = (const char *)xmlTextReaderConstValue(reader);
     if (!m_state->m_inMetadata && text && text[0]==' ' && text[1]==0)
       m_collector->insertText(text);
-    return;
+    return 1;
   }
   else if (XML_READER_TYPE_TEXT == tokenType)
   {
@@ -217,6 +218,9 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
       m_collector->insertText(text);
     }
   }
+
+  int ret = 1;
+
   switch (tokenId)
   {
   case XML_ABIWORD:
@@ -235,15 +239,15 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
     break;
   case XML_HISTORY:
     if (XML_READER_TYPE_ELEMENT == tokenType)
-      readHistory(reader);
+      ret = readHistory(reader);
     break;
   case XML_REVISIONS:
     if (XML_READER_TYPE_ELEMENT == tokenType)
-      readRevisions(reader);
+      ret = readRevisions(reader);
     break;
   case XML_IGNOREDWORDS:
     if (XML_READER_TYPE_ELEMENT == tokenType)
-      readIgnoredWords(reader);
+      ret = readIgnoredWords(reader);
     break;
   case XML_S:
     if (XML_READER_TYPE_ELEMENT == tokenType)
@@ -266,7 +270,7 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
     break;
   case XML_D:
     if (XML_READER_TYPE_ELEMENT == tokenType)
-      readD(reader);
+      ret = readD(reader);
     break;
   case XML_P:
     if (XML_READER_TYPE_ELEMENT == tokenType)
@@ -367,6 +371,8 @@ void libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
     ABW_DEBUG_MSG((" %s\n", value));
   }
 #endif
+
+  return ret;
 }
 
 int libabw::ABWParser::getElementToken(xmlTextReaderPtr reader)
@@ -388,7 +394,7 @@ void libabw::ABWParser::readM(xmlTextReaderPtr reader)
     m_state->m_currentMetadataKey = static_cast<const char *>(key);
 }
 
-void libabw::ABWParser::readHistory(xmlTextReaderPtr reader)
+int libabw::ABWParser::readHistory(xmlTextReaderPtr reader)
 {
   int ret = 1;
   int tokenId = XML_TOKEN_INVALID;
@@ -409,9 +415,10 @@ void libabw::ABWParser::readHistory(xmlTextReaderPtr reader)
     }
   }
   while ((XML_HISTORY != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
+  return ret;
 }
 
-void libabw::ABWParser::readRevisions(xmlTextReaderPtr reader)
+int libabw::ABWParser::readRevisions(xmlTextReaderPtr reader)
 {
   int ret = 1;
   int tokenId = XML_TOKEN_INVALID;
@@ -433,9 +440,10 @@ void libabw::ABWParser::readRevisions(xmlTextReaderPtr reader)
     }
   }
   while ((XML_REVISIONS != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
+  return ret;
 }
 
-void libabw::ABWParser::readIgnoredWords(xmlTextReaderPtr reader)
+int libabw::ABWParser::readIgnoredWords(xmlTextReaderPtr reader)
 {
   int ret = 1;
   int tokenId = XML_TOKEN_INVALID;
@@ -456,6 +464,7 @@ void libabw::ABWParser::readIgnoredWords(xmlTextReaderPtr reader)
     }
   }
   while ((XML_IGNOREDWORDS != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
+  return ret;
 }
 
 void libabw::ABWParser::readPageSize(xmlTextReaderPtr reader)
@@ -498,7 +507,7 @@ void libabw::ABWParser::readSection(xmlTextReaderPtr reader)
   }
 }
 
-void libabw::ABWParser::readD(xmlTextReaderPtr reader)
+int libabw::ABWParser::readD(xmlTextReaderPtr reader)
 {
   ABWXMLString name = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("name"));
   ABWXMLString mimeType = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("mime-type"));
@@ -545,6 +554,7 @@ void libabw::ABWParser::readD(xmlTextReaderPtr reader)
     }
   }
   while ((XML_D != tokenId || XML_READER_TYPE_END_ELEMENT != tokenType) && 1 == ret);
+  return ret;
 }
 
 void libabw::ABWParser::readS(xmlTextReaderPtr reader)
