@@ -10,7 +10,6 @@
 #include <zlib.h>
 #include "ABWZlibStream.h"
 #include <string.h>  // for memcpy
-#include <stdio.h>
 
 #define BLOCK_SIZE 16384
 

@@ -8,7 +8,6 @@
  */
 
 #include "ABWOutputElements.h"
-#include "libabw_internal.h"
 
 namespace
 {

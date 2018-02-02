@@ -14,7 +14,6 @@
 
 #include <librevenge/librevenge.h>
 #include "ABWStylesCollector.h"
-#include "libabw_internal.h"
 
 #define ABW_EPSILON 1.0E-06
 
