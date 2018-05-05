@@ -120,9 +120,9 @@ AM_CONDITIONAL(PLATFORM_DARWIN, [test "x$platform_darwin" = "xyes"])
 # Check for cflags
 # ================
 AC_ARG_ENABLE([werror],
-	[AS_HELP_STRING([--disable-werror], [Treat all warnings as errors, useful for development])],
+	[AS_HELP_STRING([--enable-werror], [Treat all warnings as errors, useful for development])],
 	[enable_werror="$enableval"],
-	[enable_werror=yes]
+	[enable_werror=no]
 )
 AS_IF([test x"$enable_werror" != "xno"], [
 	CFLAGS="$CFLAGS -Werror"
