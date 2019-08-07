@@ -51,6 +51,7 @@ struct ABWData
   ABWData(const librevenge::RVNGString &mimeType, const librevenge::RVNGBinaryData binaryData)
     : m_mimeType(mimeType), m_binaryData(binaryData) {}
   ~ABWData() {}
+  ABWData &operator=(const ABWData &data) = default;
 
   librevenge::RVNGString m_mimeType;
   librevenge::RVNGBinaryData m_binaryData;
