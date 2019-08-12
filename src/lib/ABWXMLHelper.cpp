@@ -132,7 +132,7 @@ std::unique_ptr<xmlTextReader, void(*)(xmlTextReaderPtr)> xmlReaderForStream(lib
 {
   std::unique_ptr<xmlTextReader, void(*)(xmlTextReaderPtr)> reader(
     xmlReaderForIO(abwxmlInputReadFunc, abwxmlInputCloseFunc, (void *)input, nullptr, nullptr,
-                   XML_PARSE_NOBLANKS|XML_PARSE_NOENT|XML_PARSE_NONET|XML_PARSE_RECOVER),
+                   XML_PARSE_NOBLANKS|XML_PARSE_NONET|XML_PARSE_RECOVER),
     xmlFreeTextReader);
   if (watcher)
     watcher->setReader(reader.get());
