@@ -1,3 +1,11 @@
+libabw 0.1.3
+
+- Fix a memory access error found by oss-fuzz.
+- Configure with --disable-werror by default.
+- Disable expanding entities by XML parser as a vulnerability
+  prevention measure. Abiword-saved documents do not contain entities,
+  so there is no difference in behavior.
+
 libabw 0.1.2
 
 - Fix several issues identified by Coverity.
