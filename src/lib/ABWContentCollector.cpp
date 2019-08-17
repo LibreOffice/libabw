@@ -2197,8 +2197,11 @@ void libabw::ABWContentCollector::openFrame(const char *props, const char *image
     m_outputElements.addOpenTextBox(propList);
     return;
   }
-  m_ps->m_parsingContext=ABW_FRAME_UNKNOWN;
-  ABW_DEBUG_MSG(("libabw::ABWContentCollector::openFrame: sorry, unknown frame type: %s\n", iter->second.c_str()));
+  else
+  {
+    m_ps->m_parsingContext=ABW_FRAME_UNKNOWN;
+    ABW_DEBUG_MSG(("libabw::ABWContentCollector::openFrame: sorry, unknown frame type: %s\n", iter->second.c_str()));
+  }
 }
 
 void libabw::ABWContentCollector::closeFrame(libabw::ABWOutputElements *(&elements), bool &pageFrame)
