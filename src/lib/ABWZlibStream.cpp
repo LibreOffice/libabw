@@ -105,12 +105,13 @@ const unsigned char *ABWZlibStream::read(unsigned long numBytes, unsigned long &
   if (numBytes == 0)
     return nullptr;
 
-  unsigned long numBytesToRead;
+  if (m_offset < 0)
+    return nullptr;
 
-  if (((unsigned long)m_offset+numBytes) < m_buffer.size())
-    numBytesToRead = numBytes;
-  else
-    numBytesToRead = m_buffer.size() - (unsigned long)m_offset;
+  const unsigned long bufSize = m_buffer.size();
+  const unsigned long pos = static_cast<unsigned long>(m_offset);
+  const unsigned long remaining = pos < bufSize ? bufSize - pos : 0;
+  const unsigned long numBytesToRead = numBytes < remaining ? numBytes : remaining;
 
   numBytesRead = numBytesToRead; // about as paranoid as we can be..
 
