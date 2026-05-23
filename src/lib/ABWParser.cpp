@@ -592,7 +592,7 @@ void libabw::ABWParser::readP(xmlTextReaderPtr reader)
 {
   ABWXMLString level = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("level"));
   ABWXMLString listid = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("listid"));
-  ABWXMLString parentid = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("listid"));
+  ABWXMLString parentid = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("parentid"));
   ABWXMLString style = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("style"));
   ABWXMLString props = xmlTextReaderGetAttribute(reader, call_BAD_CAST_OnConst("props"));
   if (m_collector)
