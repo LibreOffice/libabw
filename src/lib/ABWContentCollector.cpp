@@ -25,6 +25,7 @@
 
 #define ABW_EPSILON 1.0E-06
 #define MAX_LIST_LEVEL 64 // a safeguard against damaged files
+#define MAX_TABLE_ROW (1 << 16) // a safeguard against damaged top-attach
 
 using boost::optional;
 
@@ -2018,7 +2019,9 @@ void libabw::ABWContentCollector::openCell(const char *props)
   {
     if (props)
       parsePropString(props, m_ps->m_tableStates.top().m_currentCellProperties);
-    const int currentRow(getCellPos("top-attach", "bottom-attach", m_ps->m_tableStates.top().m_currentTableRow + 1));
+    int currentRow(getCellPos("top-attach", "bottom-attach", m_ps->m_tableStates.top().m_currentTableRow + 1));
+    if (currentRow > MAX_TABLE_ROW)
+      currentRow = MAX_TABLE_ROW;
 
     while (m_ps->m_tableStates.top().m_currentTableRow < currentRow)
     {
