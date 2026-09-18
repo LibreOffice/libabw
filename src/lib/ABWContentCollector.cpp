@@ -27,6 +27,7 @@
 #define MAX_LIST_LEVEL 64 // a safeguard against damaged files
 #define MAX_TABLE_ROW (1 << 16) // a safeguard against damaged top-attach
 #define MAX_SECTION_COLUMN 64 // a safeguard against a damaged columns property
+#define MAX_TABLE_COLUMN (1u << 16) // a safeguard against damaged left-attach and right-attach
 
 using boost::optional;
 
@@ -1468,6 +1469,8 @@ void libabw::ABWContentCollector::_openTable()
   auto iter = m_tableSizes.find(m_ps->m_tableStates.top().m_currentTableId);
   if (iter != m_tableSizes.end())
     numColumns = unsigned(iter->second);
+  if (numColumns > MAX_TABLE_COLUMN)
+    numColumns = MAX_TABLE_COLUMN;
   librevenge::RVNGPropertyListVector columns;
   for (unsigned j = 0; j < numColumns; ++j)
   {
