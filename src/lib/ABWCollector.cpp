@@ -13,6 +13,22 @@
 
 #include "ABWCollector.h"
 
+namespace
+{
+
+// At most four exponent digits, so the parser can subtract the count of fraction digits from the
+// exponent without overflowing an int.
+struct ABWRealPolicies : boost::spirit::qi::real_policies<double>
+{
+  template <typename Iterator>
+  static bool parse_exp_n(Iterator &first, const Iterator &last, int &attr)
+  {
+    return boost::spirit::qi::extract_int<int, 10, 1, 4>::call(first, last, attr);
+  }
+};
+
+}
+
 bool libabw::findInt(const std::string &str, int &res)
 {
   using namespace boost::spirit::qi;
@@ -62,9 +78,10 @@ bool libabw::findDouble(const std::string &str, double &res, ABWUnit &unit)
   ;
 
   boost::optional<std::pair<ABWUnit, double>> u;
+  const real_parser<double, ABWRealPolicies> number = real_parser<double, ABWRealPolicies>();
 
   auto it = str.cbegin();
-  if (!phrase_parse(it, str.cend(), double_ >> -units, space, res, u) || it != str.cend())
+  if (!phrase_parse(it, str.cend(), number >> -units, space, res, u) || it != str.cend())
     return false;
 
   if (u)
