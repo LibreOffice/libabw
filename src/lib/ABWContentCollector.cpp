@@ -2284,8 +2284,7 @@ void libabw::ABWContentCollector::_handleListChange()
 
   if (m_ps->m_currentListLevel > oldListLevel)
   {
-    if (!m_ps->m_isSectionOpened)
-      _openSection();
+    _openContainer();
     _recurseListLevels(oldListLevel, m_ps->m_currentListLevel, m_ps->m_currentListId);
   }
   else if (m_ps->m_currentListLevel < oldListLevel)
