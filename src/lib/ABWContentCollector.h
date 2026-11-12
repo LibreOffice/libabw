@@ -45,7 +45,10 @@ struct ABWStyle
 //! the state that the body and every frame of one document share in the content pass
 struct ABWContentDocumentState
 {
-  ABWContentDocumentState() : m_tableCounter(0), m_addedTableParts(0) {}
+  ABWContentDocumentState() : m_textStyles(), m_documentStyle(), m_tableCounter(0), m_addedTableParts(0) {}
+
+  std::map<std::string, ABWStyle> m_textStyles;
+  ABWPropertyMap m_documentStyle;
 
   //! the number of tables opened so far in the document, frames included
   int m_tableCounter;
@@ -244,9 +247,6 @@ private:
   std::shared_ptr<ABWContentParsingState> m_ps;
   librevenge::RVNGTextInterface *m_iface;
   std::stack<std::shared_ptr<ABWContentParsingState> > m_parsingStates;
-  std::map<std::string, ABWStyle> m_textStyles;
-
-  ABWPropertyMap m_documentStyle;
   ABWPropertyMap m_metadata;
 
   const std::map<std::string, ABWData> &m_data;

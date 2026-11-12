@@ -432,8 +432,6 @@ libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *
   m_ps(new ABWContentParsingState),
   m_iface(iface),
   m_parsingStates(),
-  m_textStyles(),
-  m_documentStyle(),
   m_metadata(),
   m_data(data),
   m_tableSizes(tableSizes),
@@ -457,7 +455,7 @@ void libabw::ABWContentCollector::collectTextStyle(const char *name, const char 
   if (props)
     parsePropString(props, style.properties);
   if (name)
-    m_textStyles[name] = style;
+    m_documentState.m_textStyles[name] = style;
 }
 
 void libabw::ABWContentCollector::_recurseTextProperties(const char *name, ABWPropertyMap &styleProps)
@@ -469,8 +467,8 @@ void libabw::ABWContentCollector::_recurseTextProperties(const char *name, ABWPr
   std::set<std::string> seen(chain.begin(), chain.end());
   while (chain.size() < MAX_STYLE_DEPTH)
   {
-    const auto iter = m_textStyles.find(chain.back());
-    if (iter == m_textStyles.end() || iter->second.basedon.empty()
+    const auto iter = m_documentState.m_textStyles.find(chain.back());
+    if (iter == m_documentState.m_textStyles.end() || iter->second.basedon.empty()
         || !seen.insert(iter->second.basedon).second)
       break;
     chain.push_back(iter->second.basedon);
@@ -479,8 +477,8 @@ void libabw::ABWContentCollector::_recurseTextProperties(const char *name, ABWPr
   // The base style comes first, so each derived style overrides what it is based on.
   for (auto it = chain.crbegin(); it != chain.crend(); ++it)
   {
-    const auto iter = m_textStyles.find(*it);
-    if (iter != m_textStyles.end())
+    const auto iter = m_documentState.m_textStyles.find(*it);
+    if (iter != m_documentState.m_textStyles.end())
     {
       for (const auto &propertie : iter->second.properties)
         styleProps[propertie.first] = propertie.second;
@@ -503,7 +501,7 @@ void libabw::ABWContentCollector::_recurseTextProperties(const char *name, ABWPr
 
 std::string libabw::ABWContentCollector::_findDocumentProperty(const char *const name)
 {
-  return findProperty(m_documentStyle, name);
+  return findProperty(m_documentState.m_documentStyle, name);
 }
 
 std::string libabw::ABWContentCollector::_findParagraphProperty(const char *name)
@@ -544,7 +542,7 @@ std::string libabw::ABWContentCollector::_findMetadataEntry(const char *const na
 void libabw::ABWContentCollector::collectDocumentProperties(const char *const props)
 {
   if (props)
-    parsePropString(props, m_documentStyle);
+    parsePropString(props, m_documentState.m_documentStyle);
 }
 
 void libabw::ABWContentCollector::_addBorderProperties(const std::map<std::string, std::string> &map, librevenge::RVNGPropertyList &propList, const std::string &defaultUndefBorderProp)
