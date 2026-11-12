@@ -24,7 +24,6 @@
 #include "libabw_internal.h"
 
 #define ABW_EPSILON 1.0E-06
-#define MAX_LIST_LEVEL 64 // a safeguard against damaged files
 #define MAX_TABLE_ROW (1 << 16) // a safeguard against damaged top-attach
 #define MAX_SECTION_COLUMN 64 // a safeguard against a damaged columns property
 #define MAX_TABLE_COLUMN (1u << 16) // a safeguard against damaged left-attach and right-attach

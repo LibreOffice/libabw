@@ -14,6 +14,7 @@
 
 #include <librevenge/librevenge.h>
 #include "ABWStylesCollector.h"
+#include "libabw_internal.h"
 
 #define ABW_EPSILON 1.0E-06
 
@@ -421,6 +422,8 @@ void libabw::ABWStylesCollector::collectParagraphProperties(const char *level, c
 
     if (!level || !findInt(level, listElement->m_listLevel) || listElement->m_listLevel < 0)
       listElement->m_listLevel = 0;
+    if (listElement->m_listLevel > MAX_LIST_LEVEL)
+      listElement->m_listLevel = MAX_LIST_LEVEL;
 
     ABWPropertyMap::const_iterator i = properties.find("margin-left");
     ABWUnit unit(ABW_NONE);

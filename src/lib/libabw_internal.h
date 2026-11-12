@@ -35,5 +35,7 @@ void debugPrint(const char *format, ...) ABW_ATTRIBUTE_PRINTF(1, 2);
 
 #define ABW_NUM_ELEMENTS(array) sizeof(array)/sizeof(array[0])
 
+#define MAX_LIST_LEVEL 64 // a safeguard against damaged files
+
 #endif /* LIBABW_INTERNAL_H */
 /* vim:set shiftwidth=2 softtabstop=2 expandtab: */
