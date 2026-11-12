@@ -1535,11 +1535,11 @@ void libabw::ABWContentCollector::_openTableCell()
   propList.insert("librevenge:row", m_ps->m_tableStates.top().m_currentTableRow);
 
   int rightAttach(0);
-  if (findInt(_findCellProperty("right-attach"), rightAttach))
+  if (findInt(_findCellProperty("right-attach"), rightAttach) && rightAttach > m_ps->m_tableStates.top().m_currentTableCol)
     propList.insert("table:number-columns-spanned", rightAttach - m_ps->m_tableStates.top().m_currentTableCol);
 
   int botAttach(0);
-  if (findInt(_findCellProperty("bot-attach"), botAttach))
+  if (findInt(_findCellProperty("bot-attach"), botAttach) && botAttach > m_ps->m_tableStates.top().m_currentTableRow)
     propList.insert("table:number-rows-spanned", botAttach - m_ps->m_tableStates.top().m_currentTableRow);
 
   std::string bgColor = getColor(_findCellProperty("background-color"));
@@ -2020,8 +2020,12 @@ void libabw::ABWContentCollector::openCell(const char *props)
       _openTableRow();
     }
 
-    m_ps->m_tableStates.top().m_currentTableCol =
-      getCellPos("left-attach", "right-attach", m_ps->m_tableStates.top().m_currentTableCol + 1);
+    int currentCol(getCellPos("left-attach", "right-attach", m_ps->m_tableStates.top().m_currentTableCol + 1));
+    if (currentCol < 0)
+      currentCol = 0;
+    else if (currentCol > int(MAX_TABLE_COLUMN))
+      currentCol = int(MAX_TABLE_COLUMN);
+    m_ps->m_tableStates.top().m_currentTableCol = currentCol;
   }
 }
 
