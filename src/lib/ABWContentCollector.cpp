@@ -2312,11 +2312,15 @@ void libabw::ABWContentCollector::_writeOutDummyListLevels(int oldLevel, int new
   if (oldLevel < newLevel)
   {
     _writeOutDummyListLevels(oldLevel, newLevel-1);
-    m_dummyListElements.push_back(std::make_shared<ABWUnorderedListElement>());
-    m_dummyListElements.back()->m_listLevel = newLevel;
-    m_ps->m_listLevels.push(std::make_pair(newLevel, m_dummyListElements.back()));
+    std::shared_ptr<ABWListElement> &dummy = m_dummyListElements[newLevel];
+    if (!dummy)
+    {
+      dummy = std::make_shared<ABWUnorderedListElement>();
+      dummy->m_listLevel = newLevel;
+    }
+    m_ps->m_listLevels.push(std::make_pair(newLevel, dummy));
     librevenge::RVNGPropertyList propList;
-    m_dummyListElements.back()->writeOut(propList);
+    dummy->writeOut(propList);
     m_outputElements.addOpenUnorderedListLevel(propList);
   }
 }

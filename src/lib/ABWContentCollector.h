@@ -14,6 +14,7 @@
 #include <vector>
 #include <stack>
 #include <set>
+#include <map>
 
 #include <librevenge/librevenge.h>
 #include "ABWOutputElements.h"
@@ -243,7 +244,8 @@ private:
   ABWOutputElements m_outputElements;
   ABWOutputElements m_pageOutputElements;
   const std::map<int, std::shared_ptr<ABWListElement>> &m_listElements;
-  std::vector<std::shared_ptr<ABWListElement>> m_dummyListElements;
+  //! the unordered list element that stands in for each missing list level, by level
+  std::map<int, std::shared_ptr<ABWListElement>> m_dummyListElements;
 };
 
 } // namespace libabw
