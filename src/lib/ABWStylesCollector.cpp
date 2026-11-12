@@ -410,7 +410,7 @@ void libabw::ABWStylesCollector::collectParagraphProperties(const char *level, c
     if (i != properties.end())
       startValue = i->second;
     int intStartValue(0);
-    if (startValue.empty() || findInt(startValue, intStartValue) || intStartValue < 0)
+    if (startValue.empty() || !findInt(startValue, intStartValue) || intStartValue < 0)
       intStartValue = 0;
     _processList(intListId, "%L", intParentId, intStartValue, listStyle);
     iter = m_listElements.find(intListId);
