@@ -1527,6 +1527,9 @@ void libabw::ABWContentCollector::_closeTableRow()
 
 void libabw::ABWContentCollector::_openTableCell()
 {
+  if (!m_ps->m_tableStates.top().m_isTableRowOpened)
+    _openTableRow();
+
   librevenge::RVNGPropertyList propList;
   propList.insert("librevenge:column", m_ps->m_tableStates.top().m_currentTableCol);
   propList.insert("librevenge:row", m_ps->m_tableStates.top().m_currentTableRow);
