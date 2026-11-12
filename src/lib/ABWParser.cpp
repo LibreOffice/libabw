@@ -12,6 +12,7 @@
 #include <set>
 #include <stack>
 #include <utility>
+#include <vector>
 
 #include <libxml/xmlIO.h>
 #include <libxml/xmlstring.h>
@@ -64,25 +65,38 @@ static xmlChar *call_BAD_CAST_OnConst(char const *str)
   */
 static int _findAndUpdateListElementId(std::map<int, std::shared_ptr<ABWListElement>> &listElements, int id, std::set<int> &seen)
 {
-  if (listElements.find(id)==listElements.end() || !listElements.find(id)->second)
-    return 0;
-  const std::shared_ptr<ABWListElement> &tmpElement= listElements.find(id)->second;
-  if (tmpElement->m_listId)
-    return tmpElement->m_listId;
-  if (seen.find(id)!=seen.end())
+  std::vector<ABWListElement *> chain;
+  int listId = 0;
+  while (true)
   {
-    // oops, this means that we have a loop
-    tmpElement->m_parentId=0;
+    const auto iter = listElements.find(id);
+    if (iter == listElements.end() || !iter->second)
+      break;
+    ABWListElement &element = *iter->second;
+    if (element.m_listId)
+    {
+      listId = element.m_listId;
+      break;
+    }
+    if (seen.find(id)!=seen.end())
+    {
+      // oops, this means that we have a loop
+      element.m_parentId=0;
+    }
+    else
+      seen.insert(id);
+    if (!element.m_parentId)
+    {
+      element.m_listId=id;
+      listId = id;
+      break;
+    }
+    chain.push_back(&element);
+    id = element.m_parentId;
   }
-  else
-    seen.insert(id);
-  if (!tmpElement->m_parentId)
-  {
-    tmpElement->m_listId=id;
-    return id;
-  }
-  tmpElement->m_listId=_findAndUpdateListElementId(listElements, tmpElement->m_parentId, seen);
-  return tmpElement->m_listId;
+  for (ABWListElement *element : chain)
+    element->m_listId = listId;
+  return listId;
 }
 
 /** try to update the final list id for each list elements */
