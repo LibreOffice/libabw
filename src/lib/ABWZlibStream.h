@@ -10,8 +10,11 @@
 #ifndef __ABWZLIBSTREAM_H__
 #define __ABWZLIBSTREAM_H__
 
+#include <memory>
 #include <vector>
 #include <librevenge-stream/librevenge-stream.h>
+
+struct z_stream_s;
 
 namespace libabw
 {
@@ -20,7 +23,7 @@ class ABWZlibStream : public librevenge::RVNGInputStream
 {
 public:
   ABWZlibStream(librevenge::RVNGInputStream *input);
-  ~ABWZlibStream() override {}
+  ~ABWZlibStream() override;
 
   bool isStructured() override
   {
@@ -50,14 +53,24 @@ public:
   int seek(long offset, librevenge::RVNG_SEEK_TYPE seekType) override;
   long tell() override;
   bool isEnd() override;
-  unsigned long getSize() const
-  {
-    return m_buffer.size();
-  }
 private:
+  bool restart();
+  bool inflateNextBlock();
+  bool reachOffset();
+
+  //! the stream itself when it is not gzip compressed, otherwise null
   librevenge::RVNGInputStream *m_input;
-  volatile long m_offset;
-  std::vector<unsigned char> m_buffer;
+  //! the gzip compressed stream, otherwise null
+  librevenge::RVNGInputStream *m_compressed;
+  long m_compressedStart;
+  std::unique_ptr<z_stream_s> m_zstream;
+  bool m_finished;
+  std::vector<unsigned char> m_inBlock;
+  //! the most recently inflated block, which starts at m_blockStart in the uncompressed data
+  std::vector<unsigned char> m_block;
+  long m_blockStart;
+  unsigned long m_blockSize;
+  long m_offset;
   ABWZlibStream(const ABWZlibStream &);
   ABWZlibStream &operator=(const ABWZlibStream &);
 };

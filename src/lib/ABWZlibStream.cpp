@@ -16,83 +16,110 @@
 namespace libabw
 {
 
-namespace
-{
-
-static bool getInflatedBuffer(librevenge::RVNGInputStream *input, std::vector<unsigned char> &buffer)
-{
-  int ret;
-  z_stream strm;
-  unsigned char in[BLOCK_SIZE];
-  unsigned char out[BLOCK_SIZE];
-
-  strm.zalloc = Z_NULL;
-  strm.zfree = Z_NULL;
-  strm.opaque = Z_NULL;
-  strm.avail_in = 0;
-  strm.next_in = Z_NULL;
-  ret = inflateInit2(&strm, 16 + MAX_WBITS);
-  if (Z_OK != ret)
-    return false;
-
-  do
-  {
-    unsigned long numBytesRead(0);
-    const unsigned char *p = input->read(BLOCK_SIZE, numBytesRead);
-    strm.avail_in = uInt(numBytesRead);
-    if (!strm.avail_in)
-      break;
-    memcpy(in, p, strm.avail_in);
-    strm.next_in = in;
-
-    do
-    {
-      strm.avail_out = BLOCK_SIZE;
-      strm.next_out = out;
-      ret = inflate(&strm, Z_NO_FLUSH);
-      switch (ret)
-      {
-      case Z_NEED_DICT:
-      case Z_DATA_ERROR:
-      case Z_MEM_ERROR:
-      case Z_STREAM_ERROR:
-        (void)inflateEnd(&strm);
-        return false;
-      default:
-        break;
-      }
-      for (unsigned i = 0; i < BLOCK_SIZE - strm.avail_out; ++i)
-        buffer.push_back(out[i]);
-    }
-    while (!strm.avail_out);
-  }
-  while (Z_STREAM_END != ret);
-
-  (void)inflateEnd(&strm);
-  input->seek(0, librevenge::RVNG_SEEK_SET);
-  if (Z_STREAM_END == ret)
-    return true;
-  return false;
-}
-
-}
-
 ABWZlibStream::ABWZlibStream(librevenge::RVNGInputStream *input) :
   librevenge::RVNGInputStream(),
   m_input(nullptr),
-  m_offset(0),
-  m_buffer()
+  m_compressed(input),
+  m_compressedStart(input ? input->tell() : 0),
+  m_zstream(new z_stream()),
+  m_finished(true),
+  m_inBlock(BLOCK_SIZE),
+  m_block(BLOCK_SIZE),
+  m_blockStart(0),
+  m_blockSize(0),
+  m_offset(0)
 {
-  if (!getInflatedBuffer(input, m_buffer))
+  m_zstream->zalloc = Z_NULL;
+  m_zstream->zfree = Z_NULL;
+  m_zstream->opaque = Z_NULL;
+  m_zstream->avail_in = 0;
+  m_zstream->next_in = Z_NULL;
+  if (!input || Z_OK != inflateInit2(m_zstream.get(), 16 + MAX_WBITS))
   {
-    if (input)
-    {
-      input->seek(0, librevenge::RVNG_SEEK_CUR);
-      m_input = input;
-    }
-    else
-      m_buffer.clear();
+    m_zstream.reset();
+    m_compressed = nullptr;
+    m_input = input;
+    return;
   }
+  // A stream whose first block does not inflate is read as it is.
+  m_finished = false;
+  if (!inflateNextBlock())
+  {
+    (void)inflateEnd(m_zstream.get());
+    m_zstream.reset();
+    m_compressed = nullptr;
+    m_input = input;
+    input->seek(m_compressedStart, librevenge::RVNG_SEEK_SET);
+  }
+}
+
+ABWZlibStream::~ABWZlibStream()
+{
+  if (m_zstream)
+    (void)inflateEnd(m_zstream.get());
+}
+
+bool ABWZlibStream::restart()
+{
+  if (Z_OK != inflateReset(m_zstream.get()))
+  {
+    m_finished = true;
+    return false;
+  }
+  m_zstream->avail_in = 0;
+  m_zstream->next_in = Z_NULL;
+  m_compressed->seek(m_compressedStart, librevenge::RVNG_SEEK_SET);
+  m_finished = false;
+  m_blockStart = 0;
+  m_blockSize = 0;
+  return inflateNextBlock();
+}
+
+bool ABWZlibStream::inflateNextBlock()
+{
+  m_blockStart += long(m_blockSize);
+  m_blockSize = 0;
+  while (!m_finished && !m_blockSize)
+  {
+    if (!m_zstream->avail_in)
+    {
+      unsigned long numBytesRead(0);
+      const unsigned char *p = m_compressed->read(BLOCK_SIZE, numBytesRead);
+      if (!p || !numBytesRead)
+      {
+        m_finished = true;
+        break;
+      }
+      memcpy(m_inBlock.data(), p, numBytesRead);
+      m_zstream->next_in = m_inBlock.data();
+      m_zstream->avail_in = uInt(numBytesRead);
+    }
+    m_zstream->next_out = m_block.data();
+    m_zstream->avail_out = BLOCK_SIZE;
+    const int ret = inflate(m_zstream.get(), Z_NO_FLUSH);
+    if (Z_OK != ret && Z_STREAM_END != ret)
+    {
+      m_finished = true;
+      break;
+    }
+    m_blockSize = BLOCK_SIZE - m_zstream->avail_out;
+    if (Z_STREAM_END == ret)
+      m_finished = true;
+  }
+  return m_blockSize != 0;
+}
+
+// Brings the block that holds m_offset into m_block, or returns false at the end of the data.
+bool ABWZlibStream::reachOffset()
+{
+  if (m_offset < m_blockStart && !restart())
+    return false;
+  while (m_offset >= m_blockStart + long(m_blockSize))
+  {
+    if (!inflateNextBlock())
+      return false;
+  }
+  return true;
 }
 
 const unsigned char *ABWZlibStream::read(unsigned long numBytes, unsigned long &numBytesRead)
@@ -102,26 +129,17 @@ const unsigned char *ABWZlibStream::read(unsigned long numBytes, unsigned long &
 
   numBytesRead = 0;
 
-  if (numBytes == 0)
+  if (numBytes == 0 || !m_zstream)
     return nullptr;
 
-  if (m_offset < 0)
+  if (!reachOffset())
     return nullptr;
 
-  const unsigned long bufSize = m_buffer.size();
-  const unsigned long pos = static_cast<unsigned long>(m_offset);
-  const unsigned long remaining = pos < bufSize ? bufSize - pos : 0;
-  const unsigned long numBytesToRead = numBytes < remaining ? numBytes : remaining;
-
-  numBytesRead = numBytesToRead; // about as paranoid as we can be..
-
-  if (numBytesToRead == 0)
-    return nullptr;
-
-  long oldOffset = m_offset;
-  m_offset += numBytesToRead;
-
-  return &m_buffer[size_t(oldOffset)];
+  const unsigned long pos = static_cast<unsigned long>(m_offset - m_blockStart);
+  const unsigned long remaining = m_blockSize - pos;
+  numBytesRead = numBytes < remaining ? numBytes : remaining;
+  m_offset += long(numBytesRead);
+  return &m_block[pos];
 }
 
 int ABWZlibStream::seek(long offset, librevenge::RVNG_SEEK_TYPE seekType)
@@ -139,10 +157,11 @@ int ABWZlibStream::seek(long offset, librevenge::RVNG_SEEK_TYPE seekType)
     m_offset = 0;
     return 1;
   }
-  if ((long)m_offset > (long)m_buffer.size())
+  if (m_zstream && !reachOffset())
   {
-    m_offset = (long) m_buffer.size();
-    return 1;
+    // The data ends before the requested offset, so stop at its end.
+    m_offset = m_blockStart + long(m_blockSize);
+    return m_offset == offset ? 0 : 1;
   }
 
   return 0;
@@ -161,10 +180,7 @@ bool ABWZlibStream::isEnd()
   if (m_input)
     return m_input->isEnd();
 
-  if ((long)m_offset >= (long)m_buffer.size())
-    return true;
-
-  return false;
+  return !m_zstream || !reachOffset();
 }
 
 } // namespace libabw
