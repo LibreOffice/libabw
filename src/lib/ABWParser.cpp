@@ -252,15 +252,15 @@ int libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
       readM(reader);
     break;
   case XML_HISTORY:
-    if (XML_READER_TYPE_ELEMENT == tokenType)
+    if (XML_READER_TYPE_ELEMENT == tokenType && emptyToken <= 0)
       ret = readHistory(reader);
     break;
   case XML_REVISIONS:
-    if (XML_READER_TYPE_ELEMENT == tokenType)
+    if (XML_READER_TYPE_ELEMENT == tokenType && emptyToken <= 0)
       ret = readRevisions(reader);
     break;
   case XML_IGNOREDWORDS:
-    if (XML_READER_TYPE_ELEMENT == tokenType)
+    if (XML_READER_TYPE_ELEMENT == tokenType && emptyToken <= 0)
       ret = readIgnoredWords(reader);
     break;
   case XML_S:
@@ -283,7 +283,7 @@ int libabw::ABWParser::processXmlNode(xmlTextReaderPtr reader)
         m_collector->endSection();
     break;
   case XML_D:
-    if (XML_READER_TYPE_ELEMENT == tokenType)
+    if (XML_READER_TYPE_ELEMENT == tokenType && emptyToken <= 0)
       ret = readD(reader);
     break;
   case XML_P:
