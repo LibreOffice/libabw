@@ -1185,28 +1185,11 @@ void libabw::ABWContentCollector::_openParagraph()
 {
   if (!m_ps->m_isParagraphOpened)
   {
-    switch (m_ps->m_parsingContext)
+    _openContainer();
+    if (m_ps->m_parsingContext == ABW_FRAME_IMAGE)
     {
-    case ABW_HEADER:
-      if (!m_ps->m_isHeaderOpened)
-        _openHeader();
-      break;
-    case ABW_FOOTER:
-      if (!m_ps->m_isFooterOpened)
-        _openFooter();
-      break;
-    case ABW_SECTION:
-    default:
-      if (!m_ps->m_isSectionOpened)
-        _openSection();
-      break;
-    case ABW_FRAME_IMAGE:
       ABW_DEBUG_MSG(("libabw::ABWContentCollector::_openParagraph: can not open a paragraph\n"));
       m_ps->m_parsingContext=ABW_FRAME_UNKNOWN;
-      break;
-    case ABW_FRAME_TEXTBOX:
-    case ABW_FRAME_UNKNOWN:
-      break;
     }
 
     if (!m_ps->m_tableStates.empty() && !m_ps->m_tableStates.top().m_isTableCellOpened)
@@ -1232,28 +1215,11 @@ void libabw::ABWContentCollector::_openListElement()
 {
   if (!m_ps->m_isListElementOpened)
   {
-    switch (m_ps->m_parsingContext)
+    _openContainer();
+    if (m_ps->m_parsingContext == ABW_FRAME_IMAGE)
     {
-    case ABW_HEADER:
-      if (!m_ps->m_isHeaderOpened)
-        _openHeader();
-      break;
-    case ABW_FOOTER:
-      if (!m_ps->m_isFooterOpened)
-        _openFooter();
-      break;
-    case ABW_SECTION:
-    default:
-      if (!m_ps->m_isSectionOpened)
-        _openSection();
-      break;
-    case ABW_FRAME_IMAGE:
       ABW_DEBUG_MSG(("libabw::ABWContentCollector::_openListElement: can not open a list\n"));
       m_ps->m_parsingContext=ABW_FRAME_UNKNOWN;
-      break;
-    case ABW_FRAME_TEXTBOX:
-    case ABW_FRAME_UNKNOWN:
-      break;
     }
 
     if (!m_ps->m_tableStates.empty() && !m_ps->m_tableStates.top().m_isTableCellOpened)
@@ -1442,7 +1408,7 @@ void libabw::ABWContentCollector::_closeSpan()
   m_ps->m_isSpanOpened = false;
 }
 
-void libabw::ABWContentCollector::_openTable()
+void libabw::ABWContentCollector::_openContainer()
 {
   switch (m_ps->m_parsingContext)
   {
@@ -1464,6 +1430,11 @@ void libabw::ABWContentCollector::_openTable()
   case ABW_FRAME_UNKNOWN:
     break;
   }
+}
+
+void libabw::ABWContentCollector::_openTable()
+{
+  _openContainer();
 
   librevenge::RVNGPropertyList propList;
   if (m_ps->m_deferredPageBreak)

@@ -179,6 +179,8 @@ private:
   void _closePageSpan();
 
   void _openSection();
+  //! opens the header, footer or section of the parsing context if it is not open, frames need none
+  void _openContainer();
   void _closeSection();
 
   //! open a paragraph or a list element (depend on m_currentListLevel)
