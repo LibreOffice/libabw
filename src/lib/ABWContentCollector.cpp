@@ -27,6 +27,7 @@
 #define MAX_TABLE_ROW (1 << 16) // a safeguard against damaged top-attach
 #define MAX_SECTION_COLUMN 64 // a safeguard against a damaged columns property
 #define MAX_TABLE_COLUMN (1u << 16) // a safeguard against damaged left-attach and right-attach
+#define MAX_ADDED_TABLE_PARTS (1u << 18) // a safeguard against many damaged tables
 #define MAX_STYLE_DEPTH 64u // a safeguard against a damaged basedon chain
 
 using boost::optional;
@@ -425,7 +426,8 @@ libabw::ABWContentParsingState::~ABWContentParsingState()
 }
 
 libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes,
-                                                 int &tableCounter, const std::map<std::string, ABWData> &data,
+                                                 int &tableCounter, unsigned &addedTableParts,
+                                                 const std::map<std::string, ABWData> &data,
                                                  const std::map<int, std::shared_ptr<ABWListElement>> &listElements) :
   m_ps(new ABWContentParsingState),
   m_iface(iface),
@@ -436,6 +438,7 @@ libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *
   m_data(data),
   m_tableSizes(tableSizes),
   m_tableCounter(tableCounter),
+  m_addedTableParts(addedTableParts),
   m_outputElements(),
   m_pageOutputElements(),
   m_listElements(listElements),
@@ -1451,6 +1454,8 @@ void libabw::ABWContentCollector::_openTable()
     numColumns = unsigned(iter->second);
   if (numColumns > MAX_TABLE_COLUMN)
     numColumns = MAX_TABLE_COLUMN;
+  if (numColumns > tmpColumns.count())
+    numColumns = unsigned(tmpColumns.count()) + _addTableParts(numColumns - unsigned(tmpColumns.count()));
   librevenge::RVNGPropertyListVector columns;
   for (unsigned j = 0; j < numColumns; ++j)
   {
@@ -2011,6 +2016,9 @@ void libabw::ABWContentCollector::openCell(const char *props)
     int currentRow(getCellPos("top-attach", "bottom-attach", m_ps->m_tableStates.top().m_currentTableRow + 1));
     if (currentRow > MAX_TABLE_ROW)
       currentRow = MAX_TABLE_ROW;
+    const int nextRow(m_ps->m_tableStates.top().m_currentTableRow + 1);
+    if (currentRow > nextRow)
+      currentRow = nextRow + int(_addTableParts(unsigned(currentRow - nextRow)));
 
     while (m_ps->m_tableStates.top().m_currentTableRow < currentRow)
     {
@@ -2026,6 +2034,14 @@ void libabw::ABWContentCollector::openCell(const char *props)
       currentCol = int(MAX_TABLE_COLUMN);
     m_ps->m_tableStates.top().m_currentTableCol = currentCol;
   }
+}
+
+unsigned libabw::ABWContentCollector::_addTableParts(unsigned wanted)
+{
+  const unsigned left(MAX_ADDED_TABLE_PARTS - m_addedTableParts);
+  const unsigned added(wanted < left ? wanted : left);
+  m_addedTableParts += added;
+  return added;
 }
 
 int libabw::ABWContentCollector::getCellPos(const char *startProp, const char *endProp, int defStart)

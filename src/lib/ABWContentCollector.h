@@ -120,7 +120,8 @@ class ABWContentCollector : public ABWCollector
 {
 public:
   ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes,
-                      int &tableCounter, const std::map<std::string, ABWData> &data,
+                      int &tableCounter, unsigned &addedTableParts,
+                      const std::map<std::string, ABWData> &data,
                       const std::map<int, std::shared_ptr<ABWListElement>> &listElements);
   ~ABWContentCollector() override;
 
@@ -228,6 +229,7 @@ private:
   bool _convertFieldDTFormat(std::string const &dtFormat, librevenge::RVNGPropertyListVector &propVect);
 
   int getCellPos(const char *startProp, const char *endProp, int defStart);
+  unsigned _addTableParts(unsigned wanted);
 
   std::shared_ptr<ABWContentParsingState> m_ps;
   librevenge::RVNGTextInterface *m_iface;
@@ -241,6 +243,8 @@ private:
   const std::map<int, int> &m_tableSizes;
   //! the number of tables opened so far in the document, frames included
   int &m_tableCounter;
+  //! the number of column definitions and empty rows added to tables so far in the document
+  unsigned &m_addedTableParts;
   ABWOutputElements m_outputElements;
   ABWOutputElements m_pageOutputElements;
   const std::map<int, std::shared_ptr<ABWListElement>> &m_listElements;
