@@ -9,6 +9,8 @@
 
 #include "ABWOutputElements.h"
 
+#define MAX_REPLAYED_ELEMENTS (1u << 20) // a safeguard against many page spans with large headers
+
 namespace
 {
 
@@ -19,6 +21,22 @@ template<typename T, typename... Args>
 std::unique_ptr<T> make_unique(Args &&... args)
 {
   return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
+const OutputElements_t *findElements(int id, const OutputElementsMap_t *elements)
+{
+  if (!elements || id < 0)
+    return nullptr;
+  auto iterMap = elements->find(id);
+  if (iterMap == elements->end())
+    return nullptr;
+  return &iterMap->second;
+}
+
+std::size_t countElements(int id, const OutputElementsMap_t *elements)
+{
+  const OutputElements_t *found = findElements(id, elements);
+  return found ? found->size() : 0;
 }
 
 }
@@ -34,6 +52,12 @@ public:
   virtual void write(librevenge::RVNGTextInterface *iface,
                      const OutputElementsMap_t *footers,
                      const OutputElementsMap_t *headers) const = 0;
+  //! the number of stored footer and header elements that write sends again
+  virtual std::size_t replayedCount(const OutputElementsMap_t *,
+                                    const OutputElementsMap_t *) const
+  {
+    return 0;
+  }
 };
 
 class ABWCloseEndnoteElement : public ABWOutputElement
@@ -411,6 +435,8 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const override;
+  std::size_t replayedCount(const OutputElementsMap_t *footers,
+                            const OutputElementsMap_t *headers) const override;
 private:
   void _writeElements(librevenge::RVNGTextInterface *iface, int id,
                       const OutputElementsMap_t *elements) const;
@@ -810,17 +836,23 @@ void libabw::ABWOpenPageSpanElement::write(librevenge::RVNGTextInterface *iface,
 
 }
 
+std::size_t libabw::ABWOpenPageSpanElement::replayedCount(const OutputElementsMap_t *footers,
+                                                         const OutputElementsMap_t *headers) const
+{
+  return countElements(m_footer, footers) + countElements(m_footerLeft, footers)
+         + countElements(m_footerFirst, footers) + countElements(m_footerLast, footers)
+         + countElements(m_header, headers) + countElements(m_headerLeft, headers)
+         + countElements(m_headerFirst, headers) + countElements(m_headerLast, headers);
+}
+
 void libabw::ABWOpenPageSpanElement::_writeElements(librevenge::RVNGTextInterface *iface, int id,
                                                     const OutputElementsMap_t *elements) const
 {
-  if (!elements || id < 0 || !iface)
+  const OutputElements_t *found = findElements(id, elements);
+  if (!found || !iface)
     return;
 
-  auto iterMap = elements->find(id);
-  if (iterMap == elements->end() || iterMap->second.empty())
-    return;
-
-  for (const auto &iterVec : iterMap->second)
+  for (const auto &iterVec : *found)
     iterVec->write(iface, nullptr, nullptr);
 }
 
@@ -907,9 +939,20 @@ void libabw::ABWOutputElements::splice(ABWOutputElements &elements)
 
 void libabw::ABWOutputElements::write(librevenge::RVNGTextInterface *iface) const
 {
-  OutputElements_t::const_iterator iter;
-  for (iter = m_bodyElements.begin(); iter != m_bodyElements.end(); ++iter)
-    (*iter)->write(iface, &m_footerElements, &m_headerElements);
+  // A page span whose footers and headers do not fit in what is left of the allowance opens
+  // without them.
+  std::size_t left(MAX_REPLAYED_ELEMENTS);
+  for (const auto &element : m_bodyElements)
+  {
+    const std::size_t count(element->replayedCount(&m_footerElements, &m_headerElements));
+    if (count <= left)
+    {
+      left -= count;
+      element->write(iface, &m_footerElements, &m_headerElements);
+    }
+    else
+      element->write(iface, nullptr, nullptr);
+  }
 }
 
 void libabw::ABWOutputElements::addCloseEndnote()
