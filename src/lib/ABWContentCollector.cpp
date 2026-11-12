@@ -426,7 +426,7 @@ libabw::ABWContentParsingState::~ABWContentParsingState()
 }
 
 libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes,
-                                                 int &tableCounter, unsigned &addedTableParts,
+                                                 ABWContentDocumentState &documentState,
                                                  const std::map<std::string, ABWData> &data,
                                                  const std::map<int, std::shared_ptr<ABWListElement>> &listElements) :
   m_ps(new ABWContentParsingState),
@@ -437,8 +437,7 @@ libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *
   m_metadata(),
   m_data(data),
   m_tableSizes(tableSizes),
-  m_tableCounter(tableCounter),
-  m_addedTableParts(addedTableParts),
+  m_documentState(documentState),
   m_outputElements(),
   m_pageOutputElements(),
   m_listElements(listElements),
@@ -1992,7 +1991,7 @@ void libabw::ABWContentCollector::openTable(const char *props)
   }
 
   m_ps->m_tableStates.push(ABWContentTableState());
-  m_ps->m_tableStates.top().m_currentTableId = m_tableCounter++;
+  m_ps->m_tableStates.top().m_currentTableId = m_documentState.m_tableCounter++;
   if (props)
     parsePropString(props, m_ps->m_tableStates.top().m_currentTableProperties);
 
@@ -2038,9 +2037,9 @@ void libabw::ABWContentCollector::openCell(const char *props)
 
 unsigned libabw::ABWContentCollector::_addTableParts(unsigned wanted)
 {
-  const unsigned left(MAX_ADDED_TABLE_PARTS - m_addedTableParts);
+  const unsigned left(MAX_ADDED_TABLE_PARTS - m_documentState.m_addedTableParts);
   const unsigned added(wanted < left ? wanted : left);
-  m_addedTableParts += added;
+  m_documentState.m_addedTableParts += added;
   return added;
 }
 

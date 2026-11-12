@@ -42,6 +42,17 @@ struct ABWStyle
   ABWPropertyMap properties;
 };
 
+//! the state that the body and every frame of one document share in the content pass
+struct ABWContentDocumentState
+{
+  ABWContentDocumentState() : m_tableCounter(0), m_addedTableParts(0) {}
+
+  //! the number of tables opened so far in the document, frames included
+  int m_tableCounter;
+  //! the number of column definitions and empty rows added to tables so far in the document
+  unsigned m_addedTableParts;
+};
+
 struct ABWContentTableState
 {
   ABWContentTableState();
@@ -120,8 +131,7 @@ class ABWContentCollector : public ABWCollector
 {
 public:
   ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes,
-                      int &tableCounter, unsigned &addedTableParts,
-                      const std::map<std::string, ABWData> &data,
+                      ABWContentDocumentState &documentState, const std::map<std::string, ABWData> &data,
                       const std::map<int, std::shared_ptr<ABWListElement>> &listElements);
   ~ABWContentCollector() override;
 
@@ -241,10 +251,7 @@ private:
 
   const std::map<std::string, ABWData> &m_data;
   const std::map<int, int> &m_tableSizes;
-  //! the number of tables opened so far in the document, frames included
-  int &m_tableCounter;
-  //! the number of column definitions and empty rows added to tables so far in the document
-  unsigned &m_addedTableParts;
+  ABWContentDocumentState &m_documentState;
   ABWOutputElements m_outputElements;
   ABWOutputElements m_pageOutputElements;
   const std::map<int, std::shared_ptr<ABWListElement>> &m_listElements;
