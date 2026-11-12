@@ -7,6 +7,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <cmath>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
 #include <boost/spirit/include/qi.hpp>
@@ -81,7 +83,7 @@ bool libabw::findDouble(const std::string &str, double &res, ABWUnit &unit)
   const real_parser<double, ABWRealPolicies> number = real_parser<double, ABWRealPolicies>();
 
   auto it = str.cbegin();
-  if (!phrase_parse(it, str.cend(), number >> -units, space, res, u) || it != str.cend())
+  if (!phrase_parse(it, str.cend(), number >> -units, space, res, u) || it != str.cend() || !std::isfinite(res))
     return false;
 
   if (u)
