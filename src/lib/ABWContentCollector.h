@@ -229,7 +229,6 @@ private:
   std::shared_ptr<ABWContentParsingState> m_ps;
   librevenge::RVNGTextInterface *m_iface;
   std::stack<std::shared_ptr<ABWContentParsingState> > m_parsingStates;
-  std::set<std::string> m_dontLoop;
   std::map<std::string, ABWStyle> m_textStyles;
 
   ABWPropertyMap m_documentStyle;

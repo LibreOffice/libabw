@@ -28,6 +28,7 @@
 #define MAX_TABLE_ROW (1 << 16) // a safeguard against damaged top-attach
 #define MAX_SECTION_COLUMN 64 // a safeguard against a damaged columns property
 #define MAX_TABLE_COLUMN (1u << 16) // a safeguard against damaged left-attach and right-attach
+#define MAX_STYLE_DEPTH 64u // a safeguard against a damaged basedon chain
 
 using boost::optional;
 
@@ -430,7 +431,6 @@ libabw::ABWContentCollector::ABWContentCollector(librevenge::RVNGTextInterface *
   m_ps(new ABWContentParsingState),
   m_iface(iface),
   m_parsingStates(),
-  m_dontLoop(),
   m_textStyles(),
   m_documentStyle(),
   m_metadata(),
@@ -461,12 +461,24 @@ void libabw::ABWContentCollector::collectTextStyle(const char *name, const char 
 
 void libabw::ABWContentCollector::_recurseTextProperties(const char *name, ABWPropertyMap &styleProps)
 {
-  if (name)
+  if (!name)
+    return;
+
+  std::vector<std::string> chain(1, name);
+  std::set<std::string> seen(chain.begin(), chain.end());
+  while (chain.size() < MAX_STYLE_DEPTH)
   {
-    m_dontLoop.insert(name);
-    std::map<std::string, ABWStyle>::const_iterator iter = m_textStyles.find(name);
-    if (iter != m_textStyles.end() && !(iter->second.basedon.empty()) && !m_dontLoop.count(iter->second.basedon))
-      _recurseTextProperties(iter->second.basedon.c_str(), styleProps);
+    const auto iter = m_textStyles.find(chain.back());
+    if (iter == m_textStyles.end() || iter->second.basedon.empty()
+        || !seen.insert(iter->second.basedon).second)
+      break;
+    chain.push_back(iter->second.basedon);
+  }
+
+  // The base style comes first, so each derived style overrides what it is based on.
+  for (auto it = chain.crbegin(); it != chain.crend(); ++it)
+  {
+    const auto iter = m_textStyles.find(*it);
     if (iter != m_textStyles.end())
     {
       for (const auto &propertie : iter->second.properties)
@@ -474,10 +486,10 @@ void libabw::ABWContentCollector::_recurseTextProperties(const char *name, ABWPr
     }
 
     // Styles based on "Heading X" style are recognized as headings.
-    if (boost::starts_with(name, "Heading "))
+    if (boost::starts_with(*it, "Heading "))
     {
       int level = 0;
-      const std::string levelStr = std::string(name).substr(8);
+      const std::string levelStr = it->substr(8);
       if (findInt(levelStr, level))
       {
         // Abiword only has 4 levels of headings, but allow some more
@@ -486,8 +498,6 @@ void libabw::ABWContentCollector::_recurseTextProperties(const char *name, ABWPr
       }
     }
   }
-  if (!m_dontLoop.empty())
-    m_dontLoop.clear();
 }
 
 std::string libabw::ABWContentCollector::_findDocumentProperty(const char *const name)
