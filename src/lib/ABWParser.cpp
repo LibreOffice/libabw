@@ -117,6 +117,7 @@ struct ABWParserState
   ABWParserState();
   ~ABWParserState();
   std::map<int, int> m_tableSizes;
+  int m_tableCounter;
   std::map<std::string, ABWData> m_data;
   std::map<int, std::shared_ptr<ABWListElement>> m_listElements;
 
@@ -128,6 +129,7 @@ struct ABWParserState
 
 ABWParserState::ABWParserState()
   : m_tableSizes()
+  , m_tableCounter(0)
   , m_data()
   , m_listElements()
   , m_inMetadata(false)
@@ -164,7 +166,8 @@ bool libabw::ABWParser::parse()
     if (!processXmlDocument(m_input))
       return false;
     updateListElementIds(m_state->m_listElements);
-    m_collector.reset(new ABWContentCollector(m_iface, m_state->m_tableSizes, m_state->m_data, m_state->m_listElements));
+    m_state->m_tableCounter = 0;
+    m_collector.reset(new ABWContentCollector(m_iface, m_state->m_tableSizes, m_state->m_tableCounter, m_state->m_data, m_state->m_listElements));
     m_input->seek(0, librevenge::RVNG_SEEK_SET);
     m_state->m_inStyleParsing=false;
     return processXmlDocument(m_input) && m_state->m_collectorStack.empty();
@@ -680,7 +683,7 @@ void libabw::ABWParser::readFrame(xmlTextReaderPtr reader)
   if (!m_state->m_inStyleParsing)
   {
     m_state->m_collectorStack.push(std::move(m_collector));
-    m_collector.reset(new ABWContentCollector(m_iface, m_state->m_tableSizes, m_state->m_data, m_state->m_listElements));
+    m_collector.reset(new ABWContentCollector(m_iface, m_state->m_tableSizes, m_state->m_tableCounter, m_state->m_data, m_state->m_listElements));
   }
   m_collector->openFrame((const char *)props, (const char *) imageId, (const char *) title, (const char *) alt);
 }

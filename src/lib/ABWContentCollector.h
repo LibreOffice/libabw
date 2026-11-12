@@ -119,7 +119,7 @@ class ABWContentCollector : public ABWCollector
 {
 public:
   ABWContentCollector(librevenge::RVNGTextInterface *iface, const std::map<int, int> &tableSizes,
-                      const std::map<std::string, ABWData> &data,
+                      int &tableCounter, const std::map<std::string, ABWData> &data,
                       const std::map<int, std::shared_ptr<ABWListElement>> &listElements);
   ~ABWContentCollector() override;
 
@@ -238,7 +238,8 @@ private:
 
   const std::map<std::string, ABWData> &m_data;
   const std::map<int, int> &m_tableSizes;
-  int m_tableCounter;
+  //! the number of tables opened so far in the document, frames included
+  int &m_tableCounter;
   ABWOutputElements m_outputElements;
   ABWOutputElements m_pageOutputElements;
   const std::map<int, std::shared_ptr<ABWListElement>> &m_listElements;
