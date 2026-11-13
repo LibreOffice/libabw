@@ -989,8 +989,8 @@ void libabw::ABWContentCollector::_openPageSpan()
                                        m_ps->m_footerFirstId, m_ps->m_footerLastId,
                                        m_ps->m_headerId, m_ps->m_headerLeftId,
                                        m_ps->m_headerFirstId, m_ps->m_headerLastId);
+    m_ps->m_isPageSpanOpened = true;
   }
-  m_ps->m_isPageSpanOpened = true;
 }
 
 void libabw::ABWContentCollector::_closePageSpan()
@@ -1053,8 +1053,8 @@ void libabw::ABWContentCollector::_openSection()
       }
     }
     m_outputElements.addOpenSection(propList);
+    m_ps->m_isSectionOpened = true;
   }
-  m_ps->m_isSectionOpened = true;
 }
 
 void libabw::ABWContentCollector::_openFooter()
@@ -1065,8 +1065,8 @@ void libabw::ABWContentCollector::_openFooter()
     propList.insert("librevenge:occurrence", m_ps->m_currentHeaderFooterOccurrence);
 
     m_outputElements.addOpenFooter(propList, m_ps->m_currentHeaderFooterId);
+    m_ps->m_isFooterOpened = true;
   }
-  m_ps->m_isFooterOpened = true;
 }
 
 void libabw::ABWContentCollector::_openHeader()
@@ -1077,8 +1077,8 @@ void libabw::ABWContentCollector::_openHeader()
     propList.insert("librevenge:occurrence", m_ps->m_currentHeaderFooterOccurrence);
 
     m_outputElements.addOpenHeader(propList, m_ps->m_currentHeaderFooterId);
+    m_ps->m_isHeaderOpened = true;
   }
-  m_ps->m_isHeaderOpened = true;
 }
 
 void libabw::ABWContentCollector::_fillParagraphProperties(librevenge::RVNGPropertyList &propList,
