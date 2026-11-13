@@ -2178,6 +2178,7 @@ void libabw::ABWContentCollector::openFrame(const char *props, const char *image
   m_ps->m_isPageFrame=!isParagraph;
   m_outputElements.addOpenFrame(propList);
 
+  m_ps->m_parsingContext=ABW_FRAME_UNKNOWN;
   iter = propMap.find("frame-type");
   if (iter==propMap.end())
   {
@@ -2210,7 +2211,6 @@ void libabw::ABWContentCollector::openFrame(const char *props, const char *image
   }
   else
   {
-    m_ps->m_parsingContext=ABW_FRAME_UNKNOWN;
     ABW_DEBUG_MSG(("libabw::ABWContentCollector::openFrame: sorry, unknown frame type: %s\n", iter->second.c_str()));
   }
 }
