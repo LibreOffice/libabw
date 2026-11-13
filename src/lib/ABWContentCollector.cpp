@@ -1376,6 +1376,8 @@ void libabw::ABWContentCollector::_closeHeader()
 
     m_ps->m_isHeaderOpened = false;
   }
+  if (m_ps->m_parsingContext == ABW_HEADER)
+    m_ps->m_parsingContext = ABW_SECTION;
   m_ps->m_currentHeaderFooterId = -1;
   m_ps->m_currentHeaderFooterOccurrence.clear();
 }
@@ -1395,6 +1397,8 @@ void libabw::ABWContentCollector::_closeFooter()
 
     m_ps->m_isFooterOpened = false;
   }
+  if (m_ps->m_parsingContext == ABW_FOOTER)
+    m_ps->m_parsingContext = ABW_SECTION;
   m_ps->m_currentHeaderFooterId = -1;
   m_ps->m_currentHeaderFooterOccurrence.clear();
 }
