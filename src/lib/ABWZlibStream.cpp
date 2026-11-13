@@ -12,6 +12,9 @@
 #include <string.h>  // for memcpy
 
 #define BLOCK_SIZE 16384
+#define MAX_INFLATED_SIZE (1ull << 30)
+#define INFLATED_SIZE_ALLOWANCE (1ull << 26)
+#define MAX_INFLATE_RATIO 100ull
 
 namespace libabw
 {
@@ -81,6 +84,15 @@ bool ABWZlibStream::inflateNextBlock()
   m_blockSize = 0;
   while (!m_finished && !m_blockSize)
   {
+    // The inflated data ends at MAX_INFLATED_SIZE, or sooner at INFLATED_SIZE_ALLOWANCE plus
+    // MAX_INFLATE_RATIO times the compressed data read so far.
+    const unsigned long long inflated(static_cast<unsigned long long>(m_blockStart));
+    if (inflated >= MAX_INFLATED_SIZE
+        || inflated >= INFLATED_SIZE_ALLOWANCE + MAX_INFLATE_RATIO * m_zstream->total_in)
+    {
+      m_finished = true;
+      break;
+    }
     if (!m_zstream->avail_in)
     {
       unsigned long numBytesRead(0);
