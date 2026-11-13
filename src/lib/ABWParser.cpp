@@ -196,6 +196,8 @@ bool libabw::ABWParser::processXmlDocument(librevenge::RVNGInputStream *input)
       ret = xmlTextReaderRead(reader.get());
   }
 
+  while (!m_state->m_collectorStack.empty())
+    readCloseFrame();
   if (m_collector)
     m_collector->endDocument();
   return ret == 0 && !watcher.isStuck();
