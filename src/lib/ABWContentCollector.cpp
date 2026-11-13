@@ -752,6 +752,17 @@ void libabw::ABWContentCollector::collectSectionProperties(const char *footer, c
 
 void libabw::ABWContentCollector::collectHeaderFooter(const char *id, const char *type)
 {
+  switch (m_ps->m_parsingContext)
+  {
+  case ABW_FRAME_IMAGE:
+  case ABW_FRAME_TEXTBOX:
+  case ABW_FRAME_UNKNOWN:
+    ABW_DEBUG_MSG(("libabw::ABWContentCollector::collectHeaderFooter: no header or footer in a frame\n"));
+    return;
+  default:
+    break;
+  }
+
   if (!id || !findInt(id, m_ps->m_currentHeaderFooterId))
     m_ps->m_currentHeaderFooterId = -1;
 
