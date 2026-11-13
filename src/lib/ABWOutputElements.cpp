@@ -934,7 +934,7 @@ libabw::ABWOutputElements::~ABWOutputElements()
 
 void libabw::ABWOutputElements::splice(ABWOutputElements &elements)
 {
-  m_bodyElements.splice(m_bodyElements.end(), elements.m_bodyElements);
+  m_elements->splice(m_elements->end(), elements.m_bodyElements);
 }
 
 void libabw::ABWOutputElements::write(librevenge::RVNGTextInterface *iface) const
