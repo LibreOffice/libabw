@@ -194,7 +194,7 @@ void libabw::ABWStylesCollector::openCell(const char *props)
           && rightAttach - leftAttach < std::numeric_limits<int>::max() - m_ps->m_tableStates.top().m_currentTableWidth
          )
         m_ps->m_tableStates.top().m_currentTableWidth += rightAttach - leftAttach;
-      else
+      else if (m_ps->m_tableStates.top().m_currentTableWidth < std::numeric_limits<int>::max())
         m_ps->m_tableStates.top().m_currentTableWidth++;
     }
   }
