@@ -763,6 +763,9 @@ void libabw::ABWContentCollector::collectHeaderFooter(const char *id, const char
     break;
   }
 
+  _closeHeader();
+  _closeFooter();
+
   if (!id || !findInt(id, m_ps->m_currentHeaderFooterId))
     m_ps->m_currentHeaderFooterId = -1;
 
