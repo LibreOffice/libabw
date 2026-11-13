@@ -12,6 +12,7 @@
 #endif
 
 #include <cassert>
+#include <limits>
 #include <locale>
 #include <memory>
 #include <sstream>
@@ -2132,7 +2133,8 @@ void libabw::ABWContentCollector::openFrame(const char *props, const char *image
   {
     iter = propMap.find("frame-pref-page");
     int page=0;
-    if (iter != propMap.end() && findInt(iter->second, page))
+    if (iter != propMap.end() && findInt(iter->second, page)
+        && page >= 0 && page < std::numeric_limits<int>::max())
       propList.insert("text:anchor-page-number", page+1);
   }
   // style
