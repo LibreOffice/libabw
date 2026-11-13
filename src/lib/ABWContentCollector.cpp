@@ -1984,28 +1984,7 @@ void libabw::ABWContentCollector::openTable(const char *props)
   _changeList();
 
   if (m_ps->m_tableStates.empty())
-  {
-    switch (m_ps->m_parsingContext)
-    {
-    case ABW_HEADER:
-      if (!m_ps->m_isHeaderOpened)
-        _openHeader();
-      break;
-    case ABW_FOOTER:
-      if (!m_ps->m_isFooterOpened)
-        _openFooter();
-      break;
-    case ABW_SECTION:
-    default:
-      if (!m_ps->m_isSectionOpened)
-        _openSection();
-      break;
-    case ABW_FRAME_IMAGE:
-    case ABW_FRAME_TEXTBOX:
-    case ABW_FRAME_UNKNOWN:
-      break;
-    }
-  }
+    _openContainer();
 
   m_ps->m_tableStates.push(ABWContentTableState());
   m_ps->m_tableStates.top().m_currentTableId = m_documentState.m_tableCounter++;
