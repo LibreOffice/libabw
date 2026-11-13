@@ -697,8 +697,9 @@ void libabw::ABWParser::readCloseFrame()
   if (!m_collector)
     return;
   ABWOutputElements *elements=nullptr;
+  ABWOutputElements *pageElements=nullptr;
   bool pageFrame=false;
-  m_collector->closeFrame(elements,pageFrame);
+  m_collector->closeFrame(elements,pageElements,pageFrame);
   if (m_state->m_inStyleParsing)
     return;
   if (m_state->m_collectorStack.empty())
@@ -708,6 +709,8 @@ void libabw::ABWParser::readCloseFrame()
   }
   if (elements)
     m_state->m_collectorStack.top()->addFrameElements(*elements, pageFrame);
+  if (pageElements)
+    m_state->m_collectorStack.top()->addFrameElements(*pageElements, true);
   m_collector.swap(m_state->m_collectorStack.top());
   m_state->m_collectorStack.pop();
 }

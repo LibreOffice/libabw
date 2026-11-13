@@ -2214,9 +2214,12 @@ void libabw::ABWContentCollector::openFrame(const char *props, const char *image
   }
 }
 
-void libabw::ABWContentCollector::closeFrame(libabw::ABWOutputElements *(&elements), bool &pageFrame)
+void libabw::ABWContentCollector::closeFrame(libabw::ABWOutputElements *(&elements),
+                                             libabw::ABWOutputElements *(&pageElements),
+                                             bool &pageFrame)
 {
   elements=nullptr;
+  pageElements=nullptr;
   pageFrame=false;
   if (m_ps->m_isNote)
   {
@@ -2236,6 +2239,7 @@ void libabw::ABWContentCollector::closeFrame(libabw::ABWOutputElements *(&elemen
     m_outputElements.addCloseTextBox();
   m_outputElements.addCloseFrame();
   elements=&m_outputElements;
+  pageElements=&m_pageOutputElements;
   pageFrame=m_ps->m_isPageFrame;
 }
 

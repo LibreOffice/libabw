@@ -89,9 +89,10 @@ public:
   void closeCell() override;
 
   void openFrame(const char *, const char *, const char *, const char *) override {}
-  void closeFrame(ABWOutputElements *(&elements), bool &) override
+  void closeFrame(ABWOutputElements *(&elements), ABWOutputElements *(&pageElements), bool &) override
   {
     elements=nullptr;
+    pageElements=nullptr;
   }
   void addFrameElements(ABWOutputElements &, bool) override {}
 

@@ -177,7 +177,8 @@ public:
   void closeCell() override;
 
   void openFrame(const char *props, const char *imageId, const char *title, const char *alt) override;
-  void closeFrame(ABWOutputElements *(&elements), bool &pageFrame) override;
+  void closeFrame(ABWOutputElements *(&elements), ABWOutputElements *(&pageElements),
+                  bool &pageFrame) override;
   void addFrameElements(ABWOutputElements &elements, bool pageFrame) override;
 
   void addMetadataEntry(const char *name, const char *value) override;

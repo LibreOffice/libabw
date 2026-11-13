@@ -147,7 +147,8 @@ public:
   virtual void closeCell() = 0;
 
   virtual void openFrame(const char *props, const char *imageId, const char *title, const char *alt) = 0;
-  virtual void closeFrame(ABWOutputElements *(&elements), bool &pageFrame) = 0;
+  virtual void closeFrame(ABWOutputElements *(&elements), ABWOutputElements *(&pageElements),
+                          bool &pageFrame) = 0;
   virtual void addFrameElements(ABWOutputElements &elements, bool pageFrame) = 0;
 
   virtual void addMetadataEntry(const char *name, const char *value) = 0;
