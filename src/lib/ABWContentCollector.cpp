@@ -1985,6 +1985,8 @@ void libabw::ABWContentCollector::openTable(const char *props)
 
   if (m_ps->m_tableStates.empty())
     _openContainer();
+  else if (!m_ps->m_tableStates.top().m_isTableCellOpened)
+    _openTableCell();
 
   m_ps->m_tableStates.push(ABWContentTableState());
   m_ps->m_tableStates.top().m_currentTableId = m_documentState.m_tableCounter++;
