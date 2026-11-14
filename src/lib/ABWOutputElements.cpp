@@ -7,10 +7,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <set>
+
 #include "ABWOutputElements.h"
 
-// A safeguard against many page spans with large headers. Each replayed element counts as
-// REPLAYED_ELEMENT_SIZE bytes plus the size of its text or binary data.
+// A safeguard against many page spans with large headers, and against many references to one
+// large image. Each replayed element counts as REPLAYED_ELEMENT_SIZE bytes plus the size of its
+// text or binary data.
 #define MAX_REPLAYED_SIZE (1ull << 28)
 #define REPLAYED_ELEMENT_SIZE 256u
 
@@ -60,6 +63,11 @@ public:
   virtual unsigned long dataSize() const
   {
     return 0;
+  }
+  //! the binary data of the element, if it has any
+  virtual const librevenge::RVNGBinaryData *binaryData() const
+  {
+    return nullptr;
   }
   //! the replayed size of the stored footer and header elements that write sends again
   virtual unsigned long long replayedSize(const ElementsSizeMap_t &,
@@ -252,6 +260,10 @@ public:
   unsigned long dataSize() const override
   {
     return m_data.size();
+  }
+  const librevenge::RVNGBinaryData *binaryData() const override
+  {
+    return &m_data;
   }
 private:
   librevenge::RVNGString m_mimeType;
@@ -983,18 +995,24 @@ void libabw::ABWOutputElements::write(librevenge::RVNGTextInterface *iface) cons
 {
   const ElementsSizeMap_t footerSizes(replayedSizes(m_footerElements));
   const ElementsSizeMap_t headerSizes(replayedSizes(m_headerElements));
-  // A page span whose footers and headers do not fit in what is left of the allowance opens
-  // without them.
+  // Copies of one image share their data buffer, and each copy after the first counts as
+  // replayed. A page span whose footers and headers do not fit in what is left of the allowance
+  // opens without them, and a copy of an image that does not fit is left out.
+  std::set<const unsigned char *> sentData;
   unsigned long long left(MAX_REPLAYED_SIZE);
   for (const auto &element : m_bodyElements)
   {
-    const unsigned long long size(element->replayedSize(footerSizes, headerSizes));
+    unsigned long long size(element->replayedSize(footerSizes, headerSizes));
+    const librevenge::RVNGBinaryData *data(element->binaryData());
+    const bool repeated(data && !sentData.insert(data->getDataBuffer()).second);
+    if (repeated)
+      size += REPLAYED_ELEMENT_SIZE + element->dataSize();
     if (size <= left)
     {
       left -= size;
       element->write(iface, &m_footerElements, &m_headerElements);
     }
-    else
+    else if (!repeated)
       element->write(iface, nullptr, nullptr);
   }
 }
