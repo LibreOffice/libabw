@@ -9,13 +9,17 @@
 
 #include "ABWOutputElements.h"
 
-#define MAX_REPLAYED_ELEMENTS (1u << 20) // a safeguard against many page spans with large headers
+// A safeguard against many page spans with large headers. Each replayed element counts as
+// REPLAYED_ELEMENT_SIZE bytes plus the size of its text or binary data.
+#define MAX_REPLAYED_SIZE (1ull << 28)
+#define REPLAYED_ELEMENT_SIZE 256u
 
 namespace
 {
 
 typedef libabw::ABWOutputElements::OutputElements_t OutputElements_t;
 typedef libabw::ABWOutputElements::OutputElementsMap_t OutputElementsMap_t;
+typedef std::map<int, unsigned long long> ElementsSizeMap_t;
 
 template<typename T, typename... Args>
 std::unique_ptr<T> make_unique(Args &&... args)
@@ -33,10 +37,10 @@ const OutputElements_t *findElements(int id, const OutputElementsMap_t *elements
   return &iterMap->second;
 }
 
-std::size_t countElements(int id, const OutputElementsMap_t *elements)
+unsigned long long findSize(int id, const ElementsSizeMap_t &sizes)
 {
-  const OutputElements_t *found = findElements(id, elements);
-  return found ? found->size() : 0;
+  auto iter = sizes.find(id);
+  return iter == sizes.end() ? 0 : iter->second;
 }
 
 }
@@ -52,9 +56,14 @@ public:
   virtual void write(librevenge::RVNGTextInterface *iface,
                      const OutputElementsMap_t *footers,
                      const OutputElementsMap_t *headers) const = 0;
-  //! the number of stored footer and header elements that write sends again
-  virtual std::size_t replayedCount(const OutputElementsMap_t *,
-                                    const OutputElementsMap_t *) const
+  //! the size in bytes of the text or binary data of the element
+  virtual unsigned long dataSize() const
+  {
+    return 0;
+  }
+  //! the replayed size of the stored footer and header elements that write sends again
+  virtual unsigned long long replayedSize(const ElementsSizeMap_t &,
+                                          const ElementsSizeMap_t &) const
   {
     return 0;
   }
@@ -233,14 +242,20 @@ public:
 class ABWInsertBinaryObjectElement : public ABWOutputElement
 {
 public:
-  ABWInsertBinaryObjectElement(const librevenge::RVNGPropertyList &propList) :
-    m_propList(propList) {}
+  ABWInsertBinaryObjectElement(const librevenge::RVNGString &mimeType,
+                               const librevenge::RVNGBinaryData &data) :
+    m_mimeType(mimeType), m_data(data) {}
   ~ABWInsertBinaryObjectElement() override {}
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const override;
+  unsigned long dataSize() const override
+  {
+    return m_data.size();
+  }
 private:
-  librevenge::RVNGPropertyList m_propList;
+  librevenge::RVNGString m_mimeType;
+  librevenge::RVNGBinaryData m_data;
 };
 
 class ABWInsertFieldElement : public ABWOutputElement
@@ -308,6 +323,10 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const override;
+  unsigned long dataSize() const override
+  {
+    return m_text.size();
+  }
 private:
   librevenge::RVNGString m_text;
 };
@@ -435,8 +454,8 @@ public:
   void write(librevenge::RVNGTextInterface *iface,
              const OutputElementsMap_t *footers,
              const OutputElementsMap_t *headers) const override;
-  std::size_t replayedCount(const OutputElementsMap_t *footers,
-                            const OutputElementsMap_t *headers) const override;
+  unsigned long long replayedSize(const ElementsSizeMap_t &footers,
+                                  const ElementsSizeMap_t &headers) const override;
 private:
   void _writeElements(librevenge::RVNGTextInterface *iface, int id,
                       const OutputElementsMap_t *elements) const;
@@ -698,7 +717,12 @@ void libabw::ABWInsertBinaryObjectElement::write(librevenge::RVNGTextInterface *
                                                  const OutputElementsMap_t *) const
 {
   if (iface)
-    iface->insertBinaryObject(m_propList);
+  {
+    librevenge::RVNGPropertyList propList;
+    propList.insert("librevenge:mime-type", m_mimeType);
+    propList.insert("office:binary-data", m_data);
+    iface->insertBinaryObject(propList);
+  }
 }
 
 void libabw::ABWInsertFieldElement::write(librevenge::RVNGTextInterface *iface,
@@ -836,13 +860,13 @@ void libabw::ABWOpenPageSpanElement::write(librevenge::RVNGTextInterface *iface,
 
 }
 
-std::size_t libabw::ABWOpenPageSpanElement::replayedCount(const OutputElementsMap_t *footers,
-                                                         const OutputElementsMap_t *headers) const
+unsigned long long libabw::ABWOpenPageSpanElement::replayedSize(const ElementsSizeMap_t &footers,
+                                                                const ElementsSizeMap_t &headers) const
 {
-  return countElements(m_footer, footers) + countElements(m_footerLeft, footers)
-         + countElements(m_footerFirst, footers) + countElements(m_footerLast, footers)
-         + countElements(m_header, headers) + countElements(m_headerLeft, headers)
-         + countElements(m_headerFirst, headers) + countElements(m_headerLast, headers);
+  return findSize(m_footer, footers) + findSize(m_footerLeft, footers)
+         + findSize(m_footerFirst, footers) + findSize(m_footerLast, footers)
+         + findSize(m_header, headers) + findSize(m_headerLeft, headers)
+         + findSize(m_headerFirst, headers) + findSize(m_headerLast, headers);
 }
 
 void libabw::ABWOpenPageSpanElement::_writeElements(librevenge::RVNGTextInterface *iface, int id,
@@ -922,6 +946,24 @@ void libabw::ABWOpenUnorderedListLevelElement::write(librevenge::RVNGTextInterfa
 
 // ABWOutputElements
 
+namespace
+{
+
+ElementsSizeMap_t replayedSizes(const OutputElementsMap_t &elements)
+{
+  ElementsSizeMap_t sizes;
+  for (const auto &iterMap : elements)
+  {
+    unsigned long long size(0);
+    for (const auto &element : iterMap.second)
+      size += REPLAYED_ELEMENT_SIZE + element->dataSize();
+    sizes[iterMap.first] = size;
+  }
+  return sizes;
+}
+
+}
+
 libabw::ABWOutputElements::ABWOutputElements()
   : m_bodyElements(), m_headerElements(), m_footerElements(), m_elements(nullptr)
 {
@@ -939,15 +981,17 @@ void libabw::ABWOutputElements::splice(ABWOutputElements &elements)
 
 void libabw::ABWOutputElements::write(librevenge::RVNGTextInterface *iface) const
 {
+  const ElementsSizeMap_t footerSizes(replayedSizes(m_footerElements));
+  const ElementsSizeMap_t headerSizes(replayedSizes(m_headerElements));
   // A page span whose footers and headers do not fit in what is left of the allowance opens
   // without them.
-  std::size_t left(MAX_REPLAYED_ELEMENTS);
+  unsigned long long left(MAX_REPLAYED_SIZE);
   for (const auto &element : m_bodyElements)
   {
-    const std::size_t count(element->replayedCount(&m_footerElements, &m_headerElements));
-    if (count <= left)
+    const unsigned long long size(element->replayedSize(footerSizes, headerSizes));
+    if (size <= left)
     {
-      left -= count;
+      left -= size;
       element->write(iface, &m_footerElements, &m_headerElements);
     }
     else
@@ -1059,10 +1103,11 @@ void libabw::ABWOutputElements::addCloseUnorderedListLevel()
     m_elements->push_back(make_unique<ABWCloseUnorderedListLevelElement>());
 }
 
-void libabw::ABWOutputElements::addInsertBinaryObject(const librevenge::RVNGPropertyList &propList)
+void libabw::ABWOutputElements::addInsertBinaryObject(const librevenge::RVNGString &mimeType,
+                                                      const librevenge::RVNGBinaryData &data)
 {
   if (m_elements)
-    m_elements->push_back(make_unique<ABWInsertBinaryObjectElement>(propList));
+    m_elements->push_back(make_unique<ABWInsertBinaryObjectElement>(mimeType, data));
 }
 
 void libabw::ABWOutputElements::addInsertField(const librevenge::RVNGPropertyList &propList)

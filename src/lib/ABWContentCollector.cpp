@@ -2194,10 +2194,7 @@ void libabw::ABWContentCollector::openFrame(const char *props, const char *image
       return;
     }
 
-    propList.clear();
-    propList.insert("librevenge:mime-type", imIter->second.m_mimeType);
-    propList.insert("office:binary-data", imIter->second.m_binaryData);
-    m_outputElements.addInsertBinaryObject(propList);
+    m_outputElements.addInsertBinaryObject(imIter->second.m_mimeType, imIter->second.m_binaryData);
 
     return;
   }
@@ -2288,10 +2285,7 @@ void libabw::ABWContentCollector::insertImage(const char *dataid, const char *pr
 
       m_outputElements.addOpenFrame(propList);
 
-      propList.clear();
-      propList.insert("librevenge:mime-type", iter->second.m_mimeType);
-      propList.insert("office:binary-data", iter->second.m_binaryData);
-      m_outputElements.addInsertBinaryObject(propList);
+      m_outputElements.addInsertBinaryObject(iter->second.m_mimeType, iter->second.m_binaryData);
 
       m_outputElements.addCloseFrame();
     }
